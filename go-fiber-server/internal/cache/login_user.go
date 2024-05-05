@@ -6,7 +6,7 @@ import (
 
 // LoginUser 登录用户接口
 type LoginUser interface {
-	GetUserId() int64
+	GetUserId() uint64
 	GetUserName() string
 	GetRoles() []string
 	GetPermissions() []string
@@ -14,23 +14,23 @@ type LoginUser interface {
 
 type LoginUserCache interface {
 	AddLoginUser(user LoginUser)
-	RemoveLoginUser(userId int64)
-	GetLoginUser(userId int64) LoginUser
+	RemoveLoginUser(userId uint64)
+	GetLoginUser(userId uint64) LoginUser
 }
 
 var (
-	requestUserCache = make(map[int64]LoginUser)
+	requestUserCache = make(map[uint64]LoginUser)
 	requestUserLock  sync.RWMutex
 )
 
 type InMemoryLoginUserCache struct {
-	cache map[int64]LoginUser
+	cache map[uint64]LoginUser
 	mutex sync.RWMutex
 }
 
 func NewLoginUserCache() LoginUserCache {
 	return &InMemoryLoginUserCache{
-		cache: make(map[int64]LoginUser),
+		cache: make(map[uint64]LoginUser),
 	}
 }
 
@@ -42,35 +42,35 @@ func (i *InMemoryLoginUserCache) AddLoginUser(user LoginUser) {
 }
 
 // RemoveLoginUser 删除登录用户
-func (i *InMemoryLoginUserCache) RemoveLoginUser(userId int64) {
+func (i *InMemoryLoginUserCache) RemoveLoginUser(userId uint64) {
 	i.mutex.Lock()
 	defer i.mutex.Unlock()
 	delete(i.cache, userId)
 }
 
 // GetLoginUser 查询登录用户
-func (i *InMemoryLoginUserCache) GetLoginUser(userId int64) LoginUser {
+func (i *InMemoryLoginUserCache) GetLoginUser(userId uint64) LoginUser {
 	i.mutex.RLock()
 	defer i.mutex.RUnlock()
 	return i.cache[userId]
 }
 
 // SetRequestUser 设置当前请求的用户
-func SetRequestUser(requestId int64, user LoginUser) {
+func SetRequestUser(requestId uint64, user LoginUser) {
 	requestUserLock.Lock()
 	defer requestUserLock.Unlock()
 	requestUserCache[requestId] = user
 }
 
 // GetRequestUser 获取当前请求的用户
-func GetRequestUser(requestId int64) LoginUser {
+func GetRequestUser(requestId uint64) LoginUser {
 	requestUserLock.RLock()
 	defer requestUserLock.RUnlock()
 	return requestUserCache[requestId]
 }
 
 // ClearRequestUser 请求处理完成后，清除当前请求的登录用户
-func ClearRequestUser(requestId int64) {
+func ClearRequestUser(requestId uint64) {
 	requestUserLock.Lock()
 	defer requestUserLock.Unlock()
 	delete(requestUserCache, requestId)

@@ -10,15 +10,15 @@ import (
 	"go-fiber-ent-web-layout/internal/conf"
 )
 
-var InjectSet = wire.NewSet(NewData)
+var InjectSet = wire.NewSet(NewData, NewTagRepo, NewCategoryRepo)
 
 type Data struct {
-	Db *sqlx.DB      // sqlx连接
+	Db *sqlx.DB      // gorm连接
 	Rc *redis.Client // 封装的redis操作
 }
 
 func NewData(conf *conf.Data) (*Data, func(), error) {
-	dsn := fmt.Sprintf("host=%s post=%d user=%s password=%s dbname=%s", conf.Database.Host, conf.Database.Port, conf.Database.Username, conf.Database.Password, conf.Database.DbName)
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", conf.Database.Host, conf.Database.Port, conf.Database.Username, conf.Database.Password, conf.Database.DbName)
 	db, err := sqlx.Connect(conf.Database.Driver, dsn)
 	if err != nil {
 		return nil, nil, err

@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofiber/fiber/v3"
+	"github.com/jmoiron/sqlx"
 	res "go-fiber-ent-web-layout/internal/tools/res"
+	"go-fiber-ent-web-layout/internal/usercase"
 	"log/slog"
 	"net/http"
 )
@@ -35,4 +37,35 @@ func FiberAuthError(message string) *fiber.Error {
 
 func FiberServerError(message string) *fiber.Error {
 	return fiber.NewError(http.StatusInternalServerError, message)
+}
+
+// SqlxRowsScan SqlxRows封装辅助函数
+func SqlxRowsScan[T any](rows *sqlx.Rows, list []*T) []*T {
+	for rows.Next() {
+		var entity T
+		if err := rows.StructScan(&entity); err != nil {
+			slog.Error(fmt.Sprintf("sqlx rows scan error, message:%s", err))
+		}
+		list = append(list, &entity)
+	}
+	return list
+}
+
+// BuilderTree 将数据列表格式化为树形结构
+// 使用泛型 待格式化的数据需要实现 Tree 接口
+func BuilderTree[T usercase.Tree](list []T) []T {
+	cacheMap := make(map[int64]T)
+	roots := make([]T, 0)
+	for _, v := range list {
+		cacheMap[v.GetId()] = v
+	}
+	for _, v := range list {
+		parent, ok := cacheMap[v.GetParentId()]
+		if ok {
+			parent.AppendChild(v)
+		} else {
+			roots = append(roots, v)
+		}
+	}
+	return roots
 }
