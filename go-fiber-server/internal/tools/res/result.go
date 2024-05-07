@@ -9,7 +9,7 @@ type Result[T any] struct {
 	Code      int    `json:"code,omitempty"`
 	Message   string `json:"message,omitempty"`
 	Timestamp int64  `json:"timestamp,omitempty"`
-	Data      T      `json:"data,omitempty"`
+	Data      T      `json:"data"`
 }
 
 func Ok[T any](message string, data T) *Result[T] {
@@ -35,6 +35,14 @@ func OkByData[T any](data T) *Result[T] {
 		Message:   "ok",
 		Timestamp: time.Now().UnixMilli(),
 		Data:      data,
+	}
+}
+
+func SimpleOK() *Result[any] {
+	return &Result[any]{
+		Code:      http.StatusOK,
+		Message:   "ok",
+		Timestamp: time.Now().UnixMilli(),
 	}
 }
 

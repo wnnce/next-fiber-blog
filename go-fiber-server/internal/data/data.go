@@ -10,7 +10,7 @@ import (
 	"go-fiber-ent-web-layout/internal/conf"
 )
 
-var InjectSet = wire.NewSet(NewData, NewTagRepo, NewCategoryRepo)
+var InjectSet = wire.NewSet(NewData, NewTagRepo, NewCategoryRepo, NewConcatRepo)
 
 type Data struct {
 	Db *sqlx.DB      // gorm连接

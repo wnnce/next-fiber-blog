@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/recover"
 	"go-fiber-ent-web-layout/api"
 	"go-fiber-ent-web-layout/api/category/v1"
+	"go-fiber-ent-web-layout/api/concat/v1"
 	"go-fiber-ent-web-layout/api/tag/v1"
 	"go-fiber-ent-web-layout/internal/conf"
 	"go-fiber-ent-web-layout/internal/middleware/limiter"
@@ -21,7 +22,7 @@ import (
 var confPath string
 
 // 创建fiber app 包含注入中间件、错误处理、路由绑定等操作
-func newApp(ctx context.Context, cf *conf.Server, tagApi *tag.HttpApi, catApi *category.HttpApi) *fiber.App {
+func newApp(ctx context.Context, cf *conf.Server, tagApi *tag.HttpApi, catApi *category.HttpApi, conApi *concat.HttpApi) *fiber.App {
 	app := fiber.New(fiber.Config{
 		AppName:      cf.Name,                  // 应用名称
 		ErrorHandler: tools.CustomErrorHandler, // 自定义错误处理器
@@ -42,7 +43,7 @@ func newApp(ctx context.Context, cf *conf.Server, tagApi *tag.HttpApi, catApi *c
 		Sliding:         cf.Limiter.Sliding,
 		TokenBucket:     cf.Limiter.TokenBucket,
 	}, ctx))
-	api.RegisterRoutes(app, tagApi, catApi)
+	api.RegisterRoutes(app, tagApi, catApi, conApi)
 	return app
 }
 

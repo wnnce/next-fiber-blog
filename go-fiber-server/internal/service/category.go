@@ -18,6 +18,9 @@ func NewCategoryService(repo usercase.ICategoryRepo) usercase.ICategoryService {
 }
 
 func (c *CategoryService) CreateCategory(cat *usercase.Category) error {
+	if err := c.checkCategoryName(cat.CategoryName, 0); err != nil {
+		return err
+	}
 	if err := c.repo.Save(cat); err != nil {
 		slog.Error(fmt.Sprintf("分类保存失败，错误信息：%s", err))
 		return tools.FiberServerError("分类保存失败")
@@ -28,6 +31,9 @@ func (c *CategoryService) CreateCategory(cat *usercase.Category) error {
 func (c *CategoryService) UpdateCategory(cat *usercase.Category) error {
 	if cat.CategoryId == 0 {
 		return tools.FiberRequestError("分类Id不能为空")
+	}
+	if err := c.checkCategoryName(cat.CategoryName, cat.CategoryId); err != nil {
+		return err
 	}
 	if err := c.repo.Update(cat); err != nil {
 		slog.Error(fmt.Sprintf("分类更新失败，错误信息：%s", err))
@@ -65,7 +71,22 @@ func (c *CategoryService) QueryCategoryInfo(catId int) (*usercase.Category, erro
 	return category, nil
 }
 
-func (CategoryService) Delete(catId int) error {
-	//TODO implement me
-	panic("implement me")
+func (c *CategoryService) Delete(catId int) error {
+	if err := c.repo.DeleteById(catId); err != nil {
+		slog.Error(fmt.Sprintf("分类删除失败，错误信息：%s", err))
+		return tools.FiberServerError("分类删除失败")
+	}
+	return nil
+}
+
+func (c *CategoryService) checkCategoryName(name string, catId uint) error {
+	total, err := c.repo.CountByName(name, catId)
+	if err != nil {
+		slog.Error(fmt.Sprintf("检查分类名称是否可用失败，错误信息：%s", err))
+		return tools.FiberServerError("新增分类失败")
+	}
+	if total > 0 {
+		return tools.FiberServerError("标签名称已经存在")
+	}
+	return nil
 }

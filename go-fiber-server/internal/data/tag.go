@@ -97,7 +97,6 @@ func (t *TagRepo) ManageList(form *usercase.TagQueryForm) ([]*usercase.Tag, erro
 		args["end"] = form.CreateTimeEnd.Format("2006-04-02")
 	}
 	builder.WriteString(" order by sort asc, create_time desc")
-	tags := make([]*usercase.Tag, 0)
 	rows, err := t.db.NamedQuery(builder.String(), args)
 	if err != nil {
 		return nil, err
@@ -105,6 +104,7 @@ func (t *TagRepo) ManageList(form *usercase.TagQueryForm) ([]*usercase.Tag, erro
 	defer func() {
 		_ = rows.Close()
 	}()
+	tags := make([]*usercase.Tag, 0)
 	tags = tools.SqlxRowsScan(rows, tags)
 	return tags, nil
 }
