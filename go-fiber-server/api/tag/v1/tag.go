@@ -21,10 +21,7 @@ func NewHttpApi(service usercase.ITagService) *HttpApi {
 func (h *HttpApi) Sava(ctx fiber.Ctx) error {
 	form := &usercase.TagForm{}
 	if err := ctx.Bind().JSON(form); err != nil {
-		return tools.FiberRequestError("参数错误")
-	}
-	if validation := tools.StructFieldValidation(form); validation != "" {
-		return tools.FiberRequestError(validation)
+		return err
 	}
 	if err := h.service.CreateTag(form); err != nil {
 		return err
@@ -35,10 +32,7 @@ func (h *HttpApi) Sava(ctx fiber.Ctx) error {
 func (h *HttpApi) Update(ctx fiber.Ctx) error {
 	form := &usercase.TagForm{}
 	if err := ctx.Bind().JSON(form); err != nil {
-		return tools.FiberRequestError("参数错误")
-	}
-	if validation := tools.StructFieldValidation(form); validation != "" {
-		return tools.FiberRequestError(validation)
+		return err
 	}
 	if err := h.service.UpdateTag(form); err != nil {
 		return err

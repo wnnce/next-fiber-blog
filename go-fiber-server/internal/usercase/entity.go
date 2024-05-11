@@ -41,14 +41,14 @@ type BaseForm struct {
 
 // PageQueryForm 分页查询表单
 type PageQueryForm struct {
-	Page uint  `json:"page,omitempty" validate:"required,gte=1"`         // 页码
-	Size uint8 `json:"size,omitempty" validate:"required,gte=1,lte=100"` // 每页记录数
+	Page int `json:"page,omitempty" query:"page" validate:"required,gte=1"`         // 页码
+	Size int `json:"size,omitempty" query:"size" validate:"required,gte=1,lte=100"` // 每页记录数
 }
 
 // PageData 分页返回数据
 type PageData[T any] struct {
-	Page    int64 `json:"page"`    // 当前页码
-	Pages   int64 `json:"pages"`   // 总页数
+	Current int   `json:"current"` // 当前页码
+	Pages   int   `json:"pages"`   // 总页数
 	Total   int64 `json:"total"`   // 总记录数
 	Size    int   `json:"size"`    // 每页记录数
 	Records []*T  `json:"records"` // 当前页数据

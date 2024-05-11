@@ -2,7 +2,6 @@ package category
 
 import (
 	"github.com/gofiber/fiber/v3"
-	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/tools/res"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"strconv"
@@ -22,10 +21,7 @@ func NewHttpApi(service usercase.ICategoryService) *HttpApi {
 func (h *HttpApi) Save(ctx fiber.Ctx) error {
 	category := &usercase.Category{}
 	if err := ctx.Bind().JSON(&category); err != nil {
-		return tools.FiberRequestError("参数错误")
-	}
-	if validation := tools.StructFieldValidation(category); validation != "" {
-		return tools.FiberRequestError(validation)
+		return err
 	}
 	if err := h.service.CreateCategory(category); err != nil {
 		return err
@@ -37,10 +33,7 @@ func (h *HttpApi) Save(ctx fiber.Ctx) error {
 func (h *HttpApi) Update(ctx fiber.Ctx) error {
 	category := &usercase.Category{}
 	if err := ctx.Bind().JSON(&category); err != nil {
-		return tools.FiberRequestError("参数错误")
-	}
-	if validation := tools.StructFieldValidation(category); validation != "" {
-		return tools.FiberRequestError(validation)
+		return err
 	}
 	if err := h.service.UpdateCategory(category); err != nil {
 		return err

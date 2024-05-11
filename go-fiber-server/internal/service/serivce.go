@@ -2,4 +2,4 @@ package service
 
 import "github.com/google/wire"
 
-var InjectSet = wire.NewSet(NewTagService, NewCategoryService, NewConcatService)
+var InjectSet = wire.NewSet(NewTagService, NewCategoryService, NewConcatService, NewLinkService)

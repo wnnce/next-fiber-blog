@@ -2,7 +2,6 @@ package concat
 
 import (
 	"github.com/gofiber/fiber/v3"
-	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/tools/res"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"strconv"
@@ -20,11 +19,8 @@ func NewHttpApi(service usercase.IConcatService) *HttpApi {
 
 func (h *HttpApi) Save(ctx fiber.Ctx) error {
 	concat := &usercase.Concat{}
-	if err := ctx.Bind().JSON(&concat); err != nil {
-		return tools.FiberRequestError("参数错误")
-	}
-	if message := tools.StructFieldValidation(concat); message != "" {
-		return tools.FiberRequestError(message)
+	if err := ctx.Bind().Body(concat); err != nil {
+		return err
 	}
 	if err := h.service.CreateConcat(concat); err != nil {
 		return err
@@ -35,10 +31,7 @@ func (h *HttpApi) Save(ctx fiber.Ctx) error {
 func (h *HttpApi) Update(ctx fiber.Ctx) error {
 	concat := &usercase.Concat{}
 	if err := ctx.Bind().JSON(&concat); err != nil {
-		return tools.FiberRequestError("参数错误")
-	}
-	if message := tools.StructFieldValidation(concat); message != "" {
-		return tools.FiberRequestError(message)
+		return err
 	}
 	if err := h.service.UpdateConcat(concat); err != nil {
 		return err

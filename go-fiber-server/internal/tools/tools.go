@@ -1,31 +1,13 @@
 package tools
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gofiber/fiber/v3"
 	"github.com/jmoiron/sqlx"
-	res "go-fiber-ent-web-layout/internal/tools/res"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"log/slog"
 	"net/http"
 )
-
-func CustomStackTraceHandler(ctx fiber.Ctx, e interface{}) {
-	trace := fmt.Sprintf("fiber application panic, StackTrace:%v, uri:%s, method:%s", e, ctx.OriginalURL(), ctx.Method())
-	slog.Error(trace)
-}
-
-func CustomErrorHandler(ctx fiber.Ctx, err error) error {
-	code, message := http.StatusInternalServerError, "server error"
-	var e *fiber.Error
-	if errors.As(err, &e) {
-		code = e.Code
-		message = e.Message
-	}
-	result := res.Fail(code, message)
-	return ctx.Status(code).JSON(result)
-}
 
 func FiberRequestError(message string) *fiber.Error {
 	return fiber.NewError(http.StatusBadRequest, message)
@@ -68,4 +50,23 @@ func BuilderTree[T usercase.Tree](list []T) []T {
 		}
 	}
 	return roots
+}
+
+// ComputeOffset 计算数据库查询分页偏移量
+func ComputeOffset(total int64, page, size int, safe bool) int64 {
+	if page == 0 {
+		return 0
+	}
+	offset := int64((page - 1) * size)
+	if !safe || offset < total {
+		return offset
+	} else {
+		int64Size := int64(size)
+		pages := total / int64Size
+		if pages > 0 {
+			return (pages - 1) * int64Size
+		}
+		return 0
+	}
+
 }

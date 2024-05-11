@@ -11,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"go-fiber-ent-web-layout/api/category/v1"
 	"go-fiber-ent-web-layout/api/concat/v1"
+	"go-fiber-ent-web-layout/api/link/v1"
 	"go-fiber-ent-web-layout/api/tag/v1"
 	"go-fiber-ent-web-layout/internal/conf"
 	"go-fiber-ent-web-layout/internal/data"
@@ -34,7 +35,10 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 	iConcatRepo := data.NewConcatRepo(dataData)
 	iConcatService := service.NewConcatService(iConcatRepo)
 	concatHttpApi := concat.NewHttpApi(iConcatService)
-	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi)
+	iLinkRepo := data.NewLinkRepo(dataData)
+	iLinkService := service.NewLinkService(iLinkRepo)
+	linkHttpApi := link.NewHttpApi(iLinkService)
+	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi)
 	return app, func() {
 		cleanup()
 	}, nil
