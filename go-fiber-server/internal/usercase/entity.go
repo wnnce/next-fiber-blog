@@ -29,12 +29,11 @@ type BaseEntity struct {
 	DeleteAt   string     `json:"deleteAt,omitempty" db:"delete_at"`     // 是否删除
 	CreateTime *time.Time `json:"createTime,omitempty" db:"create_time"` // 创建时间
 	UpdateTime *time.Time `json:"updateTime,omitempty" db:"update_time"` // 更新时间
-	Sort       uint       `json:"sort" db:"sort"`                        // 排序
-	Status     uint8      `json:"status" db:"status"`                    // 状态
+	*CommonField
 }
 
-// BaseForm 基础表单 包含公共数据
-type BaseForm struct {
+// CommonField 通用字段 包含排序和状态
+type CommonField struct {
 	Sort   *uint  `json:"sort,omitempty" validate:"required,gte=0"`
 	Status *uint8 `json:"status,omitempty" validate:"required,min=0,max=1"`
 }

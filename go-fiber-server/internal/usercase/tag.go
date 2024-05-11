@@ -18,7 +18,7 @@ type TagForm struct {
 	TagName  string `json:"tagName,omitempty" validate:"required,min=1,max=64"`
 	CoverUrl string `json:"coverUrl,omitempty" validate:"required"`
 	Color    string `json:"color,omitempty" validate:"required,len=6"`
-	*BaseForm
+	*CommonField
 }
 
 // TagQueryForm 标签查询表单
