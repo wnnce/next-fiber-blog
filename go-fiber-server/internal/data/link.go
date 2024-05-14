@@ -1,17 +1,20 @@
 package data
 
 import (
+	"context"
 	"fmt"
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"log/slog"
+	"strconv"
 	"strings"
 	"time"
 )
 
 type LinkRepo struct {
-	db *sqlx.DB
+	db *pgxpool.Pool
 }
 
 func NewLinkRepo(data *Data) usercase.ILinkRepo {
@@ -21,37 +24,30 @@ func NewLinkRepo(data *Data) usercase.ILinkRepo {
 }
 
 func (l *LinkRepo) Save(link *usercase.Link) error {
-	result, err := l.db.Exec("insert into t_blog_link (name, summary, cover_url, target_url, sort, status) values ($1, $2, $3, $4, $5, $6)",
+	row := l.db.QueryRow(context.Background(), "insert into t_blog_link (name, summary, cover_url, target_url, sort, status) values ($1, $2, $3, $4, $5, $6) returning link_id",
 		link.Name, link.Summary, link.CoverUrl, link.TargetUrl, link.Sort, link.Status)
+	var linkId uint64
+	err := row.Scan(&linkId)
 	if err == nil {
-		id, _ := result.LastInsertId()
-		slog.Info(fmt.Sprintf("友情链接新增完成，id:%d", id))
+		link.LinkId = linkId
+		slog.Info(fmt.Sprintf("友情链接添加完成，id：%d", linkId))
 	}
 	return err
 }
 
 func (l *LinkRepo) Update(link *usercase.Link) error {
-	result, err := l.db.NamedExec("update t_blog_link set update_time = now(), name = :name, summary = :summary, cover_url = :cover, target_url = :target, sort = :sort, status = :status where link_id = :id", map[string]any{
-		"name":    link.Name,
-		"summary": link.Summary,
-		"cover":   link.CoverUrl,
-		"target":  link.TargetUrl,
-		"sort":    link.Sort,
-		"status":  link.Status,
-		"id":      link.LinkId,
-	})
+	result, err := l.db.Exec(context.Background(), "update t_blog_link set update_time = now(), name = $1, summary = $2, cover_url = $3, target_url = $4, sort = $5, status = $6 where link_id = $7",
+		link.Name, link.Summary, link.CoverUrl, link.TargetUrl, link.Sort, link.Status, link.LinkId)
 	if err == nil {
-		row, _ := result.RowsAffected()
-		slog.Info(fmt.Sprintf("联系方式更新完成，row:%d,id:%d", row, link.LinkId))
+		slog.Info(fmt.Sprintf("更新友情链接完成，row:%d,id:%d", result.RowsAffected(), link.LinkId))
 	}
 	return err
 }
 
 func (l *LinkRepo) UpdateStatus(linkId int64, status uint8) error {
-	result, err := l.db.Exec("update t_blog_link set update_time = now(), status = $1 where link_id = $2", status, linkId)
+	result, err := l.db.Exec(context.Background(), "update t_blog_link set update_time = now(), status = $1 where link_id = $2", status, linkId)
 	if err == nil {
-		row, _ := result.RowsAffected()
-		slog.Info(fmt.Sprintf("联系方式状态更新完成，row:%d,id:%d,status:%d", row, linkId, status))
+		slog.Info(fmt.Sprintf("联系方式状态更新完成，row:%d,id:%d,status:%d", result.RowsAffected(), linkId, status))
 	}
 	return err
 }
@@ -67,8 +63,15 @@ func (l *LinkRepo) Page(query *usercase.PageQueryForm) ([]*usercase.Link, int64,
 		return links, 0, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	err = l.db.Select(&links, "select link_id, name, summary, cover_url, target_url, click_num, create_time, sort from t_blog_link "+condition+
+	rows, err := l.db.Query(context.Background(), "select link_id, name, summary, cover_url, target_url, click_num, create_time from t_blog_link "+condition+
 		" order by sort, create_time desc limit $1 offset $2", query.Size, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	links, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Link, error) {
+		return pgx.RowToAddrOfStructByNameLax[usercase.Link](row)
+	})
 	return links, total, err
 }
 
@@ -93,23 +96,30 @@ func (l *LinkRepo) ManagePage(query *usercase.LinkQueryForm) ([]*usercase.Link, 
 		return links, 0, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString(fmt.Sprintf(" order by create_time desc limit %d offset %d", query.Size, offset))
-	if err = l.db.Select(&links, "select * from t_blog_link "+condition.String()); err != nil {
+	rows, err := l.db.Query(context.Background(), "select * from t_blog_link "+condition.String()+" order by create_time desc limit $1 offset $2", query.Size, offset)
+	if err != nil {
 		return nil, 0, err
 	}
-	return links, total, nil
+	defer rows.Close()
+	links, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Link, error) {
+		return pgx.RowToAddrOfStructByName[usercase.Link](row)
+	})
+	return links, total, err
 }
 
 func (l *LinkRepo) DeleteById(linkId int64) error {
-	result, err := l.db.Exec("update t_blog_link set delete_at = $1 where link_id = $2", time.Now().UnixMilli(), linkId)
+	deleteAt := strconv.FormatInt(time.Now().UnixMilli(), 10)
+	result, err := l.db.Exec(context.Background(), "update t_blog_link set delete_at = $1 where link_id = $2", deleteAt, linkId)
 	if err == nil {
-		row, _ := result.RowsAffected()
-		slog.Info(fmt.Sprintf("友情链接删除完成，row：%d，linkId：%d", row, linkId))
+		slog.Info(fmt.Sprintf("友情链接删除完成，row：%d，linkId：%d", result.RowsAffected(), linkId))
 	}
 	return err
 }
 
 func (l *LinkRepo) BatchDelete(linkIds []int64) (int64, error) {
+	if len(linkIds) == 0 {
+		return 0, nil
+	}
 	var builder strings.Builder
 	builder.WriteString("update t_blog_link set delete_at = $1 where link_id in (")
 	for i, v := range linkIds {
@@ -119,19 +129,14 @@ func (l *LinkRepo) BatchDelete(linkIds []int64) (int64, error) {
 		builder.WriteRune(rune(v))
 	}
 	builder.WriteByte(')')
-	result, err := l.db.Exec(builder.String())
-	if err != nil {
-		return 0, err
-	}
-	row, _ := result.RowsAffected()
-	return row, err
+	deleteAt := strconv.FormatInt(time.Now().UnixMilli(), 10)
+	result, err := l.db.Exec(context.Background(), builder.String(), deleteAt)
+	return result.RowsAffected(), err
 }
 
 func (l *LinkRepo) conditionTotal(condition string) (int64, error) {
-	row := l.db.QueryRow("select count(link_id) from t_blog_link " + condition)
+	row := l.db.QueryRow(context.Background(), "select count(link_id) from t_blog_link "+condition)
 	var total int64
-	if err := row.Scan(&total); err != nil {
-		return 0, err
-	}
-	return total, nil
+	err := row.Scan(&total)
+	return total, err
 }

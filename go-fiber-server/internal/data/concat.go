@@ -1,17 +1,19 @@
 package data
 
 import (
+	"context"
 	"fmt"
-	"github.com/jmoiron/sqlx"
-	"go-fiber-ent-web-layout/internal/tools"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"log/slog"
+	"strconv"
 	"strings"
 	"time"
 )
 
 type ConcatRepo struct {
-	db *sqlx.DB
+	db *pgxpool.Pool
 }
 
 func NewConcatRepo(data *Data) usercase.IConcatRepo {
@@ -21,87 +23,77 @@ func NewConcatRepo(data *Data) usercase.IConcatRepo {
 }
 
 func (c *ConcatRepo) Save(concat *usercase.Concat) error {
-	result, err := c.db.Exec("insert into t_blog_concat (name, logo_url, target_url, is_main, sort, status) values ($1, $2, $3, $4, $5, $6)", concat.Name, concat.LogoUrl, concat.TargetUrl, concat.IsMain, concat.Sort, concat.Status)
+	var insertId uint
+	err := c.db.QueryRow(context.Background(), "insert into t_blog_concat (name, logo_url, target_url, is_main, sort, status) values ($1, $2, $3, $4, $5, $6) returning concat_id",
+		concat.Name, concat.LogoUrl, concat.TargetUrl, concat.IsMain, concat.Sort, concat.Status).Scan(&insertId)
 	if err == nil {
-		id, _ := result.LastInsertId()
-		slog.Info(fmt.Sprintf("联系方式添加完成，id：%d", id))
+		slog.Info("联系方式添加完成，id：" + strconv.Itoa(int(insertId)))
 	}
 	return err
 }
 
 func (c *ConcatRepo) Update(concat *usercase.Concat) error {
-	result, err := c.db.NamedExec("update t_blog_concat set update_time = now(), name = :name, logo_url = :logoUrl, target_url = :targetUrl, is_main = :isMain, sort = :sort, status = :status where concat_id = :id", map[string]any{
-		"name":      concat.Name,
-		"logoUrl":   concat.LogoUrl,
-		"targetUrl": concat.TargetUrl,
-		"isMain":    concat.IsMain,
-		"sort":      concat.Sort,
-		"status":    concat.Status,
-		"id":        concat.ConcatId,
-	})
+	sql := "update t_blog_concat set update_time = now(), name = $1, logo_url = $2, target_url = $3, is_main = $4, sort = $5, status = $6 where concat_id = $7"
+	result, err := c.db.Exec(context.Background(), sql, concat.Name, concat.LogoUrl, concat.TargetUrl, concat.IsMain, concat.Sort, concat.Status, concat.ConcatId)
 	if err == nil {
-		row, _ := result.RowsAffected()
-		slog.Info(fmt.Sprintf("联系方式更新完成，row:%d, id:%d", row, concat.ConcatId))
+		slog.Info(fmt.Sprintf("联系方式更新完成，id：%d，row：%d"), concat.ConcatId, result.RowsAffected())
 	}
 	return err
 }
 
 func (c *ConcatRepo) UpdateStatus(cid int, status uint) error {
-	result, err := c.db.Exec("update t_blog_concat set update_time = now(), status = $1 where concat_id = $2", status, cid)
+	result, err := c.db.Exec(context.Background(), "update t_blog_concat set update_time = now(), status = $1 where concat_id = $2", status, cid)
 	if err == nil {
-		row, _ := result.RowsAffected()
-		slog.Info(fmt.Sprintf("更新联系方式状态完成，row:%d, id:%d, status:%d", row, cid, status))
+		slog.Info(fmt.Sprintf("更新联系方式状态完成，row:%d,id:%d,status:%d", result.RowsAffected(), cid, status))
 	}
 	return err
 }
 
 func (c *ConcatRepo) List() ([]*usercase.Concat, error) {
-	concats := make([]*usercase.Concat, 0)
-	err := c.db.Select(&concats, "select concat_id, name, logo_url, target_url, is_main from t_blog_concat where delete_at = '0' and status = 0 order by sort")
-	return concats, err
+	rows, err := c.db.Query(context.Background(), "select concat_id, name, logo_url, target_url, is_main, sort, status from t_blog_concat where delete_at = '0' and status = 0 order by sort, create_time desc")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Concat, error) {
+		return pgx.RowToAddrOfStructByNameLax[usercase.Concat](row)
+	})
 }
 
 func (c *ConcatRepo) ManageList(query *usercase.ConcatQueryForm) ([]*usercase.Concat, error) {
 	var builder strings.Builder
-	builder.WriteString("select * from t_blog_concat where delete_at = '0'")
-	args := make(map[string]any)
+	builder.WriteString("select * from t_blog_concat where delete_at = '0' ")
 	if query.Name != "" {
-		builder.WriteString(" and name like :name")
-		args["name"] = "%" + query.Name + "%"
+		builder.WriteString(fmt.Sprintf("and name like '%s' ", "%"+query.Name+"%"))
 	}
 	if query.CreateTimeBegin != nil {
-		builder.WriteString(" and create_time >= :begin")
-		args["begin"] = query.CreateTimeBegin.Format("2006-04-02")
+		builder.WriteString(fmt.Sprintf("create_time >= '%s' ", query.CreateTimeBegin.Format("2006-01-02")))
 	}
 	if query.CreateTimeEnd != nil {
-		builder.WriteString("and create_time <= :end")
-		args["end"] = query.CreateTimeEnd.Format("2006-04-02")
+		builder.WriteString(fmt.Sprintf("create_time <= '%s' ", query.CreateTimeEnd.Format("2006-04-02")))
 	}
-	builder.WriteString(" order by sort")
-	rows, err := c.db.NamedQuery(builder.String(), args)
+	builder.WriteString("order by sort, create_time desc")
+	rows, err := c.db.Query(context.Background(), builder.String())
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		_ = rows.Close()
-	}()
-	concats := make([]*usercase.Concat, 0)
-	concats = tools.SqlxRowsScan(rows, concats)
-	return concats, err
+	defer rows.Close()
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Concat, error) {
+		return pgx.RowToAddrOfStructByName[usercase.Concat](rows)
+	})
 }
 
 func (c *ConcatRepo) CountByName(name string, cid uint) (uint8, error) {
-	row := c.db.QueryRow("select count(concat_id) from t_blog_concat where name = $1 and concat_id != $2", name, cid)
+	row := c.db.QueryRow(context.Background(), "select count(concat_id) from t_blog_concat where name = $1 and concat_id != $2", name, cid)
 	var total uint8
 	err := row.Scan(&total)
 	return total, err
 }
 
 func (c *ConcatRepo) DeleteById(cid int) error {
-	result, err := c.db.Exec("update t_blog_concat set delete_at = $1 where concat_id = $2", time.Now().UnixMilli(), cid)
+	result, err := c.db.Exec(context.Background(), "update t_blog_concat set delete_at = $1 where concat_id = &2", time.Now().UnixMilli(), cid)
 	if err == nil {
-		row, _ := result.RowsAffected()
-		slog.Info(fmt.Sprintf("删除联系方式完成，row:%d, cid:%d", row, cid))
+		slog.Info(fmt.Sprintf("删除联系方式完成，concatId:%d,row:%d", cid, result.RowsAffected()))
 	}
 	return err
 }

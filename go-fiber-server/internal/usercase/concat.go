@@ -9,7 +9,7 @@ type Concat struct {
 	LogoUrl   string `json:"logoUrl,omitempty" db:"logo_url" validate:"required,max=255"`     // 联系方式Logo地址
 	TargetUrl string `json:"targetUrl,omitempty" db:"target_url" validate:"required,max=255"` // 联系方式源链接
 	IsMain    bool   `json:"isMain" db:"is_main"`                                             // 是否为主要联系方式
-	*BaseEntity
+	BaseEntity
 }
 
 // ConcatQueryForm 联系方式查询表单

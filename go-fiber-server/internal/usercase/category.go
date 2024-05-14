@@ -10,7 +10,7 @@ type Category struct {
 	ParentId     uint   `json:"parentId" db:"parent_id"`                                              // 分类上级Id
 	IsHot        bool   `json:"isHot" db:"is_hot"`                                                    // 是否热门
 	IsTop        bool   `json:"isTop" db:"is_top"`                                                    // 是否置顶
-	*BaseEntity
+	BaseEntity
 	Children []*Category `json:"children,omitempty"` // 子分类
 }
 
@@ -43,11 +43,11 @@ type ICategoryRepo interface {
 	// SelectById 通过Id查询分类
 	SelectById(catId int) (*Category, error)
 	// List 查询分类列表
-	List() []*Category
+	List() ([]*Category, error)
 	// ManageList 管理端查询分类
 	ManageList() ([]*Category, error)
 	// ListByIds 通过分类Id列表查询分类列表
-	ListByIds([]uint) ([]*Category, error)
+	ListByIds([]uint) ([]Category, error)
 
 	CountByName(name string, catId uint) (uint8, error)
 

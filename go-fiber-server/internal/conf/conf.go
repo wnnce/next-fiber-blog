@@ -46,7 +46,7 @@ type Data struct {
 
 type Jwt struct {
 	Issue      string        `json:"issue" yaml:"issue"`
-	ExpireTime time.Duration `json:"expireTime" yaml:"expire-time"`
+	ExpireTime time.Duration `json:"expireTime" yaml:"expire-timeout"`
 	Secret     string        `json:"secret" yaml:"secret"`
 }
 

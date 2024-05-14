@@ -20,7 +20,7 @@ func NewHttpApi(service usercase.ICategoryService) *HttpApi {
 // Save 保存分类
 func (h *HttpApi) Save(ctx fiber.Ctx) error {
 	category := &usercase.Category{}
-	if err := ctx.Bind().JSON(&category); err != nil {
+	if err := ctx.Bind().JSON(category); err != nil {
 		return err
 	}
 	if err := h.service.CreateCategory(category); err != nil {

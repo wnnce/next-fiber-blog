@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/wire"
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"go-fiber-ent-web-layout/internal/conf"
 )
@@ -13,13 +12,13 @@ import (
 var InjectSet = wire.NewSet(NewData, NewTagRepo, NewCategoryRepo, NewConcatRepo, NewLinkRepo)
 
 type Data struct {
-	Db *sqlx.DB      // gorm连接
+	Db *pgxpool.Pool // pgx连接
 	Rc *redis.Client // 封装的redis操作
 }
 
 func NewData(conf *conf.Data) (*Data, func(), error) {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", conf.Database.Host, conf.Database.Port, conf.Database.Username, conf.Database.Password, conf.Database.DbName)
-	db, err := sqlx.Connect(conf.Database.Driver, dsn)
+	db, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		return nil, nil, err
 	}

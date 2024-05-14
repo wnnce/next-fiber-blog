@@ -2,9 +2,11 @@ package service
 
 import (
 	"fmt"
+	"github.com/gofiber/fiber/v3"
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"log/slog"
+	"net/http"
 )
 
 type CategoryService struct {
@@ -43,7 +45,11 @@ func (c *CategoryService) UpdateCategory(cat *usercase.Category) error {
 }
 
 func (c *CategoryService) ListCategory() ([]*usercase.Category, error) {
-	categorys := c.repo.List()
+	categorys, err := c.repo.List()
+	if err != nil {
+		slog.Error("获取分类列表失败，错误信息：" + err.Error())
+		return make([]*usercase.Category, 0), tools.FiberServerError("获取标签列表失败")
+	}
 	if len(categorys) <= 1 {
 		return categorys, nil
 	}
@@ -67,6 +73,9 @@ func (c *CategoryService) QueryCategoryInfo(catId int) (*usercase.Category, erro
 	if err != nil {
 		slog.Error(fmt.Sprintf("分类获取失败，错误信息：%s", err))
 		return nil, tools.FiberServerError("分类获取失败")
+	}
+	if category == nil {
+		return nil, fiber.NewError(http.StatusNotFound, "分类不存在")
 	}
 	return category, nil
 }

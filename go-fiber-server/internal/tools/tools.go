@@ -1,11 +1,8 @@
 package tools
 
 import (
-	"fmt"
 	"github.com/gofiber/fiber/v3"
-	"github.com/jmoiron/sqlx"
 	"go-fiber-ent-web-layout/internal/usercase"
-	"log/slog"
 	"net/http"
 )
 
@@ -19,18 +16,6 @@ func FiberAuthError(message string) *fiber.Error {
 
 func FiberServerError(message string) *fiber.Error {
 	return fiber.NewError(http.StatusInternalServerError, message)
-}
-
-// SqlxRowsScan SqlxRows封装辅助函数
-func SqlxRowsScan[T any](rows *sqlx.Rows, list []*T) []*T {
-	for rows.Next() {
-		var entity T
-		if err := rows.StructScan(&entity); err != nil {
-			slog.Error(fmt.Sprintf("sqlx rows scan error, message:%s", err))
-		}
-		list = append(list, &entity)
-	}
-	return list
 }
 
 // BuilderTree 将数据列表格式化为树形结构

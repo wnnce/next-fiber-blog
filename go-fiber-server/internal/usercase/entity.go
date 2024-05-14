@@ -29,7 +29,7 @@ type BaseEntity struct {
 	DeleteAt   string     `json:"deleteAt,omitempty" db:"delete_at"`     // 是否删除
 	CreateTime *time.Time `json:"createTime,omitempty" db:"create_time"` // 创建时间
 	UpdateTime *time.Time `json:"updateTime,omitempty" db:"update_time"` // 更新时间
-	*CommonField
+	CommonField
 }
 
 // CommonField 通用字段 包含排序和状态

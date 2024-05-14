@@ -10,7 +10,7 @@ type Link struct {
 	CoverUrl  string `json:"coverUrl,omitempty" db:"cover_url" validate:"required,max=255"`   // 友情链接封面地址
 	TargetUrl string `json:"targetUrl,omitempty" db:"target_url" validate:"required,max=255"` // 友情链接源地址
 	ClickNum  uint64 `json:"clickNum" db:"click_num"`                                         // 友情链接的点击次数
-	*BaseEntity
+	BaseEntity
 }
 
 // LinkQueryForm 友情链接后端查询参数
@@ -18,7 +18,7 @@ type LinkQueryForm struct {
 	Name            string     `json:"name,omitempty"`
 	CreateTimeBegin *time.Time `json:"createTimeBegin,omitempty"`
 	CreateTimeEnd   *time.Time `json:"createTimeEnd,omitempty"`
-	*PageQueryForm
+	PageQueryForm
 }
 
 type ILinkRepo interface {

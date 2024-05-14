@@ -69,7 +69,12 @@ func (t *TagService) ManageListTag(form *usercase.TagQueryForm) ([]*usercase.Tag
 }
 
 func (t *TagService) AllTag() []*usercase.Tag {
-	return t.repo.List()
+	list, err := t.repo.List()
+	if err != nil {
+		slog.Error("获取标签列表失败，错误信息：" + err.Error())
+		return make([]*usercase.Tag, 0)
+	}
+	return list
 }
 
 func (t *TagService) Delete(tagId int) error {

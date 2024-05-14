@@ -4,12 +4,12 @@ import "time"
 
 // Tag 博客标签
 type Tag struct {
-	TagId    int    `json:"tagId,omitempty" db:"tag_id"`       // 标签ID
+	TagId    uint   `json:"tagId,omitempty" db:"tag_id"`       // 标签ID
 	TagName  string `json:"tagName,omitempty" db:"tag_name"`   // 标签名称
 	CoverUrl string `json:"coverUrl,omitempty" db:"cover_url"` // 标签封面地址
 	ViewNum  int64  `json:"viewNum" db:"view_num"`             // 标签的查看次数
 	Color    string `json:"color,omitempty" db:"color"`        // 标签颜色
-	*BaseEntity
+	BaseEntity
 }
 
 // TagForm 标签的新增、修改表单
@@ -18,7 +18,7 @@ type TagForm struct {
 	TagName  string `json:"tagName,omitempty" validate:"required,min=1,max=64"`
 	CoverUrl string `json:"coverUrl,omitempty" validate:"required"`
 	Color    string `json:"color,omitempty" validate:"required,len=6"`
-	*CommonField
+	CommonField
 }
 
 // TagQueryForm 标签查询表单
@@ -43,7 +43,7 @@ type ITagRepo interface {
 	// ManageList 后台获取标签列表
 	ManageList(form *TagQueryForm) ([]*Tag, error)
 	// List 博客页码获取标签列表
-	List() []*Tag
+	List() ([]*Tag, error)
 	// ListByIds 通过标签Id列表获取标签列表
 	ListByIds(ids []uint) ([]*Tag, error)
 	// CountByTagName 通过名称查询标签数量
