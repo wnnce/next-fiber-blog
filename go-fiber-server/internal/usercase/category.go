@@ -14,15 +14,15 @@ type Category struct {
 	Children []*Category `json:"children,omitempty"` // 子分类
 }
 
-func (c *Category) GetId() int64 {
-	return int64(c.CategoryId)
+func (c *Category) GetId() uint {
+	return c.CategoryId
 }
 
-func (c *Category) GetParentId() int64 {
-	return int64(c.ParentId)
+func (c *Category) GetParentId() uint {
+	return c.ParentId
 }
 
-func (c *Category) AppendChild(t Tree) {
+func (c *Category) AppendChild(t Tree[uint]) {
 	if cat, ok := t.(*Category); ok {
 		if c.Children == nil {
 			c.Children = make([]*Category, 0)

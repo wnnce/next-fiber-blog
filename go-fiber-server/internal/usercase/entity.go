@@ -3,13 +3,13 @@ package usercase
 import "time"
 
 // Tree 数据数据接口 用于工具函数统一处理树形数据
-type Tree interface {
+type Tree[T any] interface {
 	// GetId 获取节点Id
-	GetId() int64
+	GetId() T
 	// GetParentId 获取上级节点Id
-	GetParentId() int64
+	GetParentId() T
 	// AppendChild 添加到子节点
-	AppendChild(t Tree)
+	AppendChild(t Tree[T])
 }
 
 // UploadFile 文件上传记录
