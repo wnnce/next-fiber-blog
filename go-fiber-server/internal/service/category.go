@@ -53,7 +53,7 @@ func (c *CategoryService) ListCategory() ([]*usercase.Category, error) {
 	if len(categorys) <= 1 {
 		return categorys, nil
 	}
-	return tools.BuilderTree(categorys), nil
+	return tools.BuilderTree[uint](categorys), nil
 }
 
 func (c *CategoryService) ManageListCategory() ([]*usercase.Category, error) {
@@ -65,7 +65,7 @@ func (c *CategoryService) ManageListCategory() ([]*usercase.Category, error) {
 	if len(categorys) <= 1 {
 		return categorys, nil
 	}
-	return tools.BuilderTree(categorys), nil
+	return tools.BuilderTree[uint](categorys), nil
 }
 
 func (c *CategoryService) QueryCategoryInfo(catId int) (*usercase.Category, error) {

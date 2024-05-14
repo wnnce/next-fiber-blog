@@ -20,8 +20,8 @@ func FiberServerError(message string) *fiber.Error {
 
 // BuilderTree 将数据列表格式化为树形结构
 // 使用泛型 待格式化的数据需要实现 Tree 接口
-func BuilderTree[T usercase.Tree](list []T) []T {
-	cacheMap := make(map[int64]T)
+func BuilderTree[K any, T usercase.Tree[K]](list []T) []T {
+	cacheMap := make(map[any]T)
 	roots := make([]T, 0)
 	for _, v := range list {
 		cacheMap[v.GetId()] = v
