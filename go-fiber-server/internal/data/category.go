@@ -1,11 +1,11 @@
 package data
 
 import (
+	"context"
 	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go-fiber-ent-web-layout/internal/usercase"
-	"golang.org/x/net/context"
 	"log/slog"
 	"strconv"
 	"strings"
