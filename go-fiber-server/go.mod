@@ -4,6 +4,7 @@ go 1.22
 
 require (
 	github.com/bytedance/sonic v1.11.3
+	github.com/chai2010/webp v1.1.1
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.19.0
@@ -11,8 +12,9 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/wire v0.6.0
 	github.com/jackc/pgx/v5 v5.5.5
+	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20240510055607-89e20ab7b6c6
 	github.com/redis/go-redis/v9 v9.5.1
-	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

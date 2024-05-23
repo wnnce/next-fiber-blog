@@ -137,7 +137,7 @@ func (c *CategoryRepo) CountByName(name string, catId uint) (uint8, error) {
 
 func (c *CategoryRepo) DeleteById(catId int) error {
 	result, err := c.db.Exec(context.Background(), "update t_blog_category set delete_at = $1 where category_id = $2",
-		strconv.FormatInt(time.Now().UnixMilli(), 10), catId)
+		time.Now().UnixMilli(), catId)
 	if err == nil {
 		slog.Info(fmt.Sprintf("分类删除完成，row:%d,id:%d", result.RowsAffected(), catId))
 	}
@@ -157,7 +157,7 @@ func (c *CategoryRepo) BatchDelete(ids []int) (int64, error) {
 		builder.WriteRune(rune(id))
 	}
 	builder.WriteByte(')')
-	result, err := c.db.Exec(context.Background(), builder.String(), strconv.FormatInt(time.Now().UnixMilli(), 10))
+	result, err := c.db.Exec(context.Background(), builder.String(), time.Now().UnixMilli())
 	if err != nil {
 		return 0, err
 	}

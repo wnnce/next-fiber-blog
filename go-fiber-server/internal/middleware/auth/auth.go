@@ -3,27 +3,50 @@ package auth
 import (
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v3"
-	"go-fiber-ent-web-layout/internal/cache"
+	"github.com/golang-jwt/jwt/v5"
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
-	"net/http"
 	"time"
 )
 
-// AuthMiddleware 用户登录权限验证中间件
-type AuthMiddleware struct {
-	loginCache cache.LoginUserCache
+// 检查Token是否符合要求
+func checkToken(ctx fiber.Ctx) (*jwt.RegisteredClaims, error) {
+	authorization := ctx.Get(fiber.HeaderAuthorization)
+	if len(authorization) <= 7 {
+		return nil, tools.FiberAuthError("The token does not exist")
+	}
+	claims, err := tools.VerifyToken(authorization[7:])
+	now := time.Now()
+	if err != nil || claims.NotBefore.After(now) {
+		return nil, tools.FiberAuthError("Invalid token")
+	}
+	if claims.ExpiresAt.Before(now) {
+		return nil, tools.FiberAuthError("The token has expired")
+	}
+	return claims, nil
 }
 
-func NewAuthMiddleware(loginCache cache.LoginUserCache) *AuthMiddleware {
-	return &AuthMiddleware{
-		loginCache: loginCache,
+// ManageAuth 管理端用户登录验证
+// 如果Token验证成功那么将LoginUser存储到ctx.Locals中
+func ManageAuth(ctx fiber.Ctx) error {
+	claims, err := checkToken(ctx)
+	if err != nil {
+		return err
 	}
+	token := claims.Subject
+	loginUser := GetManageLoginUser(token)
+	if loginUser == nil {
+		return tools.FiberAuthError("Login user has expired")
+	}
+	fiber.Locals[LoginUser](ctx, "loginUser", loginUser)
+	// 请求处理完成后重设用户的过期时间
+	defer ResetManageLoginUserExpire(token, ManageUserCacheExpireTime)
+	return ctx.Next()
 }
 
 // TokenAuth 登录验证，如果Token验证成功就将Sub参数和Scope权限参数存储到ctx.Locals中
 // 后续中间件或者请求处理函数需要使用时，可以直接获取并使用类型转换
-func (a *AuthMiddleware) TokenAuth(ctx fiber.Ctx) error {
+func TokenAuth(ctx fiber.Ctx) error {
 	headers := ctx.GetReqHeaders()
 	authorization, ok := headers[fiber.HeaderAuthorization]
 	if !ok || len(authorization[0]) <= 7 {
@@ -43,36 +66,42 @@ func (a *AuthMiddleware) TokenAuth(ctx fiber.Ctx) error {
 	if err = sonic.UnmarshalString(claims.Subject, user); err != nil {
 		return tools.FiberAuthError("Invalid token")
 	}
-	// 判断用户的登录状态是否还有效
-	loginUser := a.loginCache.GetLoginUser(user.GetUserId())
-	if loginUser == nil {
-		return tools.FiberAuthError("The user login is invalid")
-	}
-
-	// 设置请求用户缓存
-	requestId := ctx.Context().ID()
-	cache.SetRequestUser(requestId, loginUser)
-	err = ctx.Next()
-	// 请求完成后清除请求用户缓存
-	cache.ClearRequestUser(requestId)
-	return err
+	fiber.Locals[*usercase.User](ctx, "user")
+	return ctx.Next()
 }
 
-// VerifyPermissions 用户权限验证
-func (a *AuthMiddleware) VerifyPermissions(permissions ...string) fiber.Handler {
+// VerifyRoles 用户角色验证
+func VerifyRoles(roles ...string) fiber.Handler {
+	roleMap := make(map[string]struct{}, len(roles))
+	for _, role := range roles {
+		roleMap[role] = struct{}{}
+	}
 	return func(ctx fiber.Ctx) error {
-		if requestUser := cache.GetRequestUser(ctx.Context().ID()); requestUser != nil {
-			for _, value := range requestUser.GetPermissions() {
-				if value == "all" {
+		if loginUser := fiber.Locals[LoginUser](ctx, "loginUser"); loginUser != nil {
+			for _, value := range loginUser.GetRoles() {
+				if _, ok := roleMap[value]; ok || value == "admin" {
 					return ctx.Next()
-				}
-				for _, p := range permissions {
-					if p == value {
-						return ctx.Next()
-					}
 				}
 			}
 		}
-		return fiber.NewError(http.StatusForbidden, "No permission")
+		return fiber.NewError(fiber.StatusForbidden, "Current role has no permissions")
+	}
+}
+
+// VerifyPermissions 用户权限验证
+func VerifyPermissions(permissions ...string) fiber.Handler {
+	permissionMap := make(map[string]struct{}, len(permissions))
+	for _, permission := range permissions {
+		permissionMap[permission] = struct{}{}
+	}
+	return func(ctx fiber.Ctx) error {
+		if loginUser := fiber.Locals[LoginUser](ctx, "loginUser"); loginUser != nil {
+			for _, value := range loginUser.GetPermissions() {
+				if _, ok := permissionMap[value]; ok || value == "all" {
+					return ctx.Next()
+				}
+			}
+		}
+		return fiber.NewError(fiber.StatusForbidden, "No permission")
 	}
 }

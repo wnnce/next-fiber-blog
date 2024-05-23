@@ -6,7 +6,6 @@ import (
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"log/slog"
-	"net/http"
 )
 
 type CategoryService struct {
@@ -75,7 +74,7 @@ func (c *CategoryService) QueryCategoryInfo(catId int) (*usercase.Category, erro
 		return nil, tools.FiberServerError("分类获取失败")
 	}
 	if category == nil {
-		return nil, fiber.NewError(http.StatusNotFound, "分类不存在")
+		return nil, fiber.NewError(fiber.StatusNotFound, "分类不存在")
 	}
 	return category, nil
 }

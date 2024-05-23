@@ -8,7 +8,6 @@ import (
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"log/slog"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -108,8 +107,7 @@ func (l *LinkRepo) ManagePage(query *usercase.LinkQueryForm) ([]*usercase.Link, 
 }
 
 func (l *LinkRepo) DeleteById(linkId int64) error {
-	deleteAt := strconv.FormatInt(time.Now().UnixMilli(), 10)
-	result, err := l.db.Exec(context.Background(), "update t_blog_link set delete_at = $1 where link_id = $2", deleteAt, linkId)
+	result, err := l.db.Exec(context.Background(), "update t_blog_link set delete_at = $1 where link_id = $2", time.Now().UnixMilli(), linkId)
 	if err == nil {
 		slog.Info(fmt.Sprintf("友情链接删除完成，row：%d，linkId：%d", result.RowsAffected(), linkId))
 	}
@@ -129,8 +127,7 @@ func (l *LinkRepo) BatchDelete(linkIds []int64) (int64, error) {
 		builder.WriteRune(rune(v))
 	}
 	builder.WriteByte(')')
-	deleteAt := strconv.FormatInt(time.Now().UnixMilli(), 10)
-	result, err := l.db.Exec(context.Background(), builder.String(), deleteAt)
+	result, err := l.db.Exec(context.Background(), builder.String(), time.Now().UnixMilli())
 	return result.RowsAffected(), err
 }
 

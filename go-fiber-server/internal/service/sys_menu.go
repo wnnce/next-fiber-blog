@@ -2,21 +2,21 @@ package service
 
 import (
 	"go-fiber-ent-web-layout/internal/tools"
-	"go-fiber-ent-web-layout/internal/usercase/system"
+	"go-fiber-ent-web-layout/internal/usercase"
 	"log/slog"
 )
 
-type MenuService struct {
-	repo usercase.IMenuRepo
+type SysMenuService struct {
+	repo usercase.ISysMenuRepo
 }
 
-func NewMenuService(repo usercase.IMenuRepo) usercase.IMenuService {
-	return &MenuService{
+func NewMenuService(repo usercase.ISysMenuRepo) usercase.ISysMenuService {
+	return &SysMenuService{
 		repo: repo,
 	}
 }
 
-func (ms *MenuService) CreateMenu(menu *usercase.Menu) error {
+func (ms *SysMenuService) CreateMenu(menu *usercase.SysMenu) error {
 	err := ms.repo.Save(menu)
 	if err != nil {
 		slog.Error("菜单添加失败", "error-message", err)
@@ -25,7 +25,7 @@ func (ms *MenuService) CreateMenu(menu *usercase.Menu) error {
 	return nil
 }
 
-func (ms *MenuService) UpdateMenu(menu *usercase.Menu) error {
+func (ms *SysMenuService) UpdateMenu(menu *usercase.SysMenu) error {
 	err := ms.repo.Update(menu)
 	if err != nil {
 		slog.Error("菜单更新失败", "error-message", err)
@@ -34,7 +34,7 @@ func (ms *MenuService) UpdateMenu(menu *usercase.Menu) error {
 	return nil
 }
 
-func (ms *MenuService) TreeMenu() ([]*usercase.Menu, error) {
+func (ms *SysMenuService) TreeMenu() ([]*usercase.SysMenu, error) {
 	menus, err := ms.repo.ListAll()
 	if err != nil {
 		slog.Error("获取全部菜单失败", "error-message", err)
@@ -43,7 +43,7 @@ func (ms *MenuService) TreeMenu() ([]*usercase.Menu, error) {
 	return tools.BuilderTree[uint](menus), nil
 }
 
-func (ms *MenuService) ManageTreeMenu() ([]*usercase.Menu, error) {
+func (ms *SysMenuService) ManageTreeMenu() ([]*usercase.SysMenu, error) {
 	menus, err := ms.repo.ManageListAll()
 	if err != nil {
 		slog.Error("管理端获取全部菜单失败", "error-message", err)
@@ -52,7 +52,7 @@ func (ms *MenuService) ManageTreeMenu() ([]*usercase.Menu, error) {
 	return tools.BuilderTree[uint](menus), nil
 }
 
-func (ms *MenuService) Delete(menuId int) error {
+func (ms *SysMenuService) Delete(menuId int) error {
 	err := ms.repo.DeleteById(menuId)
 	if err != nil {
 		slog.Error("删除菜单失败", "error-message", err)

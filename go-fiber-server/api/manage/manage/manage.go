@@ -3,35 +3,16 @@ package manage
 import (
 	"bufio"
 	"bytes"
-	"encoding/base64"
 	"fmt"
 	"github.com/gofiber/fiber/v3"
-	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/tools/clog"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
 
+// LoggerPush 日志SSE推送
 func LoggerPush(c fiber.Ctx) error {
-	// 基本身份认证
-	authorization := c.Get(fiber.HeaderAuthorization, "")
-	if len(authorization) <= 6 {
-		return c.JSON(tools.FiberAuthError("Not Authorization"))
-	}
-	byteArr, err := base64.StdEncoding.DecodeString(authorization[6:])
-	if err != nil {
-		return c.JSON(tools.FiberAuthError("Not Authorization"))
-	}
-	strs := strings.Split(string(byteArr), ":")
-	if len(strs) != 2 {
-		return c.JSON(tools.FiberAuthError("Not Authorization"))
-	}
-	if strs[0] != "admin" || strs[1] != "admin" {
-		return c.JSON(tools.FiberAuthError("账号密码错误"))
-	}
-
 	c.Set("Content-Type", "text/event-stream")
 	c.Set("Cache-Control", "no-cache")
 	c.Set("Connection", "keep-alive")
@@ -44,8 +25,7 @@ func LoggerPush(c fiber.Ctx) error {
 		if err := w.Flush(); err != nil {
 			return
 		}
-		ch := make(chan []byte)
-
+		ch := make(chan []byte, 10)
 		// 日志缓冲区
 		var buff bytes.Buffer
 		var mu sync.Mutex
@@ -66,10 +46,10 @@ func LoggerPush(c fiber.Ctx) error {
 					data := buff.String()
 					buff.Reset()
 					mu.Unlock()
-					if _, err = fmt.Fprintf(w, "data: [%s]\n\n", data); err != nil {
+					if _, err := fmt.Fprintf(w, "data: [%s]\n\n", data); err != nil {
 						break Loop
 					}
-					if err = w.Flush(); err != nil {
+					if err := w.Flush(); err != nil {
 						break Loop
 					}
 				}

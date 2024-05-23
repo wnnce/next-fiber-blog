@@ -137,7 +137,7 @@ func (t *TagRepo) CountByTagName(name string, tagId uint) (uint8, error) {
 
 func (t *TagRepo) DeleteById(id int) error {
 	result, err := t.db.Exec(context.Background(), "update t_blog_tag set delete_at = $1 where tag_id = $2",
-		strconv.FormatInt(time.Now().UnixMilli(), 10), id)
+		time.Now().UnixMilli(), id)
 	if err == nil {
 		slog.Info(fmt.Sprintf("删除标签完成，row：%d,id:%d", result.RowsAffected(), id))
 	}
@@ -157,6 +157,6 @@ func (t *TagRepo) DeleteByIds(ids []int) (int64, error) {
 		builder.WriteRune(rune(id))
 	}
 	builder.WriteByte(')')
-	result, err := t.db.Exec(context.Background(), builder.String(), strconv.FormatInt(time.Now().UnixMilli(), 10))
+	result, err := t.db.Exec(context.Background(), builder.String(), time.Now().UnixMilli())
 	return result.RowsAffected(), err
 }

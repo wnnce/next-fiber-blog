@@ -11,6 +11,13 @@ type SSEWriter struct {
 	mu        *sync.Mutex
 }
 
+func (s *SSEWriter) Write(p []byte) (int, error) {
+	for _, ch := range s.chanCache {
+		ch <- p
+	}
+	return 0, nil
+}
+
 var sseWriter *SSEWriter
 
 func init() {
@@ -24,8 +31,8 @@ func init() {
 func RegisterChan(ch chan []byte) string {
 	key := fmt.Sprintf("%p-%d", ch, time.Now().UnixMilli())
 	sseWriter.mu.Lock()
-	defer sseWriter.mu.Unlock()
 	sseWriter.chanCache[key] = ch
+	sseWriter.mu.Unlock()
 	return key
 }
 
@@ -38,11 +45,4 @@ func RemoveChan(key string) {
 
 func GetSSEWriter() *SSEWriter {
 	return sseWriter
-}
-
-func (s *SSEWriter) Write(p []byte) (int, error) {
-	for _, ch := range s.chanCache {
-		ch <- p
-	}
-	return 0, nil
 }

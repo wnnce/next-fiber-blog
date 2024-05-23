@@ -7,6 +7,7 @@ import (
 	"go-fiber-ent-web-layout/internal/conf"
 	"log/slog"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -48,9 +49,15 @@ var (
 	issue      = "jwt"
 	expireTime = 24 * time.Hour
 	secret     = "secret"
+	once       sync.Once
 )
 
-func SetJwtConfig(config conf.Jwt) {
+func init() {
+	conf.CollectConfigReader(readJwtConfig)
+}
+
+func readJwtConfig(bootstrap *conf.Bootstrap) {
+	config := &bootstrap.Jwt
 	if config.Issue != "" {
 		issue = config.Issue
 	}

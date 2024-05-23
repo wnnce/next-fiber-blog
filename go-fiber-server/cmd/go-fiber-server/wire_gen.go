@@ -12,7 +12,8 @@ import (
 	"go-fiber-ent-web-layout/api/category/v1"
 	"go-fiber-ent-web-layout/api/concat/v1"
 	"go-fiber-ent-web-layout/api/link/v1"
-	"go-fiber-ent-web-layout/api/manage/system/menu"
+	"go-fiber-ent-web-layout/api/manage/manage"
+	"go-fiber-ent-web-layout/api/other/v1"
 	"go-fiber-ent-web-layout/api/tag/v1"
 	"go-fiber-ent-web-layout/internal/conf"
 	"go-fiber-ent-web-layout/internal/data"
@@ -39,10 +40,16 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 	iLinkRepo := data.NewLinkRepo(dataData)
 	iLinkService := service.NewLinkService(iLinkRepo)
 	linkHttpApi := link.NewHttpApi(iLinkService)
-	iMenuRepo := data.NewMenuRepo(dataData)
-	iMenuService := service.NewMenuService(iMenuRepo)
-	menuHttpApi := menu.NewHttpApi(iMenuService)
-	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuHttpApi)
+	iSysMenuRepo := data.NewSysMenuRepo(dataData)
+	iSysMenuService := service.NewMenuService(iSysMenuRepo)
+	menuApi := manage.NewMenuApi(iSysMenuService)
+	iSysConfigRepo := data.NewSysConfigRepo(dataData)
+	iSysConfigService := service.NewSysConfigService(iSysConfigRepo)
+	configApi := manage.NewConfigApi(iSysConfigService)
+	iOtherRepo := data.NewOtherRepo(dataData)
+	iOtherService := service.NewOtherService(iOtherRepo)
+	otherHttpApi := other.NewHttpApi(iOtherService)
+	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi)
 	return app, func() {
 		cleanup()
 	}, nil

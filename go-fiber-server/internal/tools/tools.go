@@ -3,19 +3,18 @@ package tools
 import (
 	"github.com/gofiber/fiber/v3"
 	"go-fiber-ent-web-layout/internal/usercase"
-	"net/http"
 )
 
 func FiberRequestError(message string) *fiber.Error {
-	return fiber.NewError(http.StatusBadRequest, message)
+	return fiber.NewError(fiber.StatusBadRequest, message)
 }
 
 func FiberAuthError(message string) *fiber.Error {
-	return fiber.NewError(http.StatusUnauthorized, message)
+	return fiber.NewError(fiber.StatusUnauthorized, message)
 }
 
 func FiberServerError(message string) *fiber.Error {
-	return fiber.NewError(http.StatusInternalServerError, message)
+	return fiber.NewError(fiber.StatusInternalServerError, message)
 }
 
 // BuilderTree 将数据列表格式化为树形结构

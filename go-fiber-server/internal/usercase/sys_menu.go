@@ -1,12 +1,11 @@
 package usercase
 
 import (
-	"go-fiber-ent-web-layout/internal/usercase"
 	"time"
 )
 
-// Menu 菜单 实现Tree接口
-type Menu struct {
+// SysMenu 菜单 实现Tree接口
+type SysMenu struct {
 	MenuId     uint       `json:"menuId" db:"menu_id"`                         // 菜单Id
 	MenuName   string     `json:"menuName" db:"menu_name" validate:"required"` // 菜单名称
 	MenuType   int        `json:"menuType" db:"menu_type" validate:"required"` // 菜单类型 1：目录 2：菜单
@@ -23,48 +22,48 @@ type Menu struct {
 	CreateTime *time.Time `json:"createTime,omitempty" db:"create_time"`       // 创建时间
 	UpdateTime *time.Time `json:"updateTime,omitempty" db:"update_time"`       // 更新时间
 	Sort       int        `json:"sort" db:"sort"`                              // 排序
-	Children   []*Menu    `json:"children"`                                    // 子节点
+	Children   []*SysMenu `json:"children"`                                    // 子节点
 }
 
-func (m *Menu) GetId() uint {
+func (m *SysMenu) GetId() uint {
 	return m.MenuId
 }
 
-func (m *Menu) GetParentId() uint {
+func (m *SysMenu) GetParentId() uint {
 	return m.ParentId
 }
 
-func (m *Menu) AppendChild(t usercase.Tree[uint]) {
-	if menu, ok := t.(*Menu); ok {
+func (m *SysMenu) AppendChild(t Tree[uint]) {
+	if menu, ok := t.(*SysMenu); ok {
 		if m.Children == nil {
-			m.Children = make([]*Menu, 0)
+			m.Children = make([]*SysMenu, 0)
 		}
 		m.Children = append(m.Children, menu)
 	}
 }
 
-// IMenuRepo 菜单持久层接口
-type IMenuRepo interface {
+// ISysMenuRepo 菜单持久层接口
+type ISysMenuRepo interface {
 	// Save 保存
-	Save(menu *Menu) error
+	Save(menu *SysMenu) error
 	// Update 更新
-	Update(menu *Menu) error
+	Update(menu *SysMenu) error
 	// ListAll 查询所有
-	ListAll() ([]*Menu, error)
+	ListAll() ([]*SysMenu, error)
 	// ManageListAll 管理端查询所有
-	ManageListAll() ([]*Menu, error)
+	ManageListAll() ([]*SysMenu, error)
 	// DeleteById 通过id删除
 	DeleteById(menuId int) error
 }
 
-type IMenuService interface {
-	CreateMenu(menu *Menu) error
+type ISysMenuService interface {
+	CreateMenu(menu *SysMenu) error
 
-	UpdateMenu(menu *Menu) error
+	UpdateMenu(menu *SysMenu) error
 
-	TreeMenu() ([]*Menu, error)
+	TreeMenu() ([]*SysMenu, error)
 
-	ManageTreeMenu() ([]*Menu, error)
+	ManageTreeMenu() ([]*SysMenu, error)
 
 	Delete(menuId int) error
 }

@@ -9,7 +9,7 @@ import (
 	"go-fiber-ent-web-layout/internal/conf"
 )
 
-var InjectSet = wire.NewSet(NewData, NewTagRepo, NewCategoryRepo, NewConcatRepo, NewLinkRepo, NewMenuRepo)
+var InjectSet = wire.NewSet(NewData, NewTagRepo, NewCategoryRepo, NewConcatRepo, NewLinkRepo, NewSysMenuRepo, NewSysConfigRepo, NewOtherRepo)
 
 type Data struct {
 	Db *pgxpool.Pool // pgx连接
@@ -36,6 +36,7 @@ func NewData(conf *conf.Data) (*Data, func(), error) {
 	}
 	cleanup := func() {
 		_ = rdb.Close()
+		db.Close()
 	}
 	return &Data{
 		Db: db,

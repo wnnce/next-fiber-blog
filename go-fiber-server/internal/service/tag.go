@@ -6,7 +6,6 @@ import (
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"log/slog"
-	"net/http"
 	"strconv"
 	"strings"
 )
@@ -50,7 +49,7 @@ func (t *TagService) QueryTagInfo(tagId int) (*usercase.Tag, error) {
 		return nil, tools.FiberServerError("获取标签失败")
 	}
 	if tag == nil {
-		return nil, fiber.NewError(http.StatusNotFound, "标签不存在")
+		return nil, fiber.NewError(fiber.StatusNotFound, "标签不存在")
 	}
 	// 异步更新查看次数
 	go func() {
