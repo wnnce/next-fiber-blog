@@ -130,9 +130,12 @@ func (ot *OtherService) DeleteFile(filename string) {
 	})
 }
 
-func (OtherService) TraceLogin(record *usercase.LoginLog) {
-	//TODO implement me
-	panic("implement me")
+func (ots *OtherService) TraceLogin(record *usercase.LoginLog) {
+	pool.Go(func() {
+		location := region.SearchLocation(record.LoginIP)
+		record.Location = location
+		ots.repo.SaveLoginRecord(record)
+	})
 }
 
 func (ot *OtherService) TraceAccess(referee, ip, ua string) {

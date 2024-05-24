@@ -9,7 +9,8 @@ import (
 	"go-fiber-ent-web-layout/internal/conf"
 )
 
-var InjectSet = wire.NewSet(NewData, NewTagRepo, NewCategoryRepo, NewConcatRepo, NewLinkRepo, NewSysMenuRepo, NewSysConfigRepo, NewOtherRepo)
+var InjectSet = wire.NewSet(NewData, NewTagRepo, NewCategoryRepo, NewConcatRepo, NewLinkRepo, NewSysMenuRepo, NewOtherRepo,
+	NewSysConfigRepo, NewSysRoleRepo, NewSysUserRepo)
 
 type Data struct {
 	Db *pgxpool.Pool // pgx连接

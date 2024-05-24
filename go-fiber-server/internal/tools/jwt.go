@@ -2,7 +2,6 @@ package tools
 
 import (
 	"fmt"
-	"github.com/bytedance/sonic"
 	"github.com/golang-jwt/jwt/v5"
 	"go-fiber-ent-web-layout/internal/conf"
 	"log/slog"
@@ -69,11 +68,7 @@ func readJwtConfig(bootstrap *conf.Bootstrap) {
 	}
 }
 
-func GenerateToken(sub interface{}) (string, error) {
-	subString, err := sonic.Marshal(sub)
-	if err != nil {
-		return "", err
-	}
+func GenerateToken(sub string) (string, error) {
 	currentTime := time.Now()
 	numberDate := &jwt.NumericDate{Time: currentTime}
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
@@ -81,7 +76,7 @@ func GenerateToken(sub interface{}) (string, error) {
 		NotBefore: numberDate,
 		IssuedAt:  numberDate,
 		ExpiresAt: &jwt.NumericDate{Time: currentTime.Add(expireTime)},
-		Subject:   string(subString),
+		Subject:   sub,
 		ID:        strconv.FormatInt(currentTime.UnixMilli(), 10),
 	})
 	return t.SignedString([]byte(secret))

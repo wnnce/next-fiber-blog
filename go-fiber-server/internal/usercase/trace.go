@@ -20,7 +20,7 @@ type UploadFile struct {
 // LoginLog 登录日志
 type LoginLog struct {
 	ID         int64      `json:"id" db:"id"`                  // 主键ID
-	UserId     int64      `json:"userId" db:"user_id"`         // 用户Id
+	UserId     uint64     `json:"userId" db:"user_id"`         // 用户Id
 	UserType   int        `json:"userType" db:"user_type"`     // 用户类型
 	Username   string     `json:"username" db:"username"`      // 用户名
 	LoginIP    string     `json:"loginIp" db:"login_ip"`       // 登录IP

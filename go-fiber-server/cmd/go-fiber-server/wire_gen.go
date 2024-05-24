@@ -12,7 +12,7 @@ import (
 	"go-fiber-ent-web-layout/api/category/v1"
 	"go-fiber-ent-web-layout/api/concat/v1"
 	"go-fiber-ent-web-layout/api/link/v1"
-	"go-fiber-ent-web-layout/api/manage/manage"
+	"go-fiber-ent-web-layout/api/manage/v1"
 	"go-fiber-ent-web-layout/api/other/v1"
 	"go-fiber-ent-web-layout/api/tag/v1"
 	"go-fiber-ent-web-layout/internal/conf"
@@ -49,7 +49,13 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 	iOtherRepo := data.NewOtherRepo(dataData)
 	iOtherService := service.NewOtherService(iOtherRepo)
 	otherHttpApi := other.NewHttpApi(iOtherService)
-	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi)
+	iSysRoleRepo := data.NewSysRoleRepo(dataData)
+	iSysUserRepo := data.NewSysUserRepo(dataData)
+	iSysRoleService := service.NewSysRoleService(iSysRoleRepo, iSysUserRepo)
+	roleApi := manage.NewRoleApi(iSysRoleService)
+	iSysUserService := service.NewSysUserService(iSysUserRepo, iSysRoleRepo, iOtherService)
+	userApi := manage.NewUserApi(iSysUserService)
+	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi, roleApi, userApi)
 	return app, func() {
 		cleanup()
 	}, nil

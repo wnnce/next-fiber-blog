@@ -6,17 +6,18 @@ import (
 	"go-fiber-ent-web-layout/api/category/v1"
 	"go-fiber-ent-web-layout/api/concat/v1"
 	"go-fiber-ent-web-layout/api/link/v1"
-	"go-fiber-ent-web-layout/api/manage/manage"
+	"go-fiber-ent-web-layout/api/manage/v1"
 	"go-fiber-ent-web-layout/api/other/v1"
 	"go-fiber-ent-web-layout/api/tag/v1"
+	"go-fiber-ent-web-layout/internal/middleware/auth"
 )
 
-var InjectSet = wire.NewSet(tag.NewHttpApi, category.NewHttpApi, concat.NewHttpApi, link.NewHttpApi, manage.NewMenuApi, manage.NewConfigApi,
-	other.NewHttpApi)
+var InjectSet = wire.NewSet(tag.NewHttpApi, category.NewHttpApi, concat.NewHttpApi, link.NewHttpApi, manage.NewMenuApi,
+	manage.NewConfigApi, other.NewHttpApi, manage.NewRoleApi, manage.NewUserApi)
 
 // RegisterRoutes 全局路由绑定处理函数 在newApp函数中调用 不然wire无法处理依赖注入
 func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpApi, conApi *concat.HttpApi, linkApi *link.HttpApi,
-	menuApi *manage.MenuApi, cfgApi *manage.ConfigApi, oApi *other.HttpApi) {
+	menuApi *manage.MenuApi, cfgApi *manage.ConfigApi, oApi *other.HttpApi, roleApi *manage.RoleApi, userApi *manage.UserApi) {
 	sysRoute := app.Group("/system")
 	sysRoute.Get("/logger/sse/:interval<int;min<10>>", manage.LoggerPush)
 	menuRoute := sysRoute.Group("/menu")
@@ -30,6 +31,20 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	cfgRoute.Put("/", cfgApi.Update)
 	cfgRoute.Post("/page", cfgApi.ManagePage)
 	cfgRoute.Delete("/:id<int:;min<1>>", cfgApi.Delete)
+	roleRoute := sysRoute.Group("/role")
+	roleRoute.Post("/", roleApi.Save)
+	roleRoute.Put("/", roleApi.Update)
+	roleRoute.Get("/page", roleApi.Page)
+	roleRoute.Get("/list", roleApi.List)
+	roleRoute.Delete("/:id<int;min=<1>>", roleApi.Delete)
+	userRoute := sysRoute.Group("/user")
+	userRoute.Post("/", userApi.Save)
+	userRoute.Put("/", userApi.Update)
+	userRoute.Post("/page", userApi.Page)
+	userRoute.Get("/info", userApi.UserInfo, auth.ManageAuth)
+	userRoute.Post("/login", userApi.Login)
+	userRoute.Delete("/:id<int;min<1>>", userApi.Delete)
+	userRoute.Put("/password", userApi.UpdatePassword)
 
 	tagRoute := app.Group("/tag")
 	tagRoute.Get("/:id<int;min<1>>", tagApi.QueryInfo)

@@ -47,7 +47,7 @@ type ExpertiseDetail struct {
 func (u *User) GetUserId() uint64 {
 	return u.UserId
 }
-func (u *User) GetUserName() string {
+func (u *User) GetUsername() string {
 	return u.Username
 }
 func (u *User) GetRoles() []string {
