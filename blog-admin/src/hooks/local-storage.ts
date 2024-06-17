@@ -1,5 +1,3 @@
-import type { PageTheme } from '@/config/app-config'
-
 interface StorageItem<T> {
   key: string;
   value: T;
@@ -47,3 +45,4 @@ export const useLocalStorage = () => {
 
   return { get, set, remove }
 }
+

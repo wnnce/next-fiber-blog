@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, reactive, watch } from 'vue'
 import { type AppConfig, defaultAppConfig } from '@/config/app-config'
-import { useLocalStorage } from '@/assets/script/hooks'
+import { useLocalStorage } from '@/hooks/local-storage'
 
 
 const { set } = useLocalStorage();

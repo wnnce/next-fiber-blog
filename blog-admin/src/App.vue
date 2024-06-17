@@ -5,7 +5,7 @@ import { useAppConfigStore } from '@/stores/app-config'
 import enUS from '@arco-design/web-vue/es/locale/lang/en-us';
 import zhCN from '@arco-design/web-vue/es/locale/lang/zh-cn';
 import type { ArcoLang } from '@arco-design/web-vue/es/locale/interface'
-import { useLocalStorage } from '@/assets/script/hooks'
+import { useLocalStorage } from '@/hooks/local-storage'
 import type { AppConfig, PageTheme } from '@/config/app-config'
 import { changeTheme } from '@/assets/script/util'
 

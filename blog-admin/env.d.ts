@@ -1,5 +1,7 @@
 /// <reference types="vite/client" />
 
+declare module 'nprogress';
+
 interface ImportMetaEnv {
   /* 后端请求地址 */
   readonly VITE_REQUEST_BASE_URL: string;

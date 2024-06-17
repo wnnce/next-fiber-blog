@@ -44,7 +44,7 @@ const configStore = useAppConfigStore();
 .side-div {
   box-shadow: 8px 0 8px -8px var(--shadom-color);
   height: 100%;
-  border-top: 2px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
   .logo {
     padding: 24px 0;
   }

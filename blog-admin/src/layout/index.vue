@@ -1,10 +1,7 @@
 <script setup lang="ts">
-
-import { useAppConfigStore } from '@/stores/app-config'
 import SideLayout from '@/layout/side-layout.vue'
 import HeaderLayout from '@/layout/header-layout.vue'
 
-const configStore = useAppConfigStore();
 
 </script>
 
@@ -29,6 +26,7 @@ const configStore = useAppConfigStore();
   height: 100vh;
   width: 100%;
   background-color: var(--background-color);
+  transition: color 0.5s, background-color 0.5s;
   .header {
     flex-shrink: 1;
   }
