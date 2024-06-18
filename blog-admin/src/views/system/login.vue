@@ -2,7 +2,14 @@
 import { useRoute } from 'vue-router'
 import { onMounted, reactive, ref } from 'vue'
 import type { LoginForm } from '@/api/system/types'
+import { useLocalStorage } from '@/hooks/local-storage'
+import { useArcoMessage } from '@/hooks/message'
+
+const { get, set, remove } = useLocalStorage();
+const { successMessage } = useArcoMessage();
 const { redirect } = useRoute().query;
+
+const SAVE_DATA_KEY = "login_data";
 
 const isSavePassword = ref<boolean>(false);
 
@@ -14,8 +21,39 @@ const defaultFormData: LoginForm = {
 const formData = reactive<LoginForm>({ ...defaultFormData })
 const loginButtonLoading = ref<boolean>(false);
 const handleSubmit = async () => {
-  
+  loginButtonLoading.value = true;
+  setTimeout(() => {
+    const passwordBase64 = btoa(formData.password || '');
+    const requestData: LoginForm = {
+      username: formData.username,
+      password: passwordBase64,
+      code: formData.code
+    }
+    console.log(requestData)
+    if (isSavePassword.value) {
+      const saveLoginData = btoa(JSON.stringify(formData));
+      set<string>(SAVE_DATA_KEY, saveLoginData, undefined)
+    } else {
+      remove(SAVE_DATA_KEY);
+    }
+    successMessage('登录成功');
+    loginButtonLoading.value = false;
+  }, 500)
 }
+
+const readerSavaLoginData = () => {
+  const base64Data = get<string>(SAVE_DATA_KEY);
+  if (base64Data) {
+    isSavePassword.value = true;
+    const { username, password } = JSON.parse(atob(base64Data)) as LoginForm;
+    formData.username = username;
+    formData.password = password;
+  }
+}
+
+onMounted(() => {
+  readerSavaLoginData();
+})
 </script>
 
 <template>
