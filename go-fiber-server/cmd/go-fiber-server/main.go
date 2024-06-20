@@ -15,6 +15,7 @@ import (
 	"go-fiber-ent-web-layout/api/other/v1"
 	"go-fiber-ent-web-layout/api/tag/v1"
 	"go-fiber-ent-web-layout/internal/conf"
+	"go-fiber-ent-web-layout/internal/middleware/cors"
 	"go-fiber-ent-web-layout/internal/middleware/limiter"
 	"go-fiber-ent-web-layout/internal/middleware/timeout"
 	"go-fiber-ent-web-layout/internal/tools"
@@ -41,6 +42,8 @@ func newApp(ctx context.Context, cf *conf.Server, tagApi *tag.HttpApi, catApi *c
 		EnableStackTrace:  true,
 		StackTraceHandler: hand.StackTraceHandler,
 	}))
+	// 使用跨域中间件
+	app.Use(cors.NewMiddleware(cors.DefaultCorsConfig))
 	// 使用超时中间件
 	app.Use(timeout.NewMiddleware(cf.Timeout))
 	// 使用限流中间件
