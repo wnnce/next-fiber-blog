@@ -4,6 +4,7 @@ import { onMounted, reactive, ref } from 'vue'
 import type { LoginForm } from '@/api/system/types'
 import { useLocalStorage } from '@/hooks/local-storage'
 import { useArcoMessage } from '@/hooks/message'
+import { throttledFunction } from '@/assets/script/util'
 
 const { get, set, remove } = useLocalStorage();
 const { successMessage } = useArcoMessage();
@@ -51,6 +52,31 @@ const readerSavaLoginData = () => {
   }
 }
 
+const loginCardRef = ref();
+const cardLightStyle = reactive({
+  left: '0px',
+  top: '0px',
+  display: 'none'
+})
+let isLimit: boolean = false;
+const handleCardMouseMove = (event: MouseEvent) => {
+  if (isLimit) {
+    return;
+  }
+  isLimit = true;
+  window.requestAnimationFrame(() => {
+    const { clientX, clientY } = event;
+    const { x, y } = loginCardRef.value.getBoundingClientRect();
+    cardLightStyle.left = clientX - x - 60 + 'px';
+    cardLightStyle.top = clientY - y - 60 + 'px';
+    cardLightStyle.display = 'block';
+    isLimit = false;
+  })
+};
+const handleCardMouseLeave = () => {
+  cardLightStyle.display = 'none';
+}
+
 onMounted(() => {
   readerSavaLoginData();
 })
@@ -60,7 +86,8 @@ onMounted(() => {
   <div class="login-container flex">
     <div class="left-background"></div>
     <div class="right-div flex justify-center item-center">
-      <div class="login-card radius-xl">
+      <div ref="loginCardRef" class="login-card radius-xl" @mousemove="event => handleCardMouseMove(event)" @mouseleave="handleCardMouseLeave">
+        <div class="light" :style="cardLightStyle"/>
         <h1 class="title">欢迎访问博客后台管理系统</h1>
         <a-form :model="formData" layout="vertical" @submit="handleSubmit">
           <a-form-item field="username" label="用户名" hide-label :rules="[{required: true, message: '用户名不能为空'}]">
@@ -108,7 +135,7 @@ onMounted(() => {
   width: 100%;
   background-color: var(--background-color);
   .left-background {
-    width: 30%;
+    width: 500px;
     flex-shrink: 1;
     background-image: url("/images/login-bg.png");
     background-repeat: no-repeat;
@@ -119,10 +146,31 @@ onMounted(() => {
   .right-div {
     flex: 1;
     .login-card {
+      position: relative;
+      overflow: hidden;
       row-gap: var(--space-sm);
       padding: var(--space-xxl);
       box-shadow: 0 0 24px var(--shadom-color);
-      background-color: white;
+      background-color: transparent;
+      z-index: 2;
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        background-color: var(--card-color);
+        z-index: -3;
+      }
+      .light {
+        position: absolute;
+        background-color: #32CD99;
+        filter: blur(80px);
+        height: 120px;
+        width: 120px;
+        z-index: -2;
+      }
       .title {
         font-weight: 600;
         padding: var(--space-sm) 0 var(--space-xl) 0;
@@ -137,6 +185,41 @@ onMounted(() => {
       }
       .save-password {
         font-size: 14px;
+      }
+    }
+  }
+}
+.login-container, .right-div, .login-card {
+  transition: padding 300ms ease;
+}
+@media (max-width: 950px) {
+  .login-container {
+    display: block;
+    position: relative;
+    .left-background {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    .right-div {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+  }
+}
+@media (max-width: 550px) {
+  .login-container {
+    .right-div {
+      padding: var(--space-md);
+      .login-card {
+        padding: var(--space-md);
       }
     }
   }
