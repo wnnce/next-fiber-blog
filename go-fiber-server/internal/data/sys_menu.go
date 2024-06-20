@@ -49,7 +49,7 @@ func (m *SysMenuRepo) Update(menu *usercase.SysMenu) error {
 
 func (m *SysMenuRepo) ListAll() ([]*usercase.SysMenu, error) {
 	rows, err := m.db.Query(context.Background(), `select menu_id, menu_name, menu_type, parent_id, path, component, 
-       icon, is_frame, frame_url, is_cache, is_visible, is_disable, sort from t_system_menu where delete_at = '0' and is_visible = true order by sort`)
+       icon, is_frame, frame_url, is_cache, is_visible, is_disable, sort from t_system_menu where delete_at = 0 and is_visible = true order by sort`)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (m *SysMenuRepo) ListAll() ([]*usercase.SysMenu, error) {
 }
 
 func (m *SysMenuRepo) ManageListAll() ([]*usercase.SysMenu, error) {
-	rows, err := m.db.Query(context.Background(), "select * from t_system_menu where delete_at = '0' order by sort")
+	rows, err := m.db.Query(context.Background(), "select * from t_system_menu where delete_at = 0 order by sort")
 	if err != nil {
 		return nil, err
 	}
