@@ -69,7 +69,7 @@ func main() {
 	// 日志SSE端口推送
 	writer.RegisterWriter(clog.GetSSEWriter())
 	handler := slog.NewJSONHandler(writer, &slog.HandlerOptions{
-		AddSource: true,
+		AddSource: false,
 		Level:     slog.LevelInfo,
 	})
 	slog.SetDefault(slog.New(handler).With("app-name", config.Server.Name))
