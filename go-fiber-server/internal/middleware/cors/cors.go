@@ -6,7 +6,10 @@ import (
 	"strings"
 )
 
+// NewMiddleware 创建跨域中间件
+// config 跨域配置
 func NewMiddleware(config CorsConfig) fiber.Handler {
+	corsConfigDefault(&config)
 	return func(ctx fiber.Ctx) error {
 		if config.UseOrigin {
 			ctx.Set(fiber.HeaderAccessControlAllowOrigin, ctx.Get(fiber.HeaderOrigin, ""))
