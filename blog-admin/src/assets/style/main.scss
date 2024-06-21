@@ -1,4 +1,5 @@
 @import "./base.scss";
+@import "./animation.scss";
 
 html, body, #app {
   height: 100%;
@@ -48,21 +49,4 @@ html, body, #app {
   &:hover {
     cursor: pointer;
   }
-}
-
-
-// 元素出现隐藏动画
-.hidden-enter-active {
-  transition: all 0.3s ease-out;
-}
-.hidden-leave-active {
-  transition: all 0.3s ease-in;
-}
-.hidden-enter-from {
-  transform: translateY(20px);
-  opacity: 0;
-}
-.hidden-leave-to {
-  transform: translateY(-20px);
-  opacity: 0;
 }

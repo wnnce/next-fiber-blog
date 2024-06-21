@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <div>角色管理</div>
+  <div>首页</div>
 </template>
 
 <style scoped lang="scss">

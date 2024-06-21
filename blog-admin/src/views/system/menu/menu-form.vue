@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <div>角色管理</div>
+  <Icon
 </template>
 
 <style scoped lang="scss">

@@ -2,8 +2,6 @@ import { defineStore } from 'pinia'
 import { computed, reactive, watch } from 'vue'
 import { type AppConfig, defaultAppConfig } from '@/config/app-config'
 import { useLocalStorage } from '@/hooks/local-storage'
-
-
 const { set } = useLocalStorage();
 
 export const useAppConfigStore = defineStore('app-config', () => {

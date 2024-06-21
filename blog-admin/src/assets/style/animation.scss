@@ -1,0 +1,39 @@
+// 元素出现隐藏动画
+.hidden-enter-active {
+  transition: all 0.3s ease-out;
+}
+.hidden-leave-active {
+  transition: all 0.3s ease-in;
+}
+.hidden-enter-from {
+  transform: translateY(20px);
+  opacity: 0;
+}
+.hidden-leave-to {
+  transform: translateY(-20px);
+  opacity: 0;
+}
+
+// 元素切换动画
+.switch-enter-active {
+  transition: all 300ms ease-out;
+}
+.switch-leave-active {
+  transition: all 300ms ease-in;
+}
+.switch-enter-from,
+.switch-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+
+// 元素列表动画
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}

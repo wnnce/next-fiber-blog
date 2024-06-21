@@ -2,7 +2,6 @@
 import SideLayout from '@/layout/side-layout.vue'
 import HeaderLayout from '@/layout/header-layout.vue'
 
-
 </script>
 
 <template>
@@ -15,7 +14,13 @@ import HeaderLayout from '@/layout/header-layout.vue'
         <side-layout />
       </div>
       <div class="content-main">
-
+        <router-view v-slot="{ Component }">
+          <transition name="switch" mode="out-in">
+            <keep-alive>
+              <component :is="Component" />
+            </keep-alive>
+          </transition>
+        </router-view>
       </div>
     </div>
   </main>

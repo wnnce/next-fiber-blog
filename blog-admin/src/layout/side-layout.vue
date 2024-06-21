@@ -1,43 +1,87 @@
 <script setup lang="ts">
-import { IconApps, IconBug, IconBulb, } from '@arco-design/web-vue/es/icon';
 import { useAppConfigStore } from '@/stores/app-config'
+import { useLocalUserStore } from '@/stores/user'
+import { useRoute, useRouter } from 'vue-router'
+import { useArcoMessage } from '@/hooks/message'
+import { onMounted, ref } from 'vue'
+import * as ArcoIcons from '@arco-design/web-vue/es/icon';
 
+const router = useRouter()
+const route = useRoute();
+const { errorMessage } = useArcoMessage();
 const configStore = useAppConfigStore();
+const userStore = useLocalUserStore();
 
+const selectedKeys = ref<string[]>([]);
+const openedKeys = ref<string[]>([]);
+const handleItemClick = (key: string) => {
+  if (key === '-1') {
+    router.push('/index')
+  } else {
+    const findRoute = userStore.menuRouteList.find(item => item.name === key)
+    if (findRoute) {
+      router.push(findRoute.path)
+    } else {
+      errorMessage('菜单路由不存在');
+    }
+  }
+}
+const updateSelectedKey = () => {
+  const menuId = route.name ? route.name.toString() : undefined;
+  if (menuId) {
+    if (menuId === 'index') {
+      selectedKeys.value = ['-1'];
+      return;
+    }
+    selectedKeys.value = [menuId];
+    const parentIds = userStore.getMenuParentIdListMap().get(menuId)
+    openedKeys.value = parentIds || [];
+  }
+}
+
+onMounted(() => {
+  updateSelectedKey();
+})
 </script>
 
 <template>
   <div class="side-div">
-    <a-menu :style="{ height: '100%', width: configStore.sideWidth }" show-collapse-button>
-      <a-sub-menu key="0">
-        <template #icon><icon-apps></icon-apps></template>
-        <template #title>Navigation 1</template>
-        <a-menu-item key="0_0">Menu 1</a-menu-item>
-        <a-menu-item key="0_1">Menu 2</a-menu-item>
-        <a-menu-item key="0_2" disabled>Menu 3</a-menu-item>
-      </a-sub-menu>
-      <a-sub-menu key="1">
-        <template #icon><icon-bug></icon-bug></template>
-        <template #title>Navigation 2</template>
-        <a-menu-item key="1_0">Menu 1</a-menu-item>
-        <a-menu-item key="1_1">Menu 2</a-menu-item>
-        <a-menu-item key="1_2">Menu 3</a-menu-item>
-      </a-sub-menu>
-      <a-sub-menu key="2">
-        <template #icon><icon-bulb></icon-bulb></template>
-        <template #title>Navigation 3</template>
-        <a-menu-item-group title="Menu Group 1">
-          <a-menu-item key="2_0">Menu 1</a-menu-item>
-          <a-menu-item key="2_1">Menu 2</a-menu-item>
-        </a-menu-item-group>
-        <a-menu-item-group title="Menu Group 2">
-          <a-menu-item key="2_2">Menu 3</a-menu-item>
-          <a-menu-item key="2_3">Menu 4</a-menu-item>
-        </a-menu-item-group>
-      </a-sub-menu>
+    <a-menu :style="{ height: '100%', width: configStore.sideWidth }"
+            show-collapse-button
+            @menu-item-click="handleItemClick"
+            v-model:selected-keys="selectedKeys"
+            v-model:open-keys="openedKeys"
+    >
+      <a-menu-item :key="'-1'">
+        <template #icon><icon-home /></template>
+        首页
+      </a-menu-item>
+      <template v-for="item in userStore.treeMenu" :key="item.menuId">
+        <template v-if="item.menuType === 2 || item.children">
+          <a-sub-menu :key="item.menuId.toString()">
+            <template #icon>
+              <component :is="ArcoIcons[item.icon as keyof typeof ArcoIcons]" />
+            </template>
+            <template #title>{{ item.menuName }}</template>
+            <a-menu-item v-for="menu in item.children" :key="menu.menuId.toString()">
+              <template #icon>
+                <component :is="ArcoIcons[menu.icon as keyof typeof ArcoIcons]" />
+              </template>
+              {{ menu.menuName }}
+            </a-menu-item>
+          </a-sub-menu>
+        </template>
+        <template v-else>
+          <a-menu-item :key="item.menuId.toString()">
+            <template #icon>
+              <component :is="ArcoIcons[item.icon as keyof typeof ArcoIcons]" />
+            </template>
+            {{ item.menuName }}
+          </a-menu-item>
+        </template>
+      </template>
     </a-menu>
   </div>
-
 </template>
 
 <style scoped lang="scss">

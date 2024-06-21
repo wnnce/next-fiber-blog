@@ -12,17 +12,21 @@ export interface Result<T> {
 
 export declare type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
+export const TOKEN_KEY: string = 'Authorization_Bearer_Token';
+
 const { get } = useLocalStorage();
 
-const TOKEN_KEY: string = 'Authorization_Bearer_Token';
 const baseUrl = import.meta.env.VITE_REQUEST_BASE_URL;
 
-export function request<T>(url: string, method: HttpMethod, params?: any, data?: object, headers?: object): Promise<Result<T>> {
+export function request<T>(url: string, method: HttpMethod, params?: any, data?: object, headers?: Record<string, string>): Promise<Result<T>> {
   return new Promise((resolve, reject) => {
     const token = get<string>(TOKEN_KEY);
-    const httpHeaders = { 'Authorization': `Bearer ${token}` };
+    const httpHeaders: Record<string, string> = {};
+    if (token && token.trim().length > 0) {
+      httpHeaders['Authorization'] = `Bearer ${token}`;
+    }
     headers && (Object.assign(httpHeaders, headers));
-    if ((method === 'GET' || method === 'DELETE') || params) {
+    if (params) {
       url += '?' + new URLSearchParams(params).toString();
     }
     fetch(baseUrl + url, {

@@ -4,7 +4,9 @@ import { onMounted, ref } from 'vue'
 import { useAppConfigStore } from '@/stores/app-config'
 import type { PageTheme } from '@/config/app-config'
 import { changeTheme } from '@/assets/script/util'
+import { IconSunFill } from '@arco-design/web-vue/es/icon'
 import TextDropdown from '@/layout/components/TextDropdown.vue'
+import Breadcrumd from '@/layout/components/Breadcrumd.vue'
 
 const configStore = useAppConfigStore();
 
@@ -47,12 +49,17 @@ onMounted(() => {
 
 <template>
   <header class="header flex justify-between shadow-md">
-    <div class="logo flex item-center">
-      <div class="logo-image">
-        <img src="/images/logo.png" alt="logo">
+    <div class="left flex item-center">
+      <div class="logo flex item-center">
+        <div class="logo-image">
+          <img src="/images/logo.png" alt="logo">
+        </div>
+        <div class="logo-title">
+          博客后台管理
+        </div>
       </div>
-      <div class="logo-title">
-        博客后台管理
+      <div class="bread">
+        <breadcrumd />
       </div>
     </div>
     <div class="option flex item-center">
@@ -90,17 +97,20 @@ header {
   background-color: var(--card-color);
   padding: var(--space-sm) var(--space-xl);
   width: 100%;
-  .logo {
-    column-gap: var(--space-sm);
-    font-size: 18px;
-    font-weight: 500;
-    .logo-image {
-      height: 28px;
-      width: 28px;
-      overflow: hidden;
-      img {
-        height: 100%;
-        width: 100%;
+  .left {
+    column-gap: var(--space-xxl);
+    .logo {
+      column-gap: var(--space-sm);
+      font-size: 18px;
+      font-weight: 500;
+      .logo-image {
+        height: 28px;
+        width: 28px;
+        overflow: hidden;
+        img {
+          height: 100%;
+          width: 100%;
+        }
       }
     }
   }
