@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import SideLayout from '@/layout/side-layout.vue'
 import HeaderLayout from '@/layout/header-layout.vue'
+import PageTabs from '@/layout/components/PageTabs.vue'
+import { useLocalUserStore } from '@/stores/user'
 
 </script>
 
@@ -14,13 +16,18 @@ import HeaderLayout from '@/layout/header-layout.vue'
         <side-layout />
       </div>
       <div class="content-main">
-        <router-view v-slot="{ Component }">
-          <transition name="switch" mode="out-in">
-            <keep-alive>
-              <component :is="Component" />
-            </keep-alive>
-          </transition>
-        </router-view>
+        <div class="page-tabs">
+          <page-tabs />
+        </div>
+        <div class="main-div">
+          <router-view v-slot="{ Component }">
+            <transition name="switch" mode="out-in">
+              <keep-alive :include="useLocalUserStore().keepaliveInclude">
+                <component :is="Component" />
+              </keep-alive>
+            </transition>
+          </router-view>
+        </div>
       </div>
     </div>
   </main>
@@ -42,8 +49,14 @@ import HeaderLayout from '@/layout/header-layout.vue'
     }
     .content-main {
       flex: 1;
-      padding: var(--space-md);
-      overflow: auto;
+      .page-tabs {
+        background-color: var(--card-color);
+        border-top: 1px solid var(--border-color);
+      }
+      .main-div {
+        overflow: auto;
+        padding: var(--space-md);
+      }
     }
   }
 }

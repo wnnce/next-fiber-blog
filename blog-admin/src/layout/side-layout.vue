@@ -3,7 +3,7 @@ import { useAppConfigStore } from '@/stores/app-config'
 import { useLocalUserStore } from '@/stores/user'
 import { useRoute, useRouter } from 'vue-router'
 import { useArcoMessage } from '@/hooks/message'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import * as ArcoIcons from '@arco-design/web-vue/es/icon';
 
 const router = useRouter()
@@ -18,7 +18,7 @@ const handleItemClick = (key: string) => {
   if (key === '-1') {
     router.push('/index')
   } else {
-    const findRoute = userStore.menuRouteList.find(item => item.name === key)
+    const findRoute = userStore.menuRouteMap.get(key)
     if (findRoute) {
       router.push(findRoute.path)
     } else {
@@ -38,6 +38,10 @@ const updateSelectedKey = () => {
     openedKeys.value = parentIds || [];
   }
 }
+
+watch(route, () => {
+  updateSelectedKey();
+})
 
 onMounted(() => {
   updateSelectedKey();

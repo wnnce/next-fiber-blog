@@ -48,7 +48,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <header class="header flex justify-between shadow-md">
+  <header class="header flex justify-between">
     <div class="left flex item-center">
       <div class="logo flex item-center">
         <div class="logo-image">

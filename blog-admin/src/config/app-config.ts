@@ -10,6 +10,8 @@ export interface AppConfig {
   pageTheme: PageTheme;
   // 是否显示标签页
   showPageTag: boolean;
+  // 页面最大的缓存数量
+  maxCachePage: number;
 }
 
 // 网站默认配置
@@ -17,5 +19,6 @@ export const defaultAppConfig: AppConfig = {
   language: 'zh-CN',
   sideWidth: 200,
   pageTheme: 'light',
-  showPageTag: true
+  showPageTag: true,
+  maxCachePage: 10,
 }

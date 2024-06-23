@@ -22,8 +22,8 @@ const queryMenu = async () => {
     if (code === 200) {
       const routeList = buildRoute(data)
       mountVue();
-      useLocalUserStore().setTreeMenu(data)
-      useLocalUserStore().menuRouteList = routeList;
+      useLocalUserStore().setTreeMenu(data);
+      useLocalUserStore().setMenuRoute(routeList);
     }
   } catch (e) {
     console.log(e);

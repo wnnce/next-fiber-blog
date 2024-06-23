@@ -1,46 +1,36 @@
 <script setup lang="ts">
 
 import { useRoute } from 'vue-router'
-import { onMounted, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { useLocalUserStore } from '@/stores/user'
 
 const route = useRoute();
 
-const routePaths = ref<string[]>(['首页']);
-
-const updateBreadcrumb = () => {
-  const menuId = route.name ? route.name.toString() : undefined;
-  routePaths.value = ['首页'];
-  if (!menuId) {
-    return;
+const routePaths = computed((): string[] => {
+  const currentId = route.name ? route.name.toString() : undefined;
+  const baseName = ['首页'];
+  if (!currentId) {
+    return baseName
   }
-  const parentIds = useLocalUserStore().getMenuParentIdListMap().get(menuId);
+  const parentIds = useLocalUserStore().getMenuParentIdListMap().get(currentId);
   if (!parentIds || parentIds.length === 0) {
-    return;
+    return baseName;
   }
-  const names = parentIds.concat(menuId).map(id => queryMenuName(id))
-  routePaths.value.push(...names);
-}
+  const names = parentIds.concat(currentId).map(id => queryMenuName(id))
+  return baseName.concat(names);
+})
 
 const queryMenuName = (id: string): string => {
-  const menu = useLocalUserStore().menuList.find(item => item.menuId.toString() === id)
+  const menu = useLocalUserStore().menuListMap.get(id);
   return menu ? menu.menuName : '';
 }
-
-watch(route, () => {
-  updateBreadcrumb();
-})
-
-onMounted(() => {
-  updateBreadcrumb();
-})
 </script>
 
 <template>
   <a-breadcrumb>
-    <a-breadcrumb-item v-for="(name, index) in routePaths" :key="index">
-      {{ name }}
-    </a-breadcrumb-item>
+    <template v-for="(name, index) in routePaths" :key="index">
+      <a-breadcrumb-item>{{ name }}</a-breadcrumb-item>
+    </template>
   </a-breadcrumb>
 </template>
 

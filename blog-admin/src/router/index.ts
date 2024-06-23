@@ -61,11 +61,16 @@ const formatMenuToRoute = (menu: Menu, views: Record<string, () => Promise<unkno
     const prefixPath = menu.component.startsWith('/') ? menu.component : `/${menu.component}`;
     componentPath = prefixPath.endsWith('.vue') ? prefixPath : `${prefixPath}.vue`;
   }
+  const menuIdStr = menu.menuId.toString();
+  const findComponent = views[`../views${componentPath}`];
+  (findComponent() as Promise<{ default: { name: string } }>).then(val => {
+    val && (val.default.name = menuIdStr);
+  });
   return {
     path: menu.path.startsWith('/') ? menu.path : `/${menu.path}`,
-    name: menu.menuId.toString(),
+    name: menuIdStr,
     meta: {
-      id: menu.menuId,
+      id: menuIdStr,
       componentName: menu.menuName,
       icon: menu.icon,
       isVisible: menu.isVisible,
@@ -74,6 +79,6 @@ const formatMenuToRoute = (menu: Menu, views: Record<string, () => Promise<unkno
       isFrame: menu.isFrame,
       frameUrl: menu.frameUrl
     },
-    component: views[`../views${componentPath}`],
+    component: findComponent,
   }
 }
