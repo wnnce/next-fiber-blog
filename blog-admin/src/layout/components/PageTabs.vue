@@ -69,7 +69,7 @@ onMounted(() => {
 
 <template>
   <a-tabs editable
-          type="card-gutter"
+          type="card"
           hide-content
           :active-key="activeName"
           animation

@@ -7,23 +7,16 @@ import { changeTheme } from '@/assets/script/util'
 import { IconSunFill } from '@arco-design/web-vue/es/icon'
 import TextDropdown from '@/layout/components/TextDropdown.vue'
 import Breadcrumd from '@/layout/components/Breadcrumd.vue'
+import { useI18nLanguage } from '@/i18n'
+import SettingDrawer from '@/layout/components/SettingDrawer.vue'
 
 const configStore = useAppConfigStore();
+const i18nLanguage = useI18nLanguage();
 
 const iconSize = 18;
 
-const languageActiveIndex = ref<number>(0);
-const languageOption: OptionItem[] = [
-  { label: '中文', value: 'zh-CN' },
-  { label: 'English', value: 'en-US'}
-]
 const handleLanguageSelect = (value: string | number) => {
-  value = value.toString();
-  changeLanguageActiveIndex(value);
-  configStore.state.language = value;
-}
-const changeLanguageActiveIndex = (value: string) => {
-  languageActiveIndex.value = languageOption.findIndex(item => item.value === value)
+  i18nLanguage.changeLanguage(value.toString());
 }
 const handleThemeSwitch = () => {
   const newTheme: PageTheme = configStore.state.pageTheme === 'light' ? 'dark' : 'light';
@@ -41,9 +34,10 @@ const handleUserOptionClick = (value: string | number) => {
   console.log(value);
 }
 
-onMounted(() => {
-  changeLanguageActiveIndex(configStore.state.language);
-})
+const settingRef = ref();
+const settingShow = () => {
+  settingRef.value.show();
+}
 
 </script>
 
@@ -70,8 +64,8 @@ onMounted(() => {
       </div>
       <div class="language">
         <text-dropdown
-          :options="languageOption"
-          :text="languageOption[languageActiveIndex].label"
+          :options="i18nLanguage.languageOption"
+          :text="i18nLanguage.currentLanguage.value.label"
           @select="handleLanguageSelect"
         />
       </div>
@@ -81,7 +75,7 @@ onMounted(() => {
           <icon-moon-fill class="icon-button" :size="iconSize" v-else style="color: #8A2BE2"/>
         </transition>
       </div>
-      <div class="pointer">
+      <div class="pointer" @click="settingShow">
         <icon-settings :size="iconSize"/>
       </div>
       <div class="user flex item-center">
@@ -89,6 +83,7 @@ onMounted(() => {
         <text-dropdown :options="userOption" text="Admin" @select="handleUserOptionClick" />
       </div>
     </div>
+    <setting-drawer ref="settingRef" />
   </header>
 </template>
 
