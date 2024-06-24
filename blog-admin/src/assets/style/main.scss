@@ -50,3 +50,26 @@ html, body, #app {
     cursor: pointer;
   }
 }
+
+.card {
+  background-color: var(--card-color);
+  padding: var(--space-md);
+  min-height: 100%;
+}
+.search-div {
+  display: flex;
+  column-gap: var(--space-md);
+  margin-bottom: var(--space-md);
+  .search-item {
+    display: flex;
+    column-gap: var(--space-xs);
+    align-items: center;
+    label {
+      flex-shrink: 0;
+    }
+  }
+  .search-buttons {
+    display: flex;
+    column-gap: var(--space-sm);
+  }
+}

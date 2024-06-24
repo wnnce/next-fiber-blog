@@ -15,7 +15,7 @@ import { useLocalUserStore } from '@/stores/user'
       <div class="content-side">
         <side-layout />
       </div>
-      <div class="content-main">
+      <div class="content-main flex flex-column">
         <div class="page-tabs">
           <page-tabs />
         </div>
@@ -40,22 +40,24 @@ import { useLocalUserStore } from '@/stores/user'
   background-color: var(--background-color);
   transition: color 0.5s, background-color 0.5s;
   .header {
-    flex-shrink: 1;
+    flex-shrink: 0;
   }
   .content {
     flex: 1;
     .content-side {
-      flex-shrink: 1;
+      flex-shrink: 0;
     }
     .content-main {
       flex: 1;
       .page-tabs {
         background-color: var(--card-color);
         border-top: 1px solid var(--border-color);
+        flex-shrink: 0;
       }
       .main-div {
         overflow: auto;
         padding: var(--space-md);
+        flex: 1;
       }
     }
   }
