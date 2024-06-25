@@ -22,7 +22,7 @@ export const useArcoMessage = () => {
   }
 
   function loading(message: string) {
-    Message.loading(message);
+    return Message.loading(message);
   }
 
   function clearMessage() {
