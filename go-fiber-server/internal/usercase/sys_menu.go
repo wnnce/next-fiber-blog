@@ -18,7 +18,7 @@ type SysMenu struct {
 	IsCache    bool       `json:"isCache" db:"is_cache"`                       // 是否缓存
 	IsVisible  bool       `json:"isVisible" db:"is_visible"`                   // 是否可见
 	IsDisable  bool       `json:"isDisable" db:"is_disable"`                   // 是否关闭
-	DeleteAt   string     `json:"deleteAt,omitempty" db:"delete_at"`           // 是否删除
+	DeleteAt   int64      `json:"deleteAt,omitempty" db:"delete_at"`           // 是否删除
 	CreateTime *time.Time `json:"createTime,omitempty" db:"create_time"`       // 创建时间
 	UpdateTime *time.Time `json:"updateTime,omitempty" db:"update_time"`       // 更新时间
 	Sort       int        `json:"sort" db:"sort"`                              // 排序
