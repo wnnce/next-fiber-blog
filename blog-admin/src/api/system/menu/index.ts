@@ -10,5 +10,11 @@ export const menuApi = {
    */
   listTreeMenu: () => {
     return sendGet<Menu[]>('/system/menu/tree')
+  },
+  /**
+   * 获取菜单树管理列表
+   */
+  manageListTree: () => {
+    return sendGet<Menu[]>('/system/menu/manage/tree')
   }
 }

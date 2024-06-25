@@ -29,3 +29,20 @@ export interface Menu {
   // 子菜单
   children?: Menu[]
 }
+
+// 菜单表单
+export interface MenuForm {
+  menuId?: number;
+  menuName: string;
+  menuType?: number;
+  parentId?: number;
+  path?: string;
+  component?: string
+  icon?: string;
+  isFrame: boolean;
+  frameUrl?: string;
+  isCache: boolean;
+  isVisible: boolean;
+  isDisable: boolean;
+  sort: number;
+}
