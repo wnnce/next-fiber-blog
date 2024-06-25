@@ -59,11 +59,11 @@ func (sc *SysConfigRepo) ManagePage(query *usercase.SysConfigQueryForm) ([]userc
 	if query.Key != "" {
 		condition.WriteString(fmt.Sprintf("and config_key like '%s' ", "%"+query.Key+"%"))
 	}
-	if query.CreateTimeBegin != nil {
-		condition.WriteString(fmt.Sprintf("and create_time >= '%s' ", query.CreateTimeBegin.Format("2006-04-02")))
+	if query.CreateTimeBegin != "" {
+		condition.WriteString(fmt.Sprintf("and create_time >= '%s' ", query.CreateTimeBegin))
 	}
-	if query.CreateTimeEnd != nil {
-		condition.WriteString(fmt.Sprintf("and create_time <= '%s' ", query.CreateTimeEnd.Format("2006-04-02")))
+	if query.CreateTimeEnd != "" {
+		condition.WriteString(fmt.Sprintf("and create_time <= '%s' ", query.CreateTimeEnd))
 	}
 	total, err := sc.conditionTotal(condition.String())
 	if err != nil {

@@ -1,8 +1,6 @@
 package usercase
 
-import (
-	"time"
-)
+import "time"
 
 // SysConfig 系统配置缓存表
 type SysConfig struct {
@@ -18,10 +16,10 @@ type SysConfig struct {
 
 // SysConfigQueryForm 查询表单
 type SysConfigQueryForm struct {
-	Name            string     `json:"name"`
-	Key             string     `json:"key"`
-	CreateTimeBegin *time.Time `json:"createTimeBegin"`
-	CreateTimeEnd   *time.Time `json:"createTimeEnd"`
+	Name            string `json:"name"`
+	Key             string `json:"key"`
+	CreateTimeBegin string `json:"createTimeBegin"`
+	CreateTimeEnd   string `json:"createTimeEnd"`
 	PageQueryForm
 }
 
