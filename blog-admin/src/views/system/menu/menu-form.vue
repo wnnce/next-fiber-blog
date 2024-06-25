@@ -4,6 +4,11 @@ import { computed, reactive, ref } from 'vue'
 import type { Menu, MenuForm } from '@/api/system/menu/types'
 import type { TreeNodeData } from '@arco-design/web-vue'
 import * as ArcoIcons from '@arco-design/web-vue/es/icon';
+import type { Result } from '@/api/request'
+import { menuApi } from '@/api/system/menu'
+import { useArcoMessage } from '@/hooks/message'
+
+const { successMessage } = useArcoMessage();
 
 interface Props {
   treeMenu: Menu[]
@@ -15,7 +20,12 @@ const emits = defineEmits<{
 const props = defineProps<Props>();
 
 const modalShow = ref<boolean>(false);
-const show = (record?: Menu) => {
+const show = (record?: Menu, parentId?: number) => {
+  if (!record && parentId) {
+    formData.parentId = parentId;
+  } else if (record) {
+    Object.assign(formData, record);
+  }
   modalShow.value = true;
 }
 const onClose = () => {
@@ -41,12 +51,12 @@ const formData = reactive<MenuForm>({ ...defaultMenuForm })
 const submitButtonLoading = ref<boolean>(false);
 const formSubmit = async () => {
   submitButtonLoading.value = true;
-  /*try {
+  try {
     let result: Result<null>;
     if (formData.menuId) {
-      result = await configApi.updateSysConfig(configForm);
+      result = await menuApi.updateSysMenu(formData);
     } else {
-      result = await configApi.saveSysConfig(configForm);
+      result = await menuApi.saveSysMenu(formData);
     }
     if (result.code === 200) {
       successMessage(formData.menuId ? '修改成功' : '保存成功');
@@ -55,7 +65,7 @@ const formSubmit = async () => {
     }
   } finally {
     submitButtonLoading.value = false;
-  }*/
+  }
 }
 
 const treeSelectData = computed((): TreeNodeData[] => {
@@ -126,6 +136,30 @@ defineExpose({
       <a-form-item label="路由地址" field="path" :rules="[ {required: true, message: '路由地址不能为空'} ]">
         <a-input v-model="formData.path" placeholder="请输入路由地址" />
       </a-form-item>
+      <template v-if="formData.menuType === 2">
+        <div class="flex">
+          <a-form-item label="外链" field="isFrame" required>
+            <a-radio-group v-model="formData.isFrame">
+              <a-radio :value="true">是</a-radio>
+              <a-radio :value="false">否</a-radio>
+            </a-radio-group>
+          </a-form-item>
+          <a-form-item label="是否缓存" field="isCache" required>
+            <a-radio-group v-model="formData.isCache">
+              <a-radio :value="true">是</a-radio>
+              <a-radio :value="false">否</a-radio>
+            </a-radio-group>
+          </a-form-item>
+        </div>
+        <transition name="switch" mode="out-in">
+          <a-form-item label="外链地址" field="frameUrl" v-if="formData.isFrame">
+            <a-input v-model="formData.frameUrl" placeholder="请输入外链地址" />
+          </a-form-item>
+          <a-form-item label="组件地址" field="component" v-else>
+            <a-input v-model="formData.component" placeholder="请输入组件地址" />
+          </a-form-item>
+        </transition>
+      </template>
       <div class="flex">
         <a-form-item label="显示状态" field="isVisible" :rules="[ {required: true, message: '显示状态不能为空'} ]">
           <a-radio-group v-model="formData.isVisible">
@@ -135,23 +169,21 @@ defineExpose({
         </a-form-item>
         <a-form-item label="菜单状态" field="isDisable" :rules="[ {required: true, message: '菜单状态不能为空'} ]">
           <a-radio-group v-model="formData.isDisable">
-            <a-radio :value="true">启用</a-radio>
-            <a-radio :value="false">停用</a-radio>
+            <a-radio :value="false">启用</a-radio>
+            <a-radio :value="true">停用</a-radio>
           </a-radio-group>
         </a-form-item>
       </div>
-      <a-form-item>
-        <div class="flex justify-between" style="width: 100%; column-gap: 24px">
-          <a-button html-type="submit" type="primary" size="large" long :loading="submitButtonLoading">
-            <template #icon><icon-save /></template>
-            提交
-          </a-button>
-          <a-button size="large" long @click="modalShow = false" :disabled="submitButtonLoading">
-            <template #icon><icon-close /></template>
-            取消
-          </a-button>
-        </div>
-      </a-form-item>
+      <div class="flex justify-between" style="width: 100%; column-gap: 24px">
+        <a-button html-type="submit" type="primary" size="large" long :loading="submitButtonLoading">
+          <template #icon><icon-save /></template>
+          提交
+        </a-button>
+        <a-button size="large" long @click="modalShow = false" :disabled="submitButtonLoading">
+          <template #icon><icon-close /></template>
+          取消
+        </a-button>
+      </div>
     </a-form>
   </a-modal>
 </template>

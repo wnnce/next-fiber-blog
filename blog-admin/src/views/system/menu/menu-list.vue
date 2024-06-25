@@ -26,10 +26,10 @@ const queryTableData = async () => {
   }
 }
 
-const handleDelete = async (record: Config) => {
+const handleDelete = async (record: Menu) => {
   const loadingMsg = loading('数据删除中')
   try {
-    const result = await configApi.deleteSysConfig(record.configId);
+    const result = await menuApi.deleteSysMenu(record.menuId);
     if (result.code === 200) {
       successMessage('删除成功');
       await queryTableData();
@@ -41,8 +41,8 @@ const handleDelete = async (record: Config) => {
 }
 
 const formRef = ref();
-const showForm = (record?: Config) => {
-  formRef.value.show(record);
+const showForm = (record?: Menu, parentId?: number) => {
+  formRef.value.show(record, parentId);
 }
 
 onMounted(() => {
@@ -75,7 +75,7 @@ onMounted(() => {
         <a-table-column title="创建时间" data-index="createTime" align="center"/>
         <a-table-column title="操作" align="center">
           <template #cell="{ record }">
-            <a-button type="text" shape="circle" @click="showForm">
+            <a-button type="text" shape="circle" @click="showForm(undefined, record.menuId)">
               <template #icon><icon-plus /></template>
             </a-button>
             <a-button type="text" shape="circle" @click="showForm(record)">
@@ -93,7 +93,7 @@ onMounted(() => {
         </a-table-column>
       </template>
     </a-table>
-    <menu-form ref="formRef" :tree-menu="tableData" />
+    <menu-form ref="formRef" :tree-menu="tableData" @reload="queryTableData"/>
   </div>
 </template>
 
