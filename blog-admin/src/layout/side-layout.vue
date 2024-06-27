@@ -61,27 +61,31 @@ onMounted(() => {
         首页
       </a-menu-item>
       <template v-for="item in userStore.treeMenu" :key="item.menuId">
-        <template v-if="item.menuType === 2 || item.children">
-          <a-sub-menu :key="item.menuId.toString()">
-            <template #icon>
-              <component :is="ArcoIcons[item.icon as keyof typeof ArcoIcons]" />
-            </template>
-            <template #title>{{ item.menuName }}</template>
-            <a-menu-item v-for="menu in item.children" :key="menu.menuId.toString()">
+        <template v-if="item.isVisible">
+          <template v-if="item.menuType === 2 || item.children">
+            <a-sub-menu :key="item.menuId.toString()">
               <template #icon>
-                <component :is="ArcoIcons[menu.icon as keyof typeof ArcoIcons]" />
+                <component :is="ArcoIcons[item.icon as keyof typeof ArcoIcons]" />
               </template>
-              {{ menu.menuName }}
+              <template #title>{{ item.menuName }}</template>
+              <template v-for="(menu, index) in item.children" :key="index">
+                <a-menu-item v-if="menu.isVisible" :key="menu.menuId.toString()" :disabled="menu.isDisable">
+                  <template #icon>
+                    <component :is="ArcoIcons[menu.icon as keyof typeof ArcoIcons]" />
+                  </template>
+                  {{ menu.menuName }}
+                </a-menu-item>
+              </template>
+            </a-sub-menu>
+          </template>
+          <template v-else>
+            <a-menu-item :key="item.menuId.toString()">
+              <template #icon>
+                <component :is="ArcoIcons[item.icon as keyof typeof ArcoIcons]" />
+              </template>
+              {{ item.menuName }}
             </a-menu-item>
-          </a-sub-menu>
-        </template>
-        <template v-else>
-          <a-menu-item :key="item.menuId.toString()">
-            <template #icon>
-              <component :is="ArcoIcons[item.icon as keyof typeof ArcoIcons]" />
-            </template>
-            {{ item.menuName }}
-          </a-menu-item>
+          </template>
         </template>
       </template>
     </a-menu>

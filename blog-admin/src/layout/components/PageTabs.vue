@@ -21,7 +21,8 @@ router.beforeEach((to, form, next) => {
   }
   activeName.value = toName;
   const formIsCache = form.meta ? form.meta.keepAlive as boolean : false;
-  if (!formIsCache) {
+  const formIsVisible = form.meta ? form.meta.isVisible as boolean : false;
+  if (!formIsCache || !formIsVisible) {
     const formName = form.name ? form.name.toString() : '';
     useLocalUserStore().removeKeepaliveComponent(formName);
   }

@@ -3,6 +3,9 @@ import * as NProgress from "nprogress";
 import "nprogress/nprogress.css";
 import { publicRouter } from '@/router/routers'
 import type { Menu } from '@/api/system/menu/types'
+import { useArcoMessage } from '@/hooks/message'
+
+const { errorMessage } = useArcoMessage();
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,6 +16,11 @@ const router = createRouter({
 
 router.beforeEach((to, form, next) => {
   NProgress.start();
+  const isDisable = to.meta ? to.meta.isDisable as boolean : true;
+  if (isDisable) {
+    errorMessage('路由地址被禁用');
+    return;
+  }
   next()
 })
 

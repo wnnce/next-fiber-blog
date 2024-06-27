@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { OptionItem } from '@/assets/script/types'
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useAppConfigStore } from '@/stores/app-config'
 import type { PageTheme } from '@/config/app-config'
 import { changeTheme } from '@/assets/script/util'
