@@ -37,11 +37,11 @@ const queryTableData = async () => {
 }
 
 const queryLoading = ref<boolean>(false);
-const handleQuery = () => {
+const handleQuery = async () => {
   queryForm.page = 1;
   queryLoading.value = true;
   try {
-    queryTableData();
+    await queryTableData();
   } finally {
     queryLoading.value = false;
   }
@@ -117,7 +117,7 @@ onMounted(() => {
       </div>
       <right-operate @refresh="queryTableData"/>
     </div>
-    <a-table :data="tableData" >
+    <a-table :data="tableData" :loading="tableLoading">
       <template #columns>
         <a-table-column title="参数ID" data-index="configId" />
         <a-table-column title="参数名称" data-index="configName" />

@@ -1,5 +1,5 @@
 import type { Role, RoleForm, RoleQueryForm } from '@/api/system/role/types'
-import { sendPost, sendPut } from '@/api/request'
+import { sendDelete, sendPost, sendPut } from '@/api/request'
 import type { Page } from '@/assets/script/types'
 
 export const roleApi = {
@@ -10,10 +10,25 @@ export const roleApi = {
   pageSysRole: (query: RoleQueryForm) => {
     return sendPost<Page<Role>>('/system/role/page', query)
   },
+  /**
+   * 保存系统角色
+   * @param form
+   */
   saveSysRole: (form: RoleForm) => {
     return sendPost<null>('/system/role', form);
   },
+  /**
+   * 更新系统角色
+   * @param form
+   */
   updateSysRole: (form: RoleForm) => {
     return sendPut<null>('/system/role', form);
+  },
+  /**
+   * 删除系统角色
+   * @param id 角色id
+   */
+  deleteSysRole: (id: number) => {
+    return sendDelete<null>(`/system/role/${id}`);
   }
 }
