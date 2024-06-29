@@ -1,7 +1,5 @@
 package usercase
 
-import "time"
-
 // SysRole 系统角色
 type SysRole struct {
 	RoleId   uint   `json:"roleId,omitempty" db:"role_id"`
@@ -14,10 +12,10 @@ type SysRole struct {
 
 // SysRoleQueryForm 系统角色查询表单
 type SysRoleQueryForm struct {
-	Name            string     `json:"name"`
-	Key             string     `json:"key"`
-	CreateTimeBegin *time.Time `json:"createTimeBegin"`
-	CreateTimeEnd   *time.Time `json:"createTimeEnd"`
+	Name            string `json:"name"`
+	Key             string `json:"key"`
+	CreateTimeBegin string `json:"createTimeBegin"`
+	CreateTimeEnd   string `json:"createTimeEnd"`
 	PageQueryForm
 }
 

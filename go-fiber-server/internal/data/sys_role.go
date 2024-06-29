@@ -65,11 +65,11 @@ func (sr *SysRoleRepo) Page(query *usercase.SysRoleQueryForm) ([]*usercase.SysRo
 	if query.Key != "" {
 		condition.WriteString(fmt.Sprintf("and role_key like '%s' ", "%"+query.Key+"%"))
 	}
-	if query.CreateTimeBegin != nil {
-		condition.WriteString(fmt.Sprintf("and create_time >= '%s' ", query.CreateTimeBegin.Format("2006-01-02 15:04:05")))
+	if query.CreateTimeBegin != "" {
+		condition.WriteString(fmt.Sprintf("and create_time >= '%s' ", query.CreateTimeBegin))
 	}
-	if query.CreateTimeEnd != nil {
-		condition.WriteString(fmt.Sprintf("and create_time <= '%s' ", query.CreateTimeEnd.Format("2006-01-02 15:04:05")))
+	if query.CreateTimeEnd != "" {
+		condition.WriteString(fmt.Sprintf("and create_time <= '%s' ", query.CreateTimeEnd))
 	}
 	total, err := sr.conditionToal(condition.String())
 	if err != nil {

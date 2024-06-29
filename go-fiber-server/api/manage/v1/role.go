@@ -33,7 +33,7 @@ func (r *RoleApi) Update(ctx fiber.Ctx) error {
 	if err := ctx.Bind().JSON(role); err != nil {
 		return err
 	}
-	if err := r.service.SaveRole(role); err != nil {
+	if err := r.service.UpdateRole(role); err != nil {
 		return err
 	}
 	return ctx.JSON(res.SimpleOK())

@@ -34,7 +34,7 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	roleRoute := sysRoute.Group("/role")
 	roleRoute.Post("/", roleApi.Save)
 	roleRoute.Put("/", roleApi.Update)
-	roleRoute.Get("/page", roleApi.Page)
+	roleRoute.Post("/page", roleApi.Page)
 	roleRoute.Get("/list", roleApi.List)
 	roleRoute.Delete("/:id<int;min=<1>>", roleApi.Delete)
 	userRoute := sysRoute.Group("/user")
