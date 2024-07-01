@@ -7,6 +7,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"log/slog"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -50,6 +52,37 @@ func (m *SysMenuRepo) Update(menu *usercase.SysMenu) error {
 func (m *SysMenuRepo) ListAll() ([]*usercase.SysMenu, error) {
 	rows, err := m.db.Query(context.Background(), `select menu_id, menu_name, menu_type, parent_id, path, component, 
        icon, is_frame, frame_url, is_cache, is_visible, is_disable, sort from t_system_menu where delete_at = 0 order by sort`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.SysMenu, error) {
+		return pgx.RowToAddrOfStructByNameLax[usercase.SysMenu](row)
+	})
+}
+
+func (self *SysMenuRepo) RecursiveByMenuIds(menuIds []uint) ([]*usercase.SysMenu, error) {
+	sql := `WITH RECURSIVE tree_menu AS (
+				SELECT menu_id, menu_name, menu_type, parent_id, path, component, icon, is_frame, frame_url, is_cache, is_visible, is_disable, sort
+				FROM t_system_menu
+				WHERE menu_id in (%s) and delete_at = 0
+			  UNION ALL
+				SELECT n.menu_id, n.menu_name, n.menu_type, n.parent_id, n.path, n.component, n.icon, n.is_frame, n.frame_url, n.is_cache, n.is_visible, n.is_disable, n.sort
+				FROM t_system_menu n
+				JOIN tree_menu np ON np.parent_id = n.menu_id
+			)
+			SELECT distinct menu_id, menu_name, menu_type, parent_id, path, component, icon, is_frame, frame_url, is_cache, is_visible, is_disable, sort
+			FROM tree_menu`
+	var builder strings.Builder
+	builder.WriteByte('(')
+	for index, id := range menuIds {
+		if index > 1 {
+			builder.WriteByte(',')
+		}
+		builder.WriteString(strconv.FormatUint(uint64(id), 10))
+	}
+	builder.WriteByte(')')
+	rows, err := self.db.Query(context.Background(), fmt.Sprintf(sql, builder.String()))
 	if err != nil {
 		return nil, err
 	}
