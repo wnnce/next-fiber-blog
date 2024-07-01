@@ -59,13 +59,13 @@ type UpdatePasswordForm struct {
 
 // SysUserQueryForm 系统用户查询表单
 type SysUserQueryForm struct {
-	Username        string     `json:"username"`
-	Nickname        string     `json:"nickname"`
-	Email           string     `json:"email"`
-	Phone           string     `json:"phone"`
-	RoleId          uint       `json:"roleId"`
-	CreateTimeBegin *time.Time `json:"createTimeBegin"`
-	CreateTimeEnd   *time.Time `json:"createTimeEnd"`
+	Username        string `json:"username"`
+	Nickname        string `json:"nickname"`
+	Email           string `json:"email"`
+	Phone           string `json:"phone"`
+	RoleId          uint   `json:"roleId"`
+	CreateTimeBegin string `json:"createTimeBegin"`
+	CreateTimeEnd   string `json:"createTimeEnd"`
 	PageQueryForm
 }
 

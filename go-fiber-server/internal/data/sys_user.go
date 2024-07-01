@@ -75,11 +75,11 @@ func (sur *SysUserRepo) Page(query *usercase.SysUserQueryForm) ([]*usercase.SysU
 	if query.RoleId > 0 {
 		condition.WriteString(fmt.Sprintf("and %d = ANY (roles) ", query.RoleId))
 	}
-	if query.CreateTimeBegin != nil {
-		condition.WriteString(fmt.Sprintf("and create_time >= '%s' ", query.CreateTimeBegin.Format("2006-01-02")))
+	if query.CreateTimeBegin != "" {
+		condition.WriteString(fmt.Sprintf("and create_time >= '%s' ", query.CreateTimeBegin))
 	}
-	if query.CreateTimeEnd != nil {
-		condition.WriteString(fmt.Sprintf("and create_time <= '%s' ", query.CreateTimeEnd.Format("2006-01-02")))
+	if query.CreateTimeEnd != "" {
+		condition.WriteString(fmt.Sprintf("and create_time <= '%s' ", query.CreateTimeEnd))
 	}
 	total, err := sur.conditionTotal(condition.String())
 	if err != nil {
@@ -92,7 +92,7 @@ func (sur *SysUserRepo) Page(query *usercase.SysUserQueryForm) ([]*usercase.SysU
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
 	condition.WriteString("order by sort, create_time desc limit $1 offset $2 ")
 	rows, err := sur.db.Query(context.Background(), `select user_id, username, nickname, email, phone, avatar, roles, 
-       last_login_ip, last_login_time, create_time, update_time, sort, status, remarl from t_system_user `+condition.String(),
+       last_login_ip, last_login_time, create_time, update_time, sort, status, remark from t_system_user `+condition.String(),
 		query.Size, offset)
 	if err != nil {
 		return nil, 0, err
