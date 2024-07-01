@@ -1,5 +1,5 @@
 import type { Role, RoleForm, RoleQueryForm } from '@/api/system/role/types'
-import { sendDelete, sendPost, sendPut } from '@/api/request'
+import { sendDelete, sendGet, sendPost, sendPut } from '@/api/request'
 import type { Page } from '@/assets/script/types'
 
 export const roleApi = {
@@ -9,6 +9,12 @@ export const roleApi = {
    */
   pageSysRole: (query: RoleQueryForm) => {
     return sendPost<Page<Role>>('/system/role/page', query)
+  },
+  /**
+   * 获取所有角色列表
+   */
+  listAllSysROle: () => {
+    return sendGet<Role[]>('/system/role/list');
   },
   /**
    * 保存系统角色

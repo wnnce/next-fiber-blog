@@ -58,8 +58,9 @@ html, body, #app {
 }
 .search-div {
   display: flex;
-  column-gap: var(--space-md);
+  gap: var(--space-md);
   margin-bottom: var(--space-md);
+  flex-wrap: wrap;
   .search-item {
     display: flex;
     column-gap: var(--space-xs);
@@ -71,5 +72,17 @@ html, body, #app {
   .search-buttons {
     display: flex;
     column-gap: var(--space-sm);
+  }
+}
+
+.link-text {
+  background: linear-gradient(to right, var(--primary-color), var(--primary-color)) no-repeat left bottom;
+  background-size: 0 2px;
+  color: var(--primary-color);
+  padding-bottom: 2px;
+  transition: background-size 300ms ease;
+  &:hover {
+    cursor: pointer;
+    background-size: 100% 2px;
   }
 }
