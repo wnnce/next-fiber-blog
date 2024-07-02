@@ -115,7 +115,7 @@ export function fileUpload(url: string, formData: FormData, onProgress?: (event:
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     if (onProgress) {
-      xhr.addEventListener('progress', onProgress);
+      xhr.upload.onprogress = onProgress
     }
     xhr.addEventListener('error', err => {
       console.log(err);
