@@ -148,7 +148,7 @@ defineExpose({
         <a-input v-model="formData.phone" placeholder="请输入手机号" />
       </a-form-item>
       <a-form-item label="头像" field="avatar">
-        <image-upload />
+        <image-upload v-model:file-list="formData.avatar"/>
       </a-form-item>
       <a-form-item label="显示顺序" field="sort">
         <a-input-number v-model="formData.sort" placeholder="请输入显示顺序" />

@@ -86,3 +86,9 @@ html, body, #app {
     background-size: 100% 2px;
   }
 }
+
+.absolute-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

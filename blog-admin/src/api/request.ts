@@ -111,7 +111,7 @@ export function sendDelete<T>(url: string, params?: object) {
  * @param formData 包含待上传文件的form表单
  * @param onProgress 文件上传进度回调
  */
-export function fileUpload(url: string, formData: FormData, onProgress?: (event: ProgressEvent) => {}) {
+export function fileUpload(url: string, formData: FormData, onProgress?: (event: ProgressEvent) => void): Promise<Result<string>> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     if (onProgress) {
@@ -133,8 +133,8 @@ export function fileUpload(url: string, formData: FormData, onProgress?: (event:
         resolve(result);
       }
     })
-    const token = get<string>(TOKEN_KEY);
-    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    // const token = get<string>(TOKEN_KEY);
+    // xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     xhr.open('POST', baseUrl + url);
     xhr.send(formData);
   })
