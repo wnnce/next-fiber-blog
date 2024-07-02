@@ -14,6 +14,7 @@ interface ImageUploadProps {
   height?: string | number;
   fileList: string | string[];
   limit?: number;
+  circle?: boolean;
 }
 
 const props = withDefaults(defineProps<ImageUploadProps>(), {
@@ -22,6 +23,7 @@ const props = withDefaults(defineProps<ImageUploadProps>(), {
   height: '100px',
   width: '100px',
   limit: 0,
+  circle: false
 })
 const emits = defineEmits<{
   (e: 'update:fileList', value: string | string[]): void
@@ -50,6 +52,9 @@ const _limit = computed(() => {
     return 1;
   }
   return props.limit;
+})
+const _borderRadius = computed(() => {
+  return props.circle ? '50%' : '12px';
 })
 
 
@@ -80,8 +85,10 @@ const handleUpload = async () => {
     formData.append('image', item.file);
     try {
       const result = await fileUpload('/other/upload/image', formData, (event: ProgressEvent) => {
-        const { loaded, total } = event;
-        console.log(loaded, total)
+        const { lengthComputable, loaded, total } = event;
+        if (lengthComputable) {
+          item.percent = parseFloat((loaded / total).toFixed(2));
+        }
       })
       const { code, data } = result;
       console.log(code, data);
@@ -122,18 +129,18 @@ const handleDeleteUploadFile = (uid: string) => {
 <template>
   <div class="upload-container">
     <transition-group name="list">
-      <div class="common-card radius-md image-card" v-for="item in uploadFileList" :key="item.uid">
-        <div class="init-mask image-mask radius-md absolute-center" v-if="item.status === 'init'">
+      <div class="common-card image-card" v-for="item in uploadFileList" :key="item.uid">
+        <div class="image-mask init-mask absolute-center" v-if="item.status === 'init'">
           <icon-loading spin />
           <span>待上传</span>
         </div>
-        <div class="loading-mask image-mask radius-md" v-else-if="item.status === 'uploading'">
-
+        <div class="image-mask loading-mask absolute-center" v-else-if="item.status === 'uploading'">
+          <a-progress :percent="item.percent" type="circle" size="small"  />
         </div>
-        <div class="done-mask image-mask radius-md" v-else-if="item.status === 'done'">
-
+        <div class="image-mask done-mask" v-else-if="item.status === 'done'">
+          <icon-check />
         </div>
-        <div class="fail-mask image-mask radius-md" v-else-if="item.status === 'error'">
+        <div class="image-mask fail-mask" v-else-if="item.status === 'error'">
 
         </div>
         <div class="delete-pop flex justify-center pointer" @click="handleDeleteUploadFile(item.uid)"
@@ -151,7 +158,7 @@ const handleDeleteUploadFile = (uid: string) => {
               @change="onUploadChange" v-show="uploadFileList.length < _limit"
     >
       <template #upload-button>
-        <div class="common-card button-card radius-md" :class="isDragEnter ? 'drag-enter' : ''">
+        <div class="common-card button-card" :class="isDragEnter ? 'drag-enter' : ''">
           <div class="drag-mask"
                @dragenter="isDragEnter = true"
                @dragleave="isDragEnter = false"
@@ -174,6 +181,7 @@ const handleDeleteUploadFile = (uid: string) => {
     height: v-bind(_height);
     width: v-bind(_width);
     overflow: hidden;
+    border-radius: v-bind(_borderRadius);
   }
   .image-card {
     --delete-mask-opacity: 0;
@@ -193,13 +201,28 @@ const handleDeleteUploadFile = (uid: string) => {
       right: 0;
       bottom: 0;
       z-index: 2;
-      color: rgb(200, 200, 200);
+      color: rgb(240, 240, 240);
       font-size: 12px;
+      border-radius: v-bind(_borderRadius);
     }
     .init-mask {
       background-color: rgba(0, 0, 0, 0.5);
       flex-direction: column;
       row-gap: var(--space-xs);
+    }
+    .loading-mask {
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .done-mask {
+      color: white !important;
+      right: 0;
+      top: 0;
+      bottom: auto !important;
+      left: auto !important;
+      padding: 2px 4px;
+      font-size: 16px;
+      background-color: rgb(var(--success-3));
+      border-radius: 0;
     }
     .delete-pop {
       z-index: 20;
