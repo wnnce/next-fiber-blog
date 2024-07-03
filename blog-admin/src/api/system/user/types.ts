@@ -25,7 +25,7 @@ export interface UserForm {
   password: string;
   email?: string;
   phone?: string;
-  avatar?: string;
+  avatar: string;
   roles: number[];
   sort: number;
   status: number;

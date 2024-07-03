@@ -53,7 +53,7 @@ const defaultFormData: UserForm = {
 }
 const formData = reactive<UserForm>({ ...defaultFormData })
 
-const formRules: Record<string, FieldRule<any> | FieldRule<any>[] | undefined> = {
+const formRules: Record<string, FieldRule<any> | FieldRule<any>[]> = {
   username: { required: true, message: '用户名不能为空' },
   password: [
     { required: !formData.userId, message: '密码不能为空' },
@@ -64,9 +64,9 @@ const formRules: Record<string, FieldRule<any> | FieldRule<any>[] | undefined> =
             callback('密码不能为空');
             return;
           }
-          const regExp = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d|.*[!@#$%^&*?])[A-Za-z\\d!@#$%^&*?]{8,}$')
+          const regExp = new RegExp('^(?=.*[a-zA-Z])(?=.*\\d).{8,}$')
           if (!regExp.test(value)) {
-            callback('密码最低8为，且为数字，字母组合')
+            callback('密码最低8位，且为数字，字母组合')
             return;
           }
         }
@@ -89,6 +89,7 @@ const formSubmit = async () => {
     if (formData.userId) {
       result = await userApi.updateSysUser(formData);
     } else {
+      formData.password = btoa(formData.password);
       result = await userApi.saveSysUser(formData);
     }
     if (result.code === 200) {
@@ -133,7 +134,7 @@ defineExpose({
   <a-modal :title="formData.userId ? '修改用户' : '添加用户'" v-model:visible="modalShow" @close="onClose" :footer="false">
     <a-form :model="formData" auto-label-width @submit="formSubmit" :rules="formRules">
       <a-form-item label="用户名" field="username">
-        <a-input v-model="formData.username" placeholder="请输入角色名" />
+        <a-input v-model="formData.username" placeholder="请输入用户名" />
       </a-form-item>
       <a-form-item label="昵称" field="nickname">
         <a-input v-model="formData.nickname" placeholder="请输入昵称" />
@@ -148,14 +149,14 @@ defineExpose({
         <a-input v-model="formData.phone" placeholder="请输入手机号" />
       </a-form-item>
       <a-form-item label="头像" field="avatar">
-        <image-upload v-model:file-list="formData.avatar"/>
+        <image-upload v-model:file-list="formData.avatar" />
       </a-form-item>
       <a-form-item label="显示顺序" field="sort">
         <a-input-number v-model="formData.sort" placeholder="请输入显示顺序" />
       </a-form-item>
       <a-form-item label="所属角色" field="roles">
         <a-select multiple v-model="formData.roles" placeholder="请选择所属角色">
-          <a-option v-for="item in roleSelectOption" :key="item.value" :value="item.value" :label="item.label" />
+          <a-option v-for="item in roleSelectOption" :key="item.value" :value="item.value" :label="item.label.toString()" />
         </a-select>
       </a-form-item>
       <a-form-item label="备注" field="remark">
