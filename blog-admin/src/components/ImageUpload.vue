@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import type { FileItem } from '@arco-design/web-vue'
 import { useArcoMessage } from '@/hooks/message'
 import { fileUpload } from '@/api/request'
-import { sliceImageUrl } from '@/assets/script/util'
+import { sliceImageUrl, thumbnailImageUrl } from '@/assets/script/util'
 
 const { errorMessage } = useArcoMessage();
 
@@ -12,9 +12,10 @@ interface ImageUploadProps {
   showTip?: boolean;
   width?: string | number;
   height?: string | number;
-  fileList: string | string[];
   limit?: number;
   circle?: boolean;
+  thumbnail?: boolean;
+  disabled?: boolean;
 }
 
 const props = withDefaults(defineProps<ImageUploadProps>(), {
@@ -23,11 +24,20 @@ const props = withDefaults(defineProps<ImageUploadProps>(), {
   height: '100px',
   width: '100px',
   limit: 0,
-  circle: false
+  circle: false,
+  thumbnail: true,
+  disabled: false
 })
+
+const fileList = defineModel<FileItem[]>('fileList', {
+  required: true,
+  default: [],
+});
+const fileUrl = defineModel<string | string[]>('fileUrl', {
+  required: true,
+})
+
 const emits = defineEmits<{
-  // 更新modelValue
-  (e: 'update:fileList', value: string | string[]): void,
   // 文件状态发送改变时触发
   (e: 'change', value: FileItem): void,
   // 某个文件上传成功时触发
@@ -55,7 +65,7 @@ const _height = computed(() => {
   return `${props.height}px`
 })
 const _limit = computed(() => {
-  if (typeof props.fileList === 'string') {
+  if (typeof fileUrl.value === 'string') {
     return 1;
   }
   return props.limit;
@@ -66,16 +76,15 @@ const _borderRadius = computed(() => {
 
 const isDragEnter = ref<boolean>(false);
 const fileUploading = ref<boolean>(false);
-const uploadFileList = ref<FileItem[]>([]);
 
 const handleUpload = async () => {
   if (fileUploading.value) {
     return;
   }
-  if (!uploadFileList.value || uploadFileList.value.length === 0) {
+  if (!fileList.value || fileList.value.length === 0) {
     return;
   }
-  const waitUploadList = uploadFileList.value.filter(item => item.status === 'init')
+  const waitUploadList = fileList.value.filter(item => item.status === 'init')
   if (!waitUploadList || waitUploadList.length === 0) {
     // 检查是否全部上传完成
     checkFileAllUploadDone();
@@ -105,17 +114,10 @@ const handleUpload = async () => {
         item.url = data;
         item.status = 'done';
         item.file = undefined;
-        if (typeof props.fileList === 'string') {
-          emits('update:fileList', data);
+        if (typeof fileUrl.value === 'string') {
+          fileUrl.value = data;
         } else {
-          const doneFileList: string[] = []
-          uploadFileList.value.forEach(item => {
-            if (!item.status || item.status !== 'done' || !item.url) {
-              return;
-            }
-            doneFileList.push(item.url);
-          })
-          emits('update:fileList', doneFileList);
+          fileUrl.value.push(data);
         }
       } else {
         item.status = 'error';
@@ -133,36 +135,45 @@ const handleUpload = async () => {
 }
 
 const onUploadChange = (_: FileItem[], fileItem: FileItem) => {
-  if (uploadFileList.value.length >= _limit.value) {
+  if (_limit.value > 0 && fileList.value.length >= _limit.value) {
     errorMessage('上传文件数量达到最大限制');
     return;
   }
-  uploadFileList.value.push(fileItem);
+  fileList.value.push(fileItem);
   handleUpload();
 }
 
 const handleDeleteUploadFile = (uid: string) => {
-  const findIndex = uploadFileList.value.findIndex(item => item.uid === uid)
+  const findIndex = fileList.value.findIndex(item => item.uid === uid)
   if (findIndex < 0) {
     return;
   }
-  const { status, url } = uploadFileList.value[findIndex];
+  const { status, url } = fileList.value[findIndex];
   if (status === 'uploading') {
     errorMessage('文件上传中无法删除');
     return;
   }
   // 删除当前图片
-  uploadFileList.value.splice(findIndex, 1);
+  fileList.value.splice(findIndex, 1);
   // 如果url存在并且是blob资源 那么就释放资源
   (url && url.startsWith('blob:')) && (URL.revokeObjectURL(url));
+
+  // 删除已经上传的图片链接
+  if (status === 'done') {
+    if (typeof fileUrl.value === 'string') {
+      fileUrl.value = '';
+    } else {
+      fileUrl.value = fileUrl.value.filter(item => item !== url);
+    }
+  }
   // 检查是否全部上传
   checkFileAllUploadDone();
 }
 
 // 检查文件是否全部上传完成
 const checkFileAllUploadDone = () => {
-  const doneCount = uploadFileList.value.filter(item => item.status && item.status === 'done').length;
-  if (doneCount > 0 && doneCount === uploadFileList.value.length) {
+  const doneCount = fileList.value.filter(item => item.status && item.status === 'done').length;
+  if (doneCount > 0 && doneCount === fileList.value.length) {
     emits('ok');
   }
 }
@@ -183,14 +194,14 @@ const formatServerImageUrl = (imageUrl: string | undefined) => {
   if (imageUrl.startsWith('blob:')) {
     return imageUrl;
   }
-  return sliceImageUrl(imageUrl);
+  return props.thumbnail ? thumbnailImageUrl(imageUrl, parseFloat(_height.value)) : sliceImageUrl(imageUrl);
 }
 </script>
 
 <template>
   <div class="upload-container">
     <transition-group name="list">
-      <div class="common-card image-card" v-for="item in uploadFileList" :key="item.uid">
+      <div class="common-card image-card" v-for="item in fileList" :key="item.uid">
         <div class="image-mask init-mask absolute-center" v-if="item.status === 'init'">
           <icon-loading spin />
           <span>待上传</span>
@@ -212,18 +223,18 @@ const formatServerImageUrl = (imageUrl: string | undefined) => {
           <span class="danger-color">上传失败</span>
         </div>
         <div class="delete-pop flex justify-center pointer danger-color" @click="handleDeleteUploadFile(item.uid)"
-             v-if="item.status !== 'uploading'"
+             v-if="item.status !== 'uploading' && !disabled"
         >
           <icon-delete />
         </div>
         <img :src="formatServerImageUrl(item.url)" alt="upload">
       </div>
     </transition-group>
-    <a-upload :file-list="uploadFileList" draggable :auto-upload="false" multiple
-              tip="" :show-file-list="false" :limit="_limit"
+    <a-upload :file-list="fileList" draggable :auto-upload="false" multiple
+              :show-file-list="false" :limit="_limit"
               accept="image/png, image/jpeg, image/webp, image/gif"
-              style="height: 100px; width: 100px"
-              @change="onUploadChange" v-show="uploadFileList.length < _limit"
+              :style="{ height: _height, width: _width }"
+              @change="onUploadChange" v-show="(_limit === 0 || fileList.length < _limit) && !disabled"
     >
       <template #upload-button>
         <div class="common-card button-card" :class="isDragEnter ? 'drag-enter' : ''">

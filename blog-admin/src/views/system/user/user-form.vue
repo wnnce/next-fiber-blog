@@ -3,7 +3,7 @@
 import { reactive, ref } from 'vue'
 import { useArcoMessage } from '@/hooks/message'
 import type { Result } from '@/api/request'
-import type { TreeNodeData } from '@arco-design/web-vue'
+import type { FileItem, TreeNodeData } from '@arco-design/web-vue'
 import { menuApi } from '@/api/system/menu'
 import type { Menu } from '@/api/system/menu/types'
 import type { User, UserForm } from '@/api/system/user/types'
@@ -28,13 +28,15 @@ const modalShow = ref<boolean>(false);
 const show = (record?: User) => {
   if (record) {
     const { userId, username, nickname, email, phone, avatar, remark, roles, sort, status } = record;
-    Object.assign(formData, { userId, username, nickname, email, phone, avatar, remark, roles, sort, status })
+    Object.assign(formData, { userId, username, nickname, email, phone, avatar: avatar || '', remark, roles, sort, status })
+    formatAvatarToFileList()
   }
   queryTreeSelectData();
   modalShow.value = true;
 }
 const onClose = () => {
   treeSelectData.value = [];
+  fileList.value = [];
   Object.assign(formData, defaultFormData);
 }
 
@@ -52,7 +54,6 @@ const defaultFormData: UserForm = {
   remark: undefined,
 }
 const formData = reactive<UserForm>({ ...defaultFormData })
-
 const formRules: Record<string, FieldRule<any> | FieldRule<any>[]> = {
   username: { required: true, message: '用户名不能为空' },
   password: [
@@ -82,7 +83,6 @@ const formRules: Record<string, FieldRule<any> | FieldRule<any>[]> = {
 
 const submitButtonLoading = ref<boolean>(false);
 const formSubmit = async () => {
-  console.log(formData)
   submitButtonLoading.value = true;
   try {
     let result: Result<null>;
@@ -124,6 +124,19 @@ const parseMenuToSelectOption = (menus: Menu[]): TreeNodeData[] => {
   })
 }
 
+const fileList = ref<FileItem[]>([]);
+const formatAvatarToFileList = () => {
+  if (!formData.avatar || formData.avatar.trim().length === 0) {
+    return;
+  }
+  fileList.value = [{
+    uid: new Date().getTime().toString(),
+    status: 'done',
+    percent: 1,
+    url: formData.avatar
+  }]
+}
+
 defineExpose({
   show
 })
@@ -149,7 +162,7 @@ defineExpose({
         <a-input v-model="formData.phone" placeholder="请输入手机号" />
       </a-form-item>
       <a-form-item label="头像" field="avatar">
-        <image-upload v-model:file-list="formData.avatar" />
+        <image-upload v-model:file-list="fileList" v-model:file-url="formData.avatar" circle width="60px" height="60px" />
       </a-form-item>
       <a-form-item label="显示顺序" field="sort">
         <a-input-number v-model="formData.sort" placeholder="请输入显示顺序" />

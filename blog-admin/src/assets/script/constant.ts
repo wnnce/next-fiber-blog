@@ -1,5 +1,5 @@
 interface ConstantPool{
-  pageSizeOption: readonly number[]
+  readonly pageSizeOption: number[]
 }
 
 // 导出的常量

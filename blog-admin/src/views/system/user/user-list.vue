@@ -70,6 +70,10 @@ const handleDateChange = () => {
   queryForm.createTimeBegin = begin;
   queryForm.createTimeEnd = end;
 }
+const handleDateClear = () => {
+  queryForm.createTimeBegin = '';
+  queryForm.createTimeEnd = '';
+}
 
 const handleDelete = async (record: User) => {
   const loadingMsg = loading('数据删除中')
@@ -135,12 +139,12 @@ onMounted(() => {
                   allow-search
                   style="width: 200px"
         >
-          <a-option v-for="item in roleSelectOption" :key="item.value" :value="item.value" :label="item.label" />
+          <a-option v-for="item in roleSelectOption" :key="item.value" :value="item.value" :label="item.label.toString()" />
         </a-select>
       </div>
       <div class="search-item">
         <label>创建时间</label>
-        <a-range-picker v-model="dateRange" @change="handleDateChange" />
+        <a-range-picker v-model="dateRange" @change="handleDateChange" @clear="handleDateClear" />
       </div>
       <div class="search-buttons">
         <a-button type="primary" @click="handleQuery" :loading="queryLoading">
