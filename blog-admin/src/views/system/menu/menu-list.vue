@@ -51,10 +51,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="card flex flex-column" style="row-gap: 12px">
+  <div class="table-card">
     <div class="flex justify-between">
       <div class="flex" style="column-gap: 12px">
-        <a-button type="primary" @click="showForm">
+        <a-button type="primary" @click="showForm(undefined, 0)">
           <template #icon><icon-plus /></template>
           新增
         </a-button>

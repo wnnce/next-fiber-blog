@@ -51,11 +51,6 @@ html, body, #app {
   }
 }
 
-.card {
-  background-color: var(--card-color);
-  padding: var(--space-md);
-  min-height: 100%;
-}
 .search-div {
   display: flex;
   gap: var(--space-md);
@@ -91,4 +86,13 @@ html, body, #app {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.table-card {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--space-sm);
+  background-color: var(--card-color);
+  padding: var(--space-md);
+  min-height: 100%;
 }

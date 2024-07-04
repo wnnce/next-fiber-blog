@@ -62,7 +62,7 @@ onMounted(() => {
       </a-menu-item>
       <template v-for="item in userStore.treeMenu" :key="item.menuId">
         <template v-if="item.isVisible">
-          <template v-if="item.menuType === 2 || item.children">
+          <template v-if="item.menuType === 1 || item.children">
             <a-sub-menu :key="item.menuId.toString()">
               <template #icon>
                 <component :is="ArcoIcons[item.icon as keyof typeof ArcoIcons]" />

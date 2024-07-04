@@ -21,7 +21,7 @@ const props = defineProps<Props>();
 
 const modalShow = ref<boolean>(false);
 const show = (record?: Menu, parentId?: number) => {
-  if (!record && parentId) {
+  if (!record && (parentId || parentId === 0)) {
     formData.parentId = parentId;
   } else if (record) {
     Object.assign(formData, record);

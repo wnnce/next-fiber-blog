@@ -83,7 +83,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="card flex flex-column" style="row-gap: 12px">
+  <div class="table-card">
     <div class="search-div">
       <div class="search-item">
         <label>参数名称</label>
