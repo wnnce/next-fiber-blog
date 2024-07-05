@@ -54,12 +54,12 @@ func (h *HttpApi) List(ctx fiber.Ctx) error {
 	return ctx.JSON(res.OkByData(tags))
 }
 
-func (h *HttpApi) ManageList(ctx fiber.Ctx) error {
+func (h *HttpApi) Page(ctx fiber.Ctx) error {
 	form := &usercase.TagQueryForm{}
 	if err := ctx.Bind().JSON(form); err != nil {
 		return tools.FiberRequestError("参数错误")
 	}
-	tags, err := h.service.ManageListTag(form)
+	tags, err := h.service.PageTag(form)
 	if err != nil {
 		return err
 	}

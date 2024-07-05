@@ -6,6 +6,7 @@ import (
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"log/slog"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -58,13 +59,20 @@ func (t *TagService) QueryTagInfo(tagId int) (*usercase.Tag, error) {
 	return tag, nil
 }
 
-func (t *TagService) ManageListTag(form *usercase.TagQueryForm) ([]*usercase.Tag, error) {
-	tags, err := t.repo.ManageList(form)
+func (t *TagService) PageTag(form *usercase.TagQueryForm) (*usercase.PageData[usercase.Tag], error) {
+	tags, total, err := t.repo.Page(form)
 	if err != nil {
 		slog.Error(fmt.Sprintf("获取标签列表失败，错误信息：%v", err))
 		return nil, tools.FiberServerError("获取标签列表失败")
 	}
-	return tags, nil
+	pages := int(math.Ceil(float64(total) / float64(form.Size)))
+	return &usercase.PageData[usercase.Tag]{
+		Current: form.Page,
+		Size:    form.Size,
+		Pages:   pages,
+		Total:   total,
+		Records: tags,
+	}, nil
 }
 
 func (t *TagService) AllTag() []*usercase.Tag {

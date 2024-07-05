@@ -1,7 +1,5 @@
 package usercase
 
-import "time"
-
 // Tag 博客标签
 type Tag struct {
 	TagId    uint   `json:"tagId,omitempty" db:"tag_id"`       // 标签ID
@@ -17,15 +15,16 @@ type TagForm struct {
 	TagId    uint   `json:"tagId,omitempty"`
 	TagName  string `json:"tagName,omitempty" validate:"required,min=1,max=64"`
 	CoverUrl string `json:"coverUrl,omitempty" validate:"required"`
-	Color    string `json:"color,omitempty" validate:"required,len=6"`
+	Color    string `json:"color,omitempty" validate:"required,len=7"`
 	CommonField
 }
 
 // TagQueryForm 标签查询表单
 type TagQueryForm struct {
-	TagName         string     `json:"tagName,omitempty"`
-	CreateTimeBegin *time.Time `json:"createTimeBegin,omitempty"`
-	CreateTimeEnd   *time.Time `json:"createTimeEnd,omitempty"`
+	TagName         string `json:"tagName,omitempty"`
+	CreateTimeBegin string `json:"createTimeBegin,omitempty"`
+	CreateTimeEnd   string `json:"createTimeEnd,omitempty"`
+	PageQueryForm
 }
 
 // ITagRepo 标签Repo层接口
@@ -40,8 +39,8 @@ type ITagRepo interface {
 	UpdateViewNum(tagId int, addNum int) error
 	// SelectById 通过Id获取标签数据
 	SelectById(id int) (*Tag, error)
-	// ManageList 后台获取标签列表
-	ManageList(form *TagQueryForm) ([]*Tag, error)
+	// Page 后台获取标签列表
+	Page(form *TagQueryForm) ([]*Tag, int64, error)
 	// List 博客页码获取标签列表
 	List() ([]*Tag, error)
 	// ListByIds 通过标签Id列表获取标签列表
@@ -62,8 +61,8 @@ type ITagService interface {
 	UpdateTag(form *TagForm) error
 	// QueryTagInfo 查询标签详情
 	QueryTagInfo(id int) (*Tag, error)
-	// ManageListTag 查询标签列表
-	ManageListTag(form *TagQueryForm) ([]*Tag, error)
+	// PageTag 查询标签列表
+	PageTag(form *TagQueryForm) (*PageData[Tag], error)
 	// AllTag 博客获取所有标签
 	AllTag() []*Tag
 	// Delete 删除单个标签

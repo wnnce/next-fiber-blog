@@ -49,7 +49,7 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	tagRoute := app.Group("/tag")
 	tagRoute.Get("/:id<int;min<1>>", tagApi.QueryInfo)
 	tagRoute.Get("/list", tagApi.List)
-	tagRoute.Post("/manage/list", tagApi.ManageList)
+	tagRoute.Post("/page", tagApi.Page)
 	tagRoute.Post("/", tagApi.Sava)
 	tagRoute.Put("/", tagApi.Update)
 	tagRoute.Delete("/:id<int;min<1>>", tagApi.Delete)

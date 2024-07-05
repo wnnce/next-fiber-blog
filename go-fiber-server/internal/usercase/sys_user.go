@@ -6,7 +6,7 @@ type SysUser struct {
 	UserId        uint64     `json:"userId,omitempty" db:"user_id"`                               // 用户Id
 	Username      string     `json:"username,omitempty" db:"username" validate:"required,max=64"` // 用户名
 	Nickname      string     `json:"nickname,omitempty" db:"nickname"`                            // 昵称
-	Password      string     `json:"password,omitempty" db:"password" validate:"required"`        // 密码 sha256
+	Password      string     `json:"password,omitempty" db:"password"`                            // 密码 sha256
 	Email         string     `json:"email,omitempty" db:"email"`                                  // 邮箱
 	Phone         string     `json:"phone,omitempty" db:"phone"`                                  // 电话
 	Avatar        string     `json:"avatar,omitempty" db:"avatar"`                                // 头像
