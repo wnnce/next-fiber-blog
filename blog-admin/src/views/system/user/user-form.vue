@@ -31,11 +31,9 @@ const show = (record?: User) => {
     Object.assign(formData, { userId, username, nickname, email, phone, avatar: avatar || '', remark, roles, sort, status })
     formatAvatarToFileList()
   }
-  queryTreeSelectData();
   modalShow.value = true;
 }
 const onClose = () => {
-  treeSelectData.value = [];
   fileList.value = [];
   Object.assign(formData, defaultFormData);
 }
@@ -100,28 +98,6 @@ const formSubmit = async () => {
   } finally {
     submitButtonLoading.value = false;
   }
-}
-
-const treeSelectData = ref<TreeNodeData[]>([]);
-const queryTreeSelectData = async () => {
-  const result = await menuApi.manageListTree();
-  const { code, data } = result;
-  if (code === 200) {
-    treeSelectData.value = parseMenuToSelectOption(data);
-  }
-}
-
-const parseMenuToSelectOption = (menus: Menu[]): TreeNodeData[] => {
-  if (!menus || menus.length === 0) {
-    return [];
-  }
-  return menus.map(item => {
-    return {
-      key: item.menuId,
-      title: item.menuName,
-      children: item.children && item.children.length > 0 ? parseMenuToSelectOption(item.children) : undefined,
-    }
-  })
 }
 
 const fileList = ref<FileItem[]>([]);

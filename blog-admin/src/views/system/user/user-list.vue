@@ -213,7 +213,7 @@ onMounted(() => {
                     @change="queryTableData"
       />
     </div>
-    <user-form :role-select-option="roleSelectOption" ref="formRef" @reload="queryTableData" />
+    <user-form :role-select-option="roleSelectOption" ref="formRef" @reload="handleQuery" />
   </div>
 </template>
 

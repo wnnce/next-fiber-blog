@@ -34,7 +34,7 @@ export const sliceImageUrl = (imageUrl: string) => {
  * @param imageUrl 后端返回的七牛图片地址
  * @param h 图片短边的长度 长边自适应
  */
-export const thumbnailImageUrl = (imageUrl: string, h: number = 100) => {
+export const sliceThumbnailImageUrl = (imageUrl: string, h: number = 100) => {
   const thumbnailPrefix = `?imageView2/0/h/${h}`
   if (imageUrl.startsWith('/')) {
     return qiniuDomain + imageUrl.substring(1) + thumbnailPrefix;
