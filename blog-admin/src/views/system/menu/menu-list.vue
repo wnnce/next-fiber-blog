@@ -61,7 +61,7 @@ onMounted(() => {
       </div>
       <right-operate @refresh="queryTableData"/>
     </div>
-    <a-table :data="tableData" :loading="tableLoading">
+    <a-table :data="tableData" :loading="tableLoading" row-key="menuId">
       <template #columns>
         <a-table-column title="菜单名称" data-index="menuName" />
         <a-table-column title="图标" align="center">

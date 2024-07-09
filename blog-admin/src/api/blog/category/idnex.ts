@@ -6,27 +6,27 @@ export const categoryApi = {
    * 获取分类树型结构数据
    */
   listTree: () => {
-    return sendGet<Category[]>('/system/category/manage/list');
+    return sendGet<Category[]>('/category/manage/list');
   },
   /**
    * 保存分类
    * @param form 分类参数
    */
   saveCategory: (form: CategoryForm) => {
-    return sendPost<null>('/system/category', form)
+    return sendPost<null>('/category', form)
   },
   /**
    * 更新分类
    * @param form
    */
   updateCategory: (form: CategoryForm) => {
-    return sendPut<null>('/system/category', form)
+    return sendPut<null>('/category', form)
   },
   /**
    * 删除分类
    * @param id 分类Id
    */
   deleteCategory: (id: number) => {
-    return sendDelete<null>(`/system/category/${id}`)
+    return sendDelete<null>(`/category/${id}`)
   }
 }
