@@ -47,7 +47,7 @@ func (c *CategoryService) ListCategory() ([]*usercase.Category, error) {
 	categorys, err := c.repo.List()
 	if err != nil {
 		slog.Error("获取分类列表失败，错误信息：" + err.Error())
-		return make([]*usercase.Category, 0), tools.FiberServerError("获取标签列表失败")
+		return nil, tools.FiberServerError("获取标签列表失败")
 	}
 	if len(categorys) <= 1 {
 		return categorys, nil

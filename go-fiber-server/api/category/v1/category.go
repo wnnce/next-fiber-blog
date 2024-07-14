@@ -32,7 +32,7 @@ func (h *HttpApi) Save(ctx fiber.Ctx) error {
 // Update 更新分类
 func (h *HttpApi) Update(ctx fiber.Ctx) error {
 	category := &usercase.Category{}
-	if err := ctx.Bind().JSON(&category); err != nil {
+	if err := ctx.Bind().JSON(category); err != nil {
 		return err
 	}
 	if err := h.service.UpdateCategory(category); err != nil {
