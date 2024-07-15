@@ -41,3 +41,43 @@ export const sliceThumbnailImageUrl = (imageUrl: string, h: number = 100) => {
   }
   return qiniuDomain + imageUrl + thumbnailPrefix;
 }
+
+/**
+ * 节流函数 借助window.requestAnimationFrame实现节流
+ * @param func 需要执行的函数
+ * @param callback 事件被节流后的回调函数
+ */
+export const throttle = (func: () => void, callback?: () => void): () => void => {
+  let lock = false;
+  return (...args) => {
+    if (lock) {
+      callback && callback();
+      return;
+    }
+    lock = true;
+    window.requestAnimationFrame(() => {
+      func.apply(this, args)
+      lock = false;
+    })
+  }
+}
+
+/**
+ * 节流函数 基于间隔事件进行节流
+ * @param func 需要执行的函数
+ * @param delay 间隔事件
+ * @param callback 事件被节流后的回调函数
+ */
+export const throttleTimer = (func: () => void, delay: number, callback?: () => void): () => void => {
+  let timer: number | undefined = undefined;
+  return () => {
+    if (timer) {
+      callback && callback()
+      return;
+    }
+    timer = setTimeout(() => {
+      func()
+      timer = undefined;
+    }, delay)
+  }
+}
