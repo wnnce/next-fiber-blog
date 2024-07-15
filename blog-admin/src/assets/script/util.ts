@@ -23,7 +23,7 @@ export const changeTheme = (theme: PageTheme) => {
  * @param h 图片短边的长度 长边自适应
  */
 export const sliceThumbnailImageUrl = (imageUrl: string, h: number = 100) => {
-  if (imageUrl.startsWith('b-oss/')) {
+  if (imageUrl.startsWith('/b-oss/')) {
     return imageUrl + `?imageView2/0/h/${h}`
   }
   return imageUrl;
