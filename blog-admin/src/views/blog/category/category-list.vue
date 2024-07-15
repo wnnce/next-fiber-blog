@@ -58,7 +58,7 @@ onMounted(() => {
       </div>
       <right-operate @refresh="queryTableData"/>
     </div>
-    <a-table :data="tableData" :loading="tableLoading" row-key="categoryId">
+    <a-table :data="tableData" :loading="tableLoading" row-key="categoryId" :pagination="false">
       <template #columns>
         <a-table-column title="分类名称" data-index="categoryName" />
         <a-table-column title="封面" data-index="coverUrl">
