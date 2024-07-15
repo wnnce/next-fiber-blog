@@ -76,7 +76,7 @@ func (c *ConcatService) checkConcatName(name string, cid uint) error {
 		return tools.FiberServerError("联系方式保存失败")
 	}
 	if total > 0 {
-		return tools.FiberServerError("联系方式名称已经存在")
+		return tools.FiberRequestError("联系方式名称已经存在")
 	}
 	return nil
 }

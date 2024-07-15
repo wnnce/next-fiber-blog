@@ -66,11 +66,11 @@ func (c *ConcatRepo) ManageList(query *usercase.ConcatQueryForm) ([]*usercase.Co
 	if query.Name != "" {
 		builder.WriteString(fmt.Sprintf("and name like '%s' ", "%"+query.Name+"%"))
 	}
-	if query.CreateTimeBegin != nil {
-		builder.WriteString(fmt.Sprintf("create_time >= '%s' ", query.CreateTimeBegin.Format("2006-01-02")))
+	if query.CreateTimeBegin != "" {
+		builder.WriteString(fmt.Sprintf("and create_time >= '%s' ", query.CreateTimeBegin))
 	}
-	if query.CreateTimeEnd != nil {
-		builder.WriteString(fmt.Sprintf("create_time <= '%s' ", query.CreateTimeEnd.Format("2006-04-02")))
+	if query.CreateTimeEnd != "" {
+		builder.WriteString(fmt.Sprintf("and create_time <= '%s' ", query.CreateTimeEnd))
 	}
 	builder.WriteString("order by sort, create_time desc")
 	rows, err := c.db.Query(context.Background(), builder.String())
@@ -91,7 +91,7 @@ func (c *ConcatRepo) CountByName(name string, cid uint) (uint8, error) {
 }
 
 func (c *ConcatRepo) DeleteById(cid int) error {
-	result, err := c.db.Exec(context.Background(), "update t_blog_concat set delete_at = $1 where concat_id = &2", time.Now().UnixMilli(), cid)
+	result, err := c.db.Exec(context.Background(), "update t_blog_concat set delete_at = $1 where concat_id = $2", time.Now().UnixMilli(), cid)
 	if err == nil {
 		slog.Info(fmt.Sprintf("删除联系方式完成，concatId:%d,row:%d", cid, result.RowsAffected()))
 	}

@@ -30,7 +30,7 @@ func (h *HttpApi) Save(ctx fiber.Ctx) error {
 
 func (h *HttpApi) Update(ctx fiber.Ctx) error {
 	concat := &usercase.Concat{}
-	if err := ctx.Bind().JSON(&concat); err != nil {
+	if err := ctx.Bind().JSON(concat); err != nil {
 		return err
 	}
 	if err := h.service.UpdateConcat(concat); err != nil {

@@ -1,7 +1,5 @@
 package usercase
 
-import "time"
-
 // Concat 联系方式
 type Concat struct {
 	ConcatId  uint   `json:"concatId,omitempty" db:"concat_id"`                               // 联系方式Id
@@ -14,9 +12,9 @@ type Concat struct {
 
 // ConcatQueryForm 联系方式查询表单
 type ConcatQueryForm struct {
-	Name            string     `json:"name"`
-	CreateTimeBegin *time.Time `json:"createTimeBegin"`
-	CreateTimeEnd   *time.Time `json:"createTimeEnd"`
+	Name            string `json:"name"`
+	CreateTimeBegin string `json:"createTimeBegin"`
+	CreateTimeEnd   string `json:"createTimeEnd"`
 }
 
 type IConcatRepo interface {
