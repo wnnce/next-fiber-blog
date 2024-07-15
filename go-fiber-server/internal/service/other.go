@@ -71,7 +71,7 @@ func (ot *OtherService) UploadImage(fileHeader *multipart.FileHeader) (string, e
 			FileMd5:    sign,
 			OriginName: originName,
 			FileName:   newFileName,
-			FilePath:   filePath,
+			FilePath:   "b-oss/" + filePath,
 			FileSize:   fileSize,
 			FileType:   fileType,
 		})
@@ -112,7 +112,7 @@ func (ot *OtherService) UploadFile(fileHeader *multipart.FileHeader) (string, er
 			FileMd5:    sign,
 			OriginName: originName,
 			FileName:   newFileName,
-			FilePath:   filePath,
+			FilePath:   "b-oss/" + filePath,
 			FileSize:   fileSize,
 			FileType:   fileType,
 		})
