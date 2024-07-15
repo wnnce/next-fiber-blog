@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import type { FileItem } from '@arco-design/web-vue'
 import { useArcoMessage } from '@/hooks/message'
 import { fileUpload } from '@/api/request'
-import { sliceImageUrl, sliceThumbnailImageUrl } from '@/assets/script/util'
+import { sliceThumbnailImageUrl } from '@/assets/script/util'
 
 const { errorMessage } = useArcoMessage();
 
@@ -194,7 +194,7 @@ const formatServerImageUrl = (imageUrl: string | undefined) => {
   if (imageUrl.startsWith('blob:')) {
     return imageUrl;
   }
-  return props.thumbnail ? sliceThumbnailImageUrl(imageUrl, parseFloat(_height.value)) : sliceImageUrl(imageUrl);
+  return props.thumbnail ? sliceThumbnailImageUrl(imageUrl, parseFloat(_height.value)) : imageUrl;
 }
 </script>
 

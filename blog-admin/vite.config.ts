@@ -17,5 +17,14 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+  server: {
+    proxy: {
+      '/b-oss': {
+        target: 'https://file.qiniu.vnc.ink/',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/b-oss/, '')
+      }
+    }
   }
 })

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { sliceImageUrl, sliceThumbnailImageUrl } from '@/assets/script/util'
+import { sliceThumbnailImageUrl } from '@/assets/script/util'
 
 declare type ImageMode = 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
 
@@ -9,8 +9,6 @@ declare type ImageStatus = 'loading' | 'done' | 'error';
 interface Props {
   // 图片链接
   src: string,
-  // 是否本地图片
-  local?: boolean;
   // 是否只显示缩略图
   thumbnail?: boolean;
   // 是否开启过渡效果
@@ -64,16 +62,7 @@ const _radius = computed(() => {
   }
   return `${props.radius}px`;
 })
-const originUrl = computed(() => {
-  if (props.local) {
-    return props.src;
-  }
-  return sliceImageUrl(props.src);
-})
 const thumbnailUrl = computed(() => {
-  if (props.local) {
-    return props.src;
-  }
   const min = Math.min(parseFloat(_width.value), parseFloat(_height.value));
   return sliceThumbnailImageUrl(props.src, min);
 })
@@ -120,7 +109,7 @@ const handleLoadDone = () => {
     </template>
     <!-- 如果不是缩略图模式也不开启过渡动画的话，直接加载原图 -->
     <template v-else-if="!animation">
-      <img :src="originUrl" :loading="lazy ? 'lazy' : undefined"
+      <img :src="props.src" :loading="lazy ? 'lazy' : undefined"
            :alt="alt"
            @load="handleLoadDone"
            @error="handleLoadError"
@@ -132,7 +121,7 @@ const handleLoadDone = () => {
       <div class="mask thumb-image-mask" v-if="loadingStatus === 'loading'"
            :style="{ backgroundImage: `url(${thumbnailUrl})` }"
       />
-      <img :src="originUrl" :loading="lazy ? 'lazy' : undefined"
+      <img :src="props.src" :loading="lazy ? 'lazy' : undefined"
            :alt="alt"
            @load="handleLoadDone"
            @error="handleLoadError"
