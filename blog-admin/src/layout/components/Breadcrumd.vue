@@ -13,10 +13,8 @@ const routePaths = computed((): string[] => {
     return baseName
   }
   const parentIds = useLocalUserStore().getMenuParentIdListMap().get(currentId);
-  if (!parentIds || parentIds.length === 0) {
-    return baseName;
-  }
-  const names = parentIds.concat(currentId).map(id => queryMenuName(id))
+  const finalIds: string[] = parentIds ? parentIds.concat(currentId) : [currentId];
+  const names = finalIds.map(id => queryMenuName(id))
   return baseName.concat(names);
 })
 
