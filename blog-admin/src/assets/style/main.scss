@@ -76,6 +76,7 @@ html, body, #app {
   color: var(--primary-color);
   padding-bottom: 2px;
   transition: background-size 300ms ease;
+  text-decoration: none;
   &:hover {
     cursor: pointer;
     background-size: 100% 2px;
