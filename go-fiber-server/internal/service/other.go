@@ -64,6 +64,7 @@ func (ot *OtherService) UploadImage(fileHeader *multipart.FileHeader) (string, e
 		slog.Error("七牛云文件上传失败", "err", err)
 		return "", tools.FiberServerError("上传失败")
 	}
+	filePath = "/b-oss/" + filePath
 	// 异步保存文件上传记录
 	pool.Go(func() {
 		fileType := mime.TypeByExtension(suffix)
@@ -71,7 +72,7 @@ func (ot *OtherService) UploadImage(fileHeader *multipart.FileHeader) (string, e
 			FileMd5:    sign,
 			OriginName: originName,
 			FileName:   newFileName,
-			FilePath:   "b-oss/" + filePath,
+			FilePath:   filePath,
 			FileSize:   fileSize,
 			FileType:   fileType,
 		})
@@ -106,13 +107,14 @@ func (ot *OtherService) UploadFile(fileHeader *multipart.FileHeader) (string, er
 		slog.Error("七牛云文件上传失败", "err", err)
 		return "", tools.FiberServerError("上传失败")
 	}
+	filePath = "/b-oss/" + filePath
 	pool.Go(func() {
 		fileType := mime.TypeByExtension(suffix)
 		ot.repo.SaveFileRecord(&usercase.UploadFile{
 			FileMd5:    sign,
 			OriginName: originName,
 			FileName:   newFileName,
-			FilePath:   "b-oss/" + filePath,
+			FilePath:   filePath,
 			FileSize:   fileSize,
 			FileType:   fileType,
 		})
