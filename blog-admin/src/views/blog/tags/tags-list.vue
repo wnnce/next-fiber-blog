@@ -57,13 +57,14 @@ const handleRefresh = () => {
 }
 
 const handleDateChange = () => {
-  const [ begin, end ] = dateRange.value;
-  queryForm.createTimeBegin = begin;
-  queryForm.createTimeEnd = end;
-}
-const handleDateClear = () => {
-  queryForm.createTimeBegin = '';
-  queryForm.createTimeEnd = '';
+  if (!dateRange.value) {
+    queryForm.createTimeBegin = undefined;
+    queryForm.createTimeEnd = undefined;
+  } else {
+    const [ begin, end ] = dateRange.value;
+    queryForm.createTimeBegin = begin;
+    queryForm.createTimeEnd = end;
+  }
 }
 
 const handleDelete = async (record: Tag) => {
@@ -98,7 +99,7 @@ onMounted(() => {
       </div>
       <div class="search-item">
         <label>创建时间</label>
-        <a-range-picker v-model="dateRange" @change="handleDateChange" @clear="handleDateClear" />
+        <a-range-picker v-model="dateRange" @change="handleDateChange" />
       </div>
       <div class="search-buttons">
         <a-button type="primary" @click="handleQuery" :loading="queryLoading">
