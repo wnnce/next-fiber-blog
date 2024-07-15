@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { onMounted, reactive, ref } from 'vue'
-import type { LoginForm } from '@/api/system/types'
 import { useLocalStorage } from '@/hooks/local-storage'
 import { useArcoMessage } from '@/hooks/message'
-import { throttledFunction } from '@/assets/script/util'
+import type { LoginForm } from '@/api/system/user/types'
+import { userApi } from '@/api/system/user'
+import { TOKEN_KEY } from '@/api/request'
 
 const { get, set, remove } = useLocalStorage();
 const { successMessage } = useArcoMessage();
-const { redirect } = useRoute().query;
 
 const SAVE_DATA_KEY = "login_data";
 
@@ -23,23 +23,31 @@ const formData = reactive<LoginForm>({ ...defaultFormData })
 const loginButtonLoading = ref<boolean>(false);
 const handleSubmit = async () => {
   loginButtonLoading.value = true;
-  setTimeout(() => {
-    const passwordBase64 = btoa(formData.password || '');
-    const requestData: LoginForm = {
-      username: formData.username,
-      password: passwordBase64,
-      code: formData.code
+  const passwordBase64 = btoa(formData.password || '');
+  const form: LoginForm = {
+    username: formData.username,
+    password: passwordBase64,
+    code: formData.code
+  }
+  try {
+    const result = await userApi.login(form)
+    const { code, data } = result;
+    if (code !== 200 || !data) {
+      return
     }
-    console.log(requestData)
     if (isSavePassword.value) {
       const saveLoginData = btoa(JSON.stringify(formData));
       set<string>(SAVE_DATA_KEY, saveLoginData, undefined)
     } else {
       remove(SAVE_DATA_KEY);
     }
-    successMessage('登录成功');
+    // 保存Token
+    useLocalStorage().set(TOKEN_KEY, data, undefined);
+    const userResult = await userApi.queryUserInfo()
+    console.log(userResult)
+  } finally {
     loginButtonLoading.value = false;
-  }, 500)
+  }
 }
 
 const readerSavaLoginData = () => {
@@ -104,7 +112,7 @@ onMounted(() => {
               </template>
             </a-input-password>
           </a-form-item>
-          <a-form-item field="code" label="验证码" hide-label :rules="[{required: true, message: '验证码不能为空'}]">
+          <a-form-item field="code" label="验证码" hide-label>
             <div class="code-input flex">
               <a-input v-model="formData.code" size="large" placeholder="请输入验证码">
                 <template #prefix>
