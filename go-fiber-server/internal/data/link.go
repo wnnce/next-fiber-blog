@@ -95,7 +95,7 @@ func (l *LinkRepo) ManagePage(query *usercase.LinkQueryForm) ([]*usercase.Link, 
 		return links, 0, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	rows, err := l.db.Query(context.Background(), "select * from t_blog_link "+condition.String()+" order by create_time desc limit $1 offset $2", query.Size, offset)
+	rows, err := l.db.Query(context.Background(), "select * from t_blog_link "+condition.String()+" order by sort, create_time desc limit $1 offset $2", query.Size, offset)
 	if err != nil {
 		return nil, 0, err
 	}

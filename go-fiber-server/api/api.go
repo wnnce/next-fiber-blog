@@ -71,7 +71,7 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 
 	linkRoute := app.Group("/link")
 	linkRoute.Get("/list", linkApi.Page)
-	linkRoute.Post("/manage/list", linkApi.ManagePage)
+	linkRoute.Post("/page", linkApi.ManagePage)
 	linkRoute.Post("/", linkApi.Save)
 	linkRoute.Put("/", linkApi.Update)
 	linkRoute.Delete("/:id<int;min=<1>>", linkApi.Delete)
