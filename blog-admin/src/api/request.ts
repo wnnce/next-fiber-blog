@@ -1,5 +1,8 @@
 import { useLocalStorage } from '@/hooks/local-storage'
 import { useArcoMessage } from '@/hooks/message'
+import { LOCAl_USER_KEY, TOKEN_KEY } from '@/assets/script/constant'
+import { useLocalUserStore } from '@/stores/user'
+import router from '@/router/index';
 
 const { errorMessage } = useArcoMessage();
 
@@ -12,9 +15,7 @@ export interface Result<T> {
 
 export declare type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
-export const TOKEN_KEY: string = 'Authorization_Bearer_Token';
-
-const { get } = useLocalStorage();
+const { get, remove } = useLocalStorage();
 
 const baseUrl = import.meta.env.VITE_REQUEST_BASE_URL;
 
@@ -40,7 +41,12 @@ export function request<T>(url: string, method: HttpMethod, params?: any, data?:
         resolve(responseBody);
         return;
       } else if (code === 401) {
-        errorMessage('当前登录状态已失效，请先登录!');
+        errorMessage('当前登录状态已失效，请重新登录!');
+        // 清除登录用户信息 菜单信息 路由信息
+        useLocalUserStore().clear();
+        remove(TOKEN_KEY, LOCAl_USER_KEY);
+        // 跳转到登录页
+        router.push({ path: '/login' })
       } else if (code === 403) {
         errorMessage('当前操作无权限');
       } else if (code === 400) {
@@ -53,7 +59,6 @@ export function request<T>(url: string, method: HttpMethod, params?: any, data?:
       reject(undefined);
     }).catch(err => {
       console.log(err)
-      errorMessage('请求失败')
       reject(undefined);
     })
   })

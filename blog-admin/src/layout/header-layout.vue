@@ -9,9 +9,13 @@ import TextDropdown from '@/layout/components/TextDropdown.vue'
 import Breadcrumd from '@/layout/components/Breadcrumd.vue'
 import { useI18nLanguage } from '@/i18n'
 import SettingDrawer from '@/layout/components/SettingDrawer.vue'
+import { useLocalUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
+import LogoutModal from '@/layout/components/LogoutModal.vue'
 
 const configStore = useAppConfigStore();
 const i18nLanguage = useI18nLanguage();
+const userStore = useLocalUserStore();
 
 const iconSize = 18;
 
@@ -29,10 +33,14 @@ const userOption: OptionItem[] = [
   { label: '修改密码', value: 'reset-password' },
   { label: '退出登录', value: 'logout' }
 ]
-const handleUserOptionClick = (value: string | number) => {
+const handleUserOptionSelect = (value: string | number) => {
   value = value.toString();
-  console.log(value);
+  if (value === 'logout') {
+    logoutRef.value.show();
+  }
 }
+
+const logoutRef= ref();
 
 const settingRef = ref();
 const settingShow = () => {
@@ -79,11 +87,15 @@ const settingShow = () => {
         <icon-settings :size="iconSize"/>
       </div>
       <div class="user flex item-center">
-        <a-avatar :size="32">A</a-avatar>
-        <text-dropdown :options="userOption" text="Admin" @select="handleUserOptionClick" />
+        <a-avatar :size="32" :image-url="userStore.userInfo ? userStore.userInfo.avatar : ''">User</a-avatar>
+        <text-dropdown :options="userOption"
+                       :text="userStore.userInfo ? userStore.userInfo.nickname : '登录用户'"
+                       @select="handleUserOptionSelect"
+        />
       </div>
     </div>
     <setting-drawer ref="settingRef" />
+    <logout-modal ref="logoutRef" />
   </header>
 </template>
 

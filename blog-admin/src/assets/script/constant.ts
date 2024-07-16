@@ -6,3 +6,9 @@ interface ConstantPool{
 export const constant: ConstantPool = {
   pageSizeOption: [10, 20, 40]
 }
+
+// token本地保存的key
+export const TOKEN_KEY: string = 'Authorization_Bearer_Token';
+
+// 登录用户信息本地保存的key
+export const LOCAl_USER_KEY: string = 'Local_Login_User';

@@ -50,5 +50,11 @@ export const userApi = {
    */
   resetPassword: (form: ResetPasswordForm) => {
     return sendPut<null>('/system/user/password', form)
+  },
+  /**
+   * 退出登录
+   */
+  logout: () => {
+    return sendPost<null>('/system/user/logout')
   }
 }

@@ -4,10 +4,11 @@ import { computed, reactive, ref } from 'vue'
 import type { RouteRecordRaw } from 'vue-router'
 import type { KeepaliveItem } from '@/assets/script/types'
 import { useAppConfigStore } from '@/stores/app-config'
+import type { User } from '@/api/system/user/types'
 
 export const useLocalUserStore = defineStore('user', () => {
   // 用户详情
-  const userInfo = reactive({});
+  const userInfo = ref<User | undefined>(undefined);
 
   // 带路由的菜单Map
   const menuRouteMap = new Map<string, RouteRecordRaw>();
@@ -128,7 +129,15 @@ export const useLocalUserStore = defineStore('user', () => {
     keepaliveList.value = [];
   }
 
+  const clear = () => {
+    userInfo.value = undefined;
+    treeMenu.value = [];
+    menuListMap.clear();
+    menuParentIdListMap.clear();
+    keepaliveList.value = [];
+  }
+
   return { userInfo, setTreeMenu, treeMenu: _treeMenu, menuListMap: _menuListMap, getMenuParentIdListMap, menuRouteMap: _menuRouteMap,
     setMenuRoute, keepaliveInclude, addKeepaliveComponent, queryKeepaliveComponent, removeKeepaliveComponent, removeAllKeepaliveComponent,
-    keepaliveList: _keepaliveList }
+    keepaliveList: _keepaliveList, clear }
 })

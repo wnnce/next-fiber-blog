@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { onMounted, reactive, ref } from 'vue'
 import { useLocalStorage } from '@/hooks/local-storage'
 import { useArcoMessage } from '@/hooks/message'
 import type { LoginForm } from '@/api/system/user/types'
 import { userApi } from '@/api/system/user'
-import { TOKEN_KEY } from '@/api/request'
+import { useLocalUserStore } from '@/stores/user'
+import { LOCAl_USER_KEY, TOKEN_KEY } from '@/assets/script/constant'
+import { menuApi } from '@/api/system/menu'
+import { buildRoute } from '@/router'
 
 const { get, set, remove } = useLocalStorage();
 const { successMessage } = useArcoMessage();
+const route = useRoute();
+const router = useRouter();
 
 const SAVE_DATA_KEY = "login_data";
 
@@ -33,18 +38,33 @@ const handleSubmit = async () => {
     const result = await userApi.login(form)
     const { code, data } = result;
     if (code !== 200 || !data) {
-      return
+      return;
     }
+    // 登录成功保存Token
+    useLocalStorage().set(TOKEN_KEY, data, undefined);
     if (isSavePassword.value) {
       const saveLoginData = btoa(JSON.stringify(formData));
       set<string>(SAVE_DATA_KEY, saveLoginData, undefined)
     } else {
       remove(SAVE_DATA_KEY);
     }
-    // 保存Token
-    useLocalStorage().set(TOKEN_KEY, data, undefined);
-    const userResult = await userApi.queryUserInfo()
-    console.log(userResult)
+    // 获取登录用户详情和用户菜单
+    Promise.all([userApi.queryUserInfo(), menuApi.listTreeMenu()]).then(values => {
+      const [userResult, menuResult] = values;
+      // 保存用户信息
+      useLocalStorage().set(LOCAl_USER_KEY, userResult.data, undefined);
+      useLocalUserStore().userInfo = userResult.data;
+      // 构建路由并保存路由信息
+      const routeList = buildRoute(menuResult.data);
+      useLocalUserStore().setTreeMenu(menuResult.data);
+      useLocalUserStore().setMenuRoute(routeList);
+      successMessage('登录成功')
+      if (route.query && route.query.redirect) {
+        router.push({ path: route.query.redirect as string });
+      } else {
+        router.push({ path: '/index' })
+      }
+    })
   } finally {
     loginButtonLoading.value = false;
   }

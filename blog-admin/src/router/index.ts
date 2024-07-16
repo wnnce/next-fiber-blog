@@ -4,6 +4,7 @@ import "nprogress/nprogress.css";
 import { publicRouter } from '@/router/routers'
 import type { Menu } from '@/api/system/menu/types'
 import { useArcoMessage } from '@/hooks/message'
+import { useLocalUserStore } from '@/stores/user'
 
 const { errorMessage } = useArcoMessage();
 
@@ -14,21 +15,36 @@ const router = createRouter({
   scrollBehavior: () => ({left: 0, top: 0})
 })
 
-router.beforeEach((to, form, next) => {
+router.beforeEach((to, form) => {
   NProgress.start();
+  const toPath = to.path;
+  if (!useLocalUserStore().userInfo && toPath !== '/login') {
+    errorMessage('当前尚未登录，请登录后使用');
+    // 重定向到登录页
+    return {
+      path: '/login',
+      query: {
+        redirect: toPath
+      }
+    }
+  }
+  // 已经登录 拒绝路由到登录页 重定向返回到首页
+  if (useLocalUserStore().userInfo && toPath === '/login') {
+    return {
+      path: '/'
+    }
+  }
   const isDisable = to.meta ? to.meta.isDisable as boolean : true;
   if (isDisable) {
     errorMessage('路由地址被禁用');
-    return;
+    return false;
   }
-  next()
+  return true;
 })
 
 router.afterEach(() => {
   NProgress.done();
 })
-
-router.getRoutes()
 
 export default router
 

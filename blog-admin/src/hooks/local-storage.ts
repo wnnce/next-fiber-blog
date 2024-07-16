@@ -39,9 +39,12 @@ export const useLocalStorage = () => {
   }
 
   // 删除缓存对象
-  function remove(key: string) {
-    window.localStorage.removeItem(key);
+  function remove(...keys: string[]) {
+    keys.forEach(key => {
+      window.localStorage.removeItem(key);
+    })
   }
+
 
   return { get, set, remove }
 }
