@@ -108,4 +108,6 @@ type ISysUserService interface {
 	UpdatePassword(form *UpdatePasswordForm) error
 
 	Delete(userId int64) error
+
+	Logout(userId uint64)
 }

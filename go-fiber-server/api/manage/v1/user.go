@@ -95,3 +95,9 @@ func (u *UserApi) Login(ctx fiber.Ctx) error {
 	}
 	return ctx.JSON(res.OkByData(token))
 }
+
+func (self *UserApi) Logout(ctx fiber.Ctx) error {
+	loginUser := fiber.Locals[auth.LoginUser](ctx, "loginUser")
+	self.service.Logout(loginUser.GetUserId())
+	return ctx.JSON(res.SimpleOK())
+}

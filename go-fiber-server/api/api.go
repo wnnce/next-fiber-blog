@@ -26,7 +26,6 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	menuRoute.Get("/tree", menuApi.Tree)
 	menuRoute.Get("/manage/tree", menuApi.ManageTree)
 	menuRoute.Delete("/:id<int;min<1>>", menuApi.Delete)
-	cfgRoute := sysRoute.Group("/config")
 
 	cfgRoute := sysRoute.Group("/config", auth.ManageAuth)
 	cfgRoute.Post("/", cfgApi.Save)
@@ -42,18 +41,14 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	roleRoute.Delete("/:id<int;min=<1>>", roleApi.Delete)
 
 	userRoute := sysRoute.Group("/user")
-	userRoute.Post("/", userApi.Save)
-	userRoute.Put("/", userApi.Update)
-	userRoute.Post("/page", userApi.Page)
 	userRoute.Post("/", userApi.Save, auth.ManageAuth)
 	userRoute.Put("/", userApi.Update, auth.ManageAuth)
 	userRoute.Post("/page", userApi.Page, auth.ManageAuth)
 	userRoute.Get("/info", userApi.UserInfo, auth.ManageAuth)
 	userRoute.Post("/login", userApi.Login)
-	userRoute.Delete("/:id<int;min<1>>", userApi.Delete)
-	userRoute.Put("/password", userApi.UpdatePassword)
 	userRoute.Delete("/:id<int;min<1>>", userApi.Delete, auth.ManageAuth)
 	userRoute.Put("/password", userApi.UpdatePassword, auth.ManageAuth)
+	userRoute.Post("/logout", userApi.Logout, auth.ManageAuth)
 
 	tagRoute := app.Group("/tag")
 	tagRoute.Get("/:id<int;min<1>>", tagApi.QueryInfo)

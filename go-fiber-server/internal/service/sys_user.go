@@ -175,6 +175,10 @@ func (sus *SysUserService) Delete(userId int64) error {
 	return nil
 }
 
+func (self *SysUserService) Logout(userId uint64) {
+	auth.RemoveManageLoginUserById(userId)
+}
+
 // 密码摘要 将前面传入的密码通过base64解码后再通过sha256摘要计算
 func (sus *SysUserService) cryptoPassword(password string) (string, error) {
 	originPassword, err := base64.URLEncoding.DecodeString(password)
