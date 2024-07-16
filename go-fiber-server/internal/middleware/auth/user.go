@@ -146,11 +146,10 @@ func (mc *inMemoryManagerUserCache) GetUserById(userId uint64) LoginUser {
 	return node.value
 }
 
-var (
-	defaultManagerUserCache ManagerUserCache
-	// ManageUserCacheExpireTime 管理端登录用户的过期时间
-	ManageUserCacheExpireTime = 30 * time.Minute
-)
+var defaultManagerUserCache ManagerUserCache
+
+// ManageUserCacheExpireTime 管理端登录用户的过期时间
+const ManageUserCacheExpireTime = 30 * time.Minute
 
 func init() {
 	defaultManagerUserCache = NewManagerUserCache()
