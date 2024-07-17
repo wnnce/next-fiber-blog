@@ -107,3 +107,37 @@ func (self *OtherRepo) PageLoginRecord(query *usercase.LoginLogQueryForm) ([]*us
 	})
 	return records, total, err
 }
+
+func (self *OtherRepo) PageAccessRecord(query *usercase.AccessLogQueryForm) ([]*usercase.AccessLog, int64, error) {
+	var condition strings.Builder
+	condition.WriteString(" where id > 0")
+	if query.Ip != "" {
+		condition.WriteString(fmt.Sprintf(" and access_ip = '%s'", query.Ip))
+	}
+	if query.CreateTimeBegin != "" {
+		condition.WriteString(fmt.Sprintf(" and create_time >= '%s'", query.CreateTimeBegin))
+	}
+	if query.CreateTimeEnd != "" {
+		condition.WriteString(fmt.Sprintf(" and create_time <= '%s'", query.CreateTimeEnd))
+	}
+	row := self.db.QueryRow(context.Background(), "select count(*) from t_access_log "+condition.String())
+	var total int64
+	if err := row.Scan(&total); err != nil {
+		return nil, 0, err
+	}
+	records := make([]*usercase.AccessLog, 0)
+	if total == 0 {
+		return records, total, nil
+	}
+	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
+	condition.WriteString(" order by create_time desc limit $1 offset $2")
+	rows, err := self.db.Query(context.Background(), "select * from t_access_log "+condition.String(), query.Size, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	records, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.AccessLog, error) {
+		return pgx.RowToAddrOfStructByName[usercase.AccessLog](row)
+	})
+	return records, total, err
+}

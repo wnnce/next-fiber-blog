@@ -52,6 +52,14 @@ type AccessLog struct {
 	CreateTime *time.Time `json:"createTime" db:"create_time"` // 访问时间
 }
 
+// AccessLogQueryForm 访问日志查询表单
+type AccessLogQueryForm struct {
+	Ip              string `json:"ip"`
+	CreateTimeBegin string `json:"createTimeBegin"`
+	CreateTimeEnd   string `json:"createTimeEnd"`
+	PageQueryForm
+}
+
 type IOtherRepo interface {
 	// SaveFileRecord 保存文件上传记录
 	SaveFileRecord(file *UploadFile)
@@ -70,6 +78,9 @@ type IOtherRepo interface {
 
 	// PageLoginRecord 分页查询登录记录
 	PageLoginRecord(query *LoginLogQueryForm) ([]*LoginLog, int64, error)
+
+	// PageAccessRecord 分页查询访问记录
+	PageAccessRecord(query *AccessLogQueryForm) ([]*AccessLog, int64, error)
 }
 
 type IOtherService interface {
@@ -90,4 +101,7 @@ type IOtherService interface {
 
 	// PageLogin 分页查询登录日志
 	PageLogin(query *LoginLogQueryForm) (*PageData[LoginLog], error)
+
+	// PageAccess 分页查询访问日志
+	PageAccess(query *AccessLogQueryForm) (*PageData[AccessLog], error)
 }

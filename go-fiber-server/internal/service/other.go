@@ -170,6 +170,22 @@ func (self *OtherService) PageLogin(query *usercase.LoginLogQueryForm) (*usercas
 	}, nil
 }
 
+func (self *OtherService) PageAccess(query *usercase.AccessLogQueryForm) (*usercase.PageData[usercase.AccessLog], error) {
+	records, total, err := self.repo.PageAccessRecord(query)
+	if err != nil {
+		slog.Error("获取访问日志分页列表失败", "err", err.Error())
+		return nil, tools.FiberServerError("查询失败")
+	}
+	pages := int(math.Ceil(float64(total) / float64(query.Size)))
+	return &usercase.PageData[usercase.AccessLog]{
+		Current: query.Page,
+		Size:    query.Size,
+		Pages:   pages,
+		Total:   total,
+		Records: records,
+	}, nil
+}
+
 func (self *OtherService) generateUploadPath(prefix, fileName string) string {
 	datePath := time.Now().Format("2006/0102/")
 	return prefix + datePath + fileName

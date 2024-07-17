@@ -84,4 +84,5 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	othRoute.Post("/upload/image", oApi.UploadImage)
 	othRoute.Get("/trace/access", oApi.AccessTrace)
 	othRoute.Post("/record/login", oApi.PageLoginRecord, auth.ManageAuth)
+	othRoute.Post("/record/access", oApi.PageAccessRecord, auth.ManageAuth)
 }

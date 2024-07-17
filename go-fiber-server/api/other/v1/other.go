@@ -50,3 +50,15 @@ func (self *HttpApi) PageLoginRecord(ctx fiber.Ctx) error {
 	}
 	return ctx.JSON(res.OkByData(page))
 }
+
+func (self *HttpApi) PageAccessRecord(ctx fiber.Ctx) error {
+	query := &usercase.AccessLogQueryForm{}
+	if err := ctx.Bind().JSON(query); err != nil {
+		return err
+	}
+	page, err := self.service.PageAccess(query)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(page))
+}
