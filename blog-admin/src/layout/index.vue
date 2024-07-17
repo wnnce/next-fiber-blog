@@ -43,20 +43,22 @@ import { useLocalUserStore } from '@/stores/user'
     flex-shrink: 0;
   }
   .content {
-    flex: 1;
+    height: 100%;
+    overflow: hidden;
     .content-side {
       flex-shrink: 0;
     }
     .content-main {
-      flex: 1;
+      width: 100%;
       .page-tabs {
         background-color: var(--card-color);
         border-top: 1px solid var(--border-color);
-        flex-shrink: 0;
       }
       .main-div {
-        overflow: auto;
-        padding: var(--space-md);
+        padding: var(--space-sm);
+        box-sizing: border-box;
+        overflow-y: auto;
+        overflow-x: hidden;
         flex: 1;
       }
     }
