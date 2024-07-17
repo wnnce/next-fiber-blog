@@ -19,7 +19,7 @@ var InjectSet = wire.NewSet(tag.NewHttpApi, category.NewHttpApi, concat.NewHttpA
 func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpApi, conApi *concat.HttpApi, linkApi *link.HttpApi,
 	menuApi *manage.MenuApi, cfgApi *manage.ConfigApi, oApi *other.HttpApi, roleApi *manage.RoleApi, userApi *manage.UserApi) {
 	sysRoute := app.Group("/system")
-	sysRoute.Get("/logger/sse/:interval<int;min<10>>", manage.LoggerPush)
+	sysRoute.Get("/logger/stream/:interval<int;min<10>>", manage.LoggerPush)
 	menuRoute := sysRoute.Group("/menu", auth.ManageAuth)
 	menuRoute.Post("/", menuApi.Save)
 	menuRoute.Put("/", menuApi.Update)
@@ -82,5 +82,6 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 
 	othRoute := app.Group("/other")
 	othRoute.Post("/upload/image", oApi.UploadImage)
-	othRoute.Get("/access", oApi.AccessTrace)
+	othRoute.Get("/trace/access", oApi.AccessTrace)
+	othRoute.Post("/record/login", oApi.PageLoginRecord, auth.ManageAuth)
 }
