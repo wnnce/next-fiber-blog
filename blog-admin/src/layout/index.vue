@@ -55,7 +55,7 @@ import { useLocalUserStore } from '@/stores/user'
         border-top: 1px solid var(--border-color);
       }
       .main-div {
-        padding: var(--space-sm);
+        padding: var(--space-mm);
         box-sizing: border-box;
         overflow-y: auto;
         overflow-x: hidden;

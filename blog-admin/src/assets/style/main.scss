@@ -92,8 +92,8 @@ html, body, #app {
 .table-card {
   display: flex;
   flex-direction: column;
-  row-gap: var(--space-sm);
+  row-gap: var(--space-mm);
   background-color: var(--card-color);
-  padding: var(--space-md);
+  padding: var(--space-mm);
   min-height: 100%;
 }
