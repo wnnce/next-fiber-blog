@@ -32,6 +32,16 @@ type LoginLog struct {
 	Result     int        `json:"result" db:"result"`          // 登录结果 0：成功 1：失败
 }
 
+// LoginLogQueryForm 登录日志查询表单
+type LoginLogQueryForm struct {
+	Username        string `json:"username"`        // 用户名
+	LoginType       *uint8 `json:"loginType"`       // 扽路过类型
+	Result          *int   `json:"result"`          // 登录结果
+	CreateTimeBegin string `json:"createTimeBegin"` // 开始时间
+	CreateTimeEnd   string `json:"createTimeEnd"`   // 结束时间
+	PageQueryForm
+}
+
 // AccessLog 访问日志
 type AccessLog struct {
 	ID         int64      `json:"id" db:"id"`                  // 主键Id
@@ -43,25 +53,41 @@ type AccessLog struct {
 }
 
 type IOtherRepo interface {
+	// SaveFileRecord 保存文件上传记录
 	SaveFileRecord(file *UploadFile)
 
+	// QueryFileByMd5 通过文件md5查询文件
 	QueryFileByMd5(fileMd5 string) (*UploadFile, error)
 
+	// DeleteFileByName 通过文件名称删除文件
 	DeleteFileByName(filename string) error
 
+	// SaveLoginRecord 保存登录记录
 	SaveLoginRecord(record *LoginLog)
 
+	// SaveAccessRecord 保存访问记录
 	SaveAccessRecord(record *AccessLog)
+
+	// PageLoginRecord 分页查询登录记录
+	PageLoginRecord(query *LoginLogQueryForm) ([]*LoginLog, int64, error)
 }
 
 type IOtherService interface {
+	// UploadImage 上传图片
 	UploadImage(fileHeader *multipart.FileHeader) (string, error)
 
+	// UploadFile 上传文件
 	UploadFile(fileHeader *multipart.FileHeader) (string, error)
 
+	// DeleteFile 删除上传文件
 	DeleteFile(filename string)
 
+	// TraceLogin 记录登录日志
 	TraceLogin(record *LoginLog)
 
+	// TraceAccess 记录访问日志
 	TraceAccess(referee, ip, ua string)
+
+	// PageLogin 分页查询登录日志
+	PageLogin(query *LoginLogQueryForm) (*PageData[LoginLog], error)
 }

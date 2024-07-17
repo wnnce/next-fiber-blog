@@ -9,6 +9,7 @@ import (
 	"go-fiber-ent-web-layout/internal/usercase"
 	"io"
 	"log/slog"
+	"math"
 	"mime"
 	"mime/multipart"
 	"strings"
@@ -25,7 +26,7 @@ func NewOtherService(repo usercase.IOtherRepo) usercase.IOtherService {
 	}
 }
 
-func (ot *OtherService) UploadImage(fileHeader *multipart.FileHeader) (string, error) {
+func (self *OtherService) UploadImage(fileHeader *multipart.FileHeader) (string, error) {
 	file, err := fileHeader.Open()
 	if err != nil {
 		slog.Error("文件打开失败", "err", err)
@@ -49,7 +50,7 @@ func (ot *OtherService) UploadImage(fileHeader *multipart.FileHeader) (string, e
 	}
 	sign := tools.ComputeMd5(buffer.Bytes())
 	// 查询图片是否已经上传
-	uploadFile, err := ot.repo.QueryFileByMd5(sign)
+	uploadFile, err := self.repo.QueryFileByMd5(sign)
 	if err != nil {
 		slog.Error("检查图片是否上传失败", "err", err)
 		return "", tools.FiberServerError("检查图片是否上传失败")
@@ -59,7 +60,7 @@ func (ot *OtherService) UploadImage(fileHeader *multipart.FileHeader) (string, e
 	}
 	newFileName := sign + suffix
 	fileSize := int64(buffer.Len())
-	filePath := ot.generateUploadPath("images/", newFileName)
+	filePath := self.generateUploadPath("images/", newFileName)
 	if err = qiniu.Upload(filePath, buffer); err != nil {
 		slog.Error("七牛云文件上传失败", "err", err)
 		return "", tools.FiberServerError("上传失败")
@@ -68,7 +69,7 @@ func (ot *OtherService) UploadImage(fileHeader *multipart.FileHeader) (string, e
 	// 异步保存文件上传记录
 	pool.Go(func() {
 		fileType := mime.TypeByExtension(suffix)
-		ot.repo.SaveFileRecord(&usercase.UploadFile{
+		self.repo.SaveFileRecord(&usercase.UploadFile{
 			FileMd5:    sign,
 			OriginName: originName,
 			FileName:   newFileName,
@@ -82,7 +83,7 @@ func (ot *OtherService) UploadImage(fileHeader *multipart.FileHeader) (string, e
 
 }
 
-func (ot *OtherService) UploadFile(fileHeader *multipart.FileHeader) (string, error) {
+func (self *OtherService) UploadFile(fileHeader *multipart.FileHeader) (string, error) {
 	file, err := fileHeader.Open()
 	if err != nil {
 		slog.Error("文件打开失败", "err", err)
@@ -97,9 +98,9 @@ func (ot *OtherService) UploadFile(fileHeader *multipart.FileHeader) (string, er
 	originName := fileHeader.Filename
 	suffix := originName[strings.LastIndexByte(originName, '.'):]
 	newFileName := sign + suffix
-	filePath := ot.generateUploadPath("files/", newFileName)
+	filePath := self.generateUploadPath("files/", newFileName)
 	fileSize := fileHeader.Size
-	uploadFile, err := ot.repo.QueryFileByMd5(sign)
+	uploadFile, err := self.repo.QueryFileByMd5(sign)
 	if uploadFile != nil && err == nil {
 		return uploadFile.FilePath, nil
 	}
@@ -110,7 +111,7 @@ func (ot *OtherService) UploadFile(fileHeader *multipart.FileHeader) (string, er
 	filePath = "/b-oss/" + filePath
 	pool.Go(func() {
 		fileType := mime.TypeByExtension(suffix)
-		ot.repo.SaveFileRecord(&usercase.UploadFile{
+		self.repo.SaveFileRecord(&usercase.UploadFile{
 			FileMd5:    sign,
 			OriginName: originName,
 			FileName:   newFileName,
@@ -122,8 +123,8 @@ func (ot *OtherService) UploadFile(fileHeader *multipart.FileHeader) (string, er
 	return filePath, nil
 }
 
-func (ot *OtherService) DeleteFile(filename string) {
-	if err := ot.repo.DeleteFileByName(filename); err != nil {
+func (self *OtherService) DeleteFile(filename string) {
+	if err := self.repo.DeleteFileByName(filename); err != nil {
 		slog.Error("删除文件上传记录失败", "err", err)
 		return
 	}
@@ -132,19 +133,19 @@ func (ot *OtherService) DeleteFile(filename string) {
 	})
 }
 
-func (ots *OtherService) TraceLogin(record *usercase.LoginLog) {
+func (self *OtherService) TraceLogin(record *usercase.LoginLog) {
 	pool.Go(func() {
 		location := region.SearchLocation(record.LoginIP)
 		record.Location = location
-		ots.repo.SaveLoginRecord(record)
+		self.repo.SaveLoginRecord(record)
 	})
 }
 
-func (ot *OtherService) TraceAccess(referee, ip, ua string) {
+func (self *OtherService) TraceAccess(referee, ip, ua string) {
 	// 异步保存
 	pool.Go(func() {
 		location := region.SearchLocation(ip)
-		ot.repo.SaveAccessRecord(&usercase.AccessLog{
+		self.repo.SaveAccessRecord(&usercase.AccessLog{
 			Location: location,
 			AccessIp: ip,
 			AccessUa: ua,
@@ -153,7 +154,23 @@ func (ot *OtherService) TraceAccess(referee, ip, ua string) {
 	})
 }
 
-func (ot *OtherService) generateUploadPath(prefix, fileName string) string {
+func (self *OtherService) PageLogin(query *usercase.LoginLogQueryForm) (*usercase.PageData[usercase.LoginLog], error) {
+	records, total, err := self.repo.PageLoginRecord(query)
+	if err != nil {
+		slog.Error("获取登录日志分页列表失败", "err", err.Error())
+		return nil, tools.FiberServerError("查询失败")
+	}
+	pages := int(math.Ceil(float64(total) / float64(query.Size)))
+	return &usercase.PageData[usercase.LoginLog]{
+		Current: query.Page,
+		Size:    query.Size,
+		Pages:   pages,
+		Total:   total,
+		Records: records,
+	}, nil
+}
+
+func (self *OtherService) generateUploadPath(prefix, fileName string) string {
 	datePath := time.Now().Format("2006/0102/")
 	return prefix + datePath + fileName
 }

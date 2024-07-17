@@ -16,22 +16,37 @@ func NewHttpApi(service usercase.IOtherService) *HttpApi {
 	}
 }
 
-func (h *HttpApi) UploadImage(ctx fiber.Ctx) error {
+// UploadImage 图片上传
+func (self *HttpApi) UploadImage(ctx fiber.Ctx) error {
 	fileHeader, err := ctx.FormFile("image")
 	if err != nil {
 		return err
 	}
-	url, err := h.service.UploadImage(fileHeader)
+	url, err := self.service.UploadImage(fileHeader)
 	if err != nil {
 		return err
 	}
 	return ctx.JSON(res.OkByData(url))
 }
 
-func (h *HttpApi) AccessTrace(ctx fiber.Ctx) error {
+// AccessTrace 记录访问请求
+func (self *HttpApi) AccessTrace(ctx fiber.Ctx) error {
 	ip := ctx.IP()
 	referer := ctx.Get(fiber.HeaderReferer)
 	ua := ctx.Get(fiber.HeaderUserAgent)
-	h.service.TraceAccess(referer, ip, ua)
+	self.service.TraceAccess(referer, ip, ua)
 	return ctx.SendStatus(fiber.StatusOK)
+}
+
+// PageLoginRecord 分页查询登录日志
+func (self *HttpApi) PageLoginRecord(ctx fiber.Ctx) error {
+	query := &usercase.LoginLogQueryForm{}
+	if err := ctx.Bind().JSON(query); err != nil {
+		return err
+	}
+	page, err := self.service.PageLogin(query)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(page))
 }
