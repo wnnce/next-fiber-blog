@@ -120,7 +120,7 @@ func (self *OtherRepo) PageAccessRecord(query *usercase.AccessLogQueryForm) ([]*
 	if query.CreateTimeEnd != "" {
 		condition.WriteString(fmt.Sprintf(" and create_time <= '%s'", query.CreateTimeEnd))
 	}
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_access_log "+condition.String())
+	row := self.db.QueryRow(context.Background(), "select count(*) from t_blog_access_log "+condition.String())
 	var total int64
 	if err := row.Scan(&total); err != nil {
 		return nil, 0, err
@@ -131,7 +131,7 @@ func (self *OtherRepo) PageAccessRecord(query *usercase.AccessLogQueryForm) ([]*
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
 	condition.WriteString(" order by create_time desc limit $1 offset $2")
-	rows, err := self.db.Query(context.Background(), "select * from t_access_log "+condition.String(), query.Size, offset)
+	rows, err := self.db.Query(context.Background(), "select * from t_blog_access_log "+condition.String(), query.Size, offset)
 	if err != nil {
 		return nil, 0, err
 	}
