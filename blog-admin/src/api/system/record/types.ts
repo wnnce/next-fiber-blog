@@ -24,3 +24,20 @@ export interface LoginRecordQueryForm extends PageQuery {
   createTimeBegin?: string;
   createTimeEnd?: string;
 }
+
+// 访问记录
+export interface AccessRecord {
+  id: number;
+  location: string;
+  referee: string;
+  accessIp: string;
+  accessUa: string;
+  createTime: string;
+}
+
+// 访问记录查询表单
+export interface AccessRecordQueryForm extends PageQuery {
+  ip?: string;
+  createTimeBegin?: string;
+  createTimeEnd?: string;
+}
