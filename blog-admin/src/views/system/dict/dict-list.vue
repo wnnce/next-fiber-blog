@@ -7,26 +7,28 @@ import RightOperate from '@/components/RightOperate.vue'
 import ConfigForm from '@/views/system/config/config-form.vue'
 import { useArcoMessage } from '@/hooks/message'
 import { constant } from '@/assets/script/constant'
+import type { Dict, DictQueryForm } from '@/api/system/dict/types'
+import { dictApi } from '@/api/system/dict'
 
 const { successMessage, loading } = useArcoMessage();
 
 const tableLoading = ref<boolean>(false);
 const recordTotal = ref<number>(0);
-const tableData = ref<Config[]>([]);
-const defaultQueryForm: ConfigQueryForm = {
+const tableData = ref<Dict[]>([]);
+const defaultQueryForm: DictQueryForm = {
   page: 1,
   size: 10,
-  name: undefined,
-  key: undefined,
+  dictName: undefined,
+  dictKey: undefined,
   createTimeBegin: undefined,
   createTimeEnd: undefined
 }
 const dateRange = ref<string[]>([]);
-const queryForm = reactive<ConfigQueryForm>({ ...defaultQueryForm })
+const queryForm = reactive<DictQueryForm>({ ...defaultQueryForm })
 const queryTableData = async () => {
   tableLoading.value = true;
   try {
-    const result = await configApi.pageSysConfig(queryForm);
+    const result = await dictApi.pageDict(queryForm);
     if (result && result.code === 200) {
       const { total, records } = result.data;
       recordTotal.value = total;
@@ -92,12 +94,12 @@ onMounted(() => {
   <div class="table-card">
     <div class="search-div">
       <div class="search-item">
-        <label>参数名称</label>
-        <a-input v-model="queryForm.name" placeholder="请输入参数名称" />
+        <label>字典名称</label>
+        <a-input v-model="queryForm.dictName" placeholder="请输入字典名称" />
       </div>
       <div class="search-item">
-        <label>参数KEY</label>
-        <a-input v-model="queryForm.key" placeholder="请输入参数key" />
+        <label>字典KEY</label>
+        <a-input v-model="queryForm.dictKey" placeholder="请输入字典key" />
       </div>
       <div class="search-item">
         <label>创建时间</label>
@@ -125,10 +127,9 @@ onMounted(() => {
     </div>
     <a-table :data="tableData" :loading="tableLoading" :pagination="false">
       <template #columns>
-        <a-table-column title="参数ID" data-index="configId" />
-        <a-table-column title="参数名称" data-index="configName" />
-        <a-table-column title="参数键" data-index="configKey" />
-        <a-table-column title="参数值" data-index="configValue" />
+        <a-table-column title="字典ID" data-index="dictId" />
+        <a-table-column title="字典名称" data-index="dictName" />
+        <a-table-column title="字典KEY" data-index="dictKey" />
         <a-table-column title="创建时间" data-index="createTime" />
         <a-table-column title="备注" data-index="remark" />
         <a-table-column title="操作" align="center">
