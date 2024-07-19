@@ -13,11 +13,12 @@ import (
 )
 
 var InjectSet = wire.NewSet(tag.NewHttpApi, category.NewHttpApi, concat.NewHttpApi, link.NewHttpApi, manage.NewMenuApi,
-	manage.NewConfigApi, other.NewHttpApi, manage.NewRoleApi, manage.NewUserApi)
+	manage.NewConfigApi, other.NewHttpApi, manage.NewRoleApi, manage.NewUserApi, manage.NewDictApi)
 
 // RegisterRoutes 全局路由绑定处理函数 在newApp函数中调用 不然wire无法处理依赖注入
 func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpApi, conApi *concat.HttpApi, linkApi *link.HttpApi,
-	menuApi *manage.MenuApi, cfgApi *manage.ConfigApi, oApi *other.HttpApi, roleApi *manage.RoleApi, userApi *manage.UserApi) {
+	menuApi *manage.MenuApi, cfgApi *manage.ConfigApi, oApi *other.HttpApi, roleApi *manage.RoleApi, userApi *manage.UserApi,
+	dictApi *manage.DictApi) {
 	sysRoute := app.Group("/system")
 	sysRoute.Get("/logger/stream/:interval<int;min<10>>", manage.LoggerPush)
 	menuRoute := sysRoute.Group("/menu", auth.ManageAuth)
@@ -49,6 +50,18 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	userRoute.Delete("/:id<int;min<1>>", userApi.Delete, auth.ManageAuth)
 	userRoute.Put("/password", userApi.UpdatePassword, auth.ManageAuth)
 	userRoute.Post("/logout", userApi.Logout, auth.ManageAuth)
+
+	dictRoute := sysRoute.Group("/dict", auth.ManageAuth)
+	dictRoute.Post("/", dictApi.SaveDict)
+	dictRoute.Put("/", dictApi.UpdateDict)
+	dictRoute.Put("/status", dictApi.UpdateDictStatus)
+	dictRoute.Post("/page", dictApi.PageDict)
+	dictRoute.Delete("/:id<int:min<1>>", dictApi.DeleteDict)
+	dictRoute.Post("/value", dictApi.SaveDictValue)
+	dictRoute.Put("/value", dictApi.UpdateDictValue)
+	dictRoute.Put("/value/status", dictApi.UpdateDictValueStatus)
+	dictRoute.Post("/value/page", dictApi.PageDictValue)
+	dictRoute.Delete("/value/:id<int:min<1>>", dictApi.DeleteDictValue)
 
 	tagRoute := app.Group("/tag")
 	tagRoute.Get("/:id<int;min<1>>", tagApi.QueryInfo)

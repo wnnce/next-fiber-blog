@@ -55,7 +55,10 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 	roleApi := manage.NewRoleApi(iSysRoleService)
 	iSysUserService := service.NewSysUserService(iSysUserRepo, iSysRoleRepo, iOtherService)
 	userApi := manage.NewUserApi(iSysUserService)
-	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi, roleApi, userApi)
+	iSysDictRepo := data.NewSysDictRepo(dataData)
+	iSysDictService := service.NewSysDictService(iSysDictRepo)
+	dictApi := manage.NewDictApi(iSysDictService)
+	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi, roleApi, userApi, dictApi)
 	return app, func() {
 		cleanup()
 	}, nil

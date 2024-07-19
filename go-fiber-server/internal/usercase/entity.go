@@ -1,6 +1,9 @@
 package usercase
 
-import "time"
+import (
+	"math"
+	"time"
+)
 
 // Tree 数据数据接口 用于工具函数统一处理树形数据
 type Tree[T any] interface {
@@ -39,4 +42,16 @@ type PageData[T any] struct {
 	Total   int64 `json:"total"`   // 总记录数
 	Size    int   `json:"size"`    // 每页记录数
 	Records []*T  `json:"records"` // 当前页数据
+}
+
+// NewPageData 创建分页数据返回对象
+func NewPageData[T any](records []*T, total int64, current, size int) *PageData[T] {
+	pages := int(math.Ceil(float64(total) / float64(size)))
+	return &PageData[T]{
+		Current: current,
+		Pages:   pages,
+		Total:   total,
+		Size:    size,
+		Records: records,
+	}
 }
