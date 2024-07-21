@@ -2,6 +2,7 @@ package manage
 
 import (
 	"github.com/gofiber/fiber/v3"
+	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/tools/res"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"strconv"
@@ -121,4 +122,16 @@ func (self *DictApi) DeleteDictValue(ctx fiber.Ctx) error {
 		return err
 	}
 	return ctx.JSON(res.SimpleOK())
+}
+
+func (self *DictApi) ListDictValue(ctx fiber.Ctx) error {
+	dictKey := ctx.Params("dictKey", "")
+	if dictKey == "" {
+		return tools.FiberRequestError("DictKey不能为空")
+	}
+	values, err := self.service.ListDictValueByDictKey(dictKey)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(values))
 }
