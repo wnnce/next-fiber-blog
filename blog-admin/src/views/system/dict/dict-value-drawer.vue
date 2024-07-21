@@ -82,7 +82,7 @@ const handleDateChange = () => {
 const handleDelete = async (record: DictValue) => {
   const loadingMsg = loading('数据删除中')
   try {
-    const result = await dictApi.deleteDictValue(record.dictId);
+    const result = await dictApi.deleteDictValue(record.id);
     if (result.code === 200) {
       successMessage('删除成功');
       await queryTableData();
