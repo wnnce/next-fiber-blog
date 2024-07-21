@@ -1,16 +1,14 @@
 <script setup lang="ts">
-
 import { onMounted, reactive, ref } from 'vue'
-import type { Config, ConfigQueryForm } from '@/api/system/config/types'
-import { configApi } from '@/api/system/config'
 import RightOperate from '@/components/RightOperate.vue'
-import ConfigForm from '@/views/system/config/config-form.vue'
 import { useArcoMessage } from '@/hooks/message'
 import { constant } from '@/assets/script/constant'
 import type { Dict, DictQueryForm } from '@/api/system/dict/types'
 import { dictApi } from '@/api/system/dict'
+import DictForm from '@/views/system/dict/dict-form.vue'
+import DictValueDrawer from '@/views/system/dict/dict-value-drawer.vue'
 
-const { successMessage, loading } = useArcoMessage();
+const { successMessage, loading, errorMessage } = useArcoMessage();
 
 const tableLoading = ref<boolean>(false);
 const recordTotal = ref<number>(0);
@@ -66,10 +64,10 @@ const handleDateChange = () => {
   }
 }
 
-const handleDelete = async (record: Config) => {
+const handleDelete = async (record: Dict) => {
   const loadingMsg = loading('数据删除中')
   try {
-    const result = await configApi.deleteSysConfig(record.configId);
+    const result = await dictApi.deleteDict(record.dictId);
     if (result.code === 200) {
       successMessage('删除成功');
       await queryTableData();
@@ -77,12 +75,32 @@ const handleDelete = async (record: Config) => {
   } finally {
     loadingMsg.close();
   }
+}
 
+const handleQuickChange = async (newValue: number | string | boolean, id: number) => {
+  console.log(newValue, id)
+  const newStatus = Number(newValue);
+  const result = await dictApi.updateDictStatus({ dictId: id, status: newStatus })
+  if (result.code === 200) {
+    successMessage('更新成功');
+    return true;
+  }
+  return false;
 }
 
 const formRef = ref();
-const showForm = (record?: Config) => {
+const showForm = (record?: Dict) => {
   formRef.value.show(record);
+}
+
+const dictValueRef = ref();
+const showDictValue = (record: Dict) => {
+  const { dictId, dictKey, status } = record;
+  if (status === 1) {
+    errorMessage('禁用状态下无法查看字典详情');
+    return;
+  }
+  dictValueRef.value.show(dictId, dictKey);
 }
 
 onMounted(() => {
@@ -129,9 +147,23 @@ onMounted(() => {
       <template #columns>
         <a-table-column title="字典ID" data-index="dictId" />
         <a-table-column title="字典名称" data-index="dictName" />
-        <a-table-column title="字典KEY" data-index="dictKey" />
+        <a-table-column title="字典KEY">
+          <template #cell="{ record }">
+            <span class="link-text" @click="showDictValue(record)">
+              {{ record.dictKey }}
+            </span>
+          </template>
+        </a-table-column>
+        <a-table-column title="排序" data-index="sort" />
         <a-table-column title="创建时间" data-index="createTime" />
         <a-table-column title="备注" data-index="remark" />
+        <a-table-column title="状态">
+          <template #cell="{ record }">
+            <a-switch :checked-value="0" :unchecked-value="1" v-model="record.status"
+                      :before-change="newValue => handleQuickChange(newValue, record.dictId)"
+            />
+          </template>
+        </a-table-column>
         <a-table-column title="操作" align="center">
           <template #cell="{ record }">
             <a-button type="text" shape="circle" @click="showForm(record)">
@@ -160,7 +192,8 @@ onMounted(() => {
                     @change="queryTableData"
       />
     </div>
-    <config-form ref="formRef" @reload="queryTableData"/>
+    <dict-form ref="formRef" @reload="queryTableData"/>
+    <dict-value-drawer ref="dictValueRef" />
   </div>
 </template>
 
