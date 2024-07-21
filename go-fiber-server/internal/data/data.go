@@ -75,26 +75,26 @@ func timeQueryConditionBuilder(begin, end string, builder *strings.Builder, args
 // smartExec 通用执行方法 用于区分事务执行和普通执行
 func smartExec(pool *pgxpool.Pool, tx pgx.Tx, ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error) {
 	if tx == nil {
-		return pool.Exec(ctx, sql, args)
+		return pool.Exec(ctx, sql, args...)
 	} else {
-		return tx.Exec(ctx, sql, args)
+		return tx.Exec(ctx, sql, args...)
 	}
 }
 
 // smartQuery 通用查询方法 区分事务执行和普通执行
 func smartQuery(pool *pgxpool.Pool, tx pgx.Tx, ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
 	if tx == nil {
-		return pool.Query(ctx, sql, args)
+		return pool.Query(ctx, sql, args...)
 	} else {
-		return tx.Query(ctx, sql, args)
+		return tx.Query(ctx, sql, args...)
 	}
 }
 
 // smartQueryRow 通用查询方法
 func smartQueryRow(pool *pgxpool.Pool, tx pgx.Tx, ctx context.Context, sql string, args ...any) pgx.Row {
 	if tx == nil {
-		return pool.QueryRow(ctx, sql, args)
+		return pool.QueryRow(ctx, sql, args...)
 	} else {
-		return tx.QueryRow(ctx, sql, args)
+		return tx.QueryRow(ctx, sql, args...)
 	}
 }
