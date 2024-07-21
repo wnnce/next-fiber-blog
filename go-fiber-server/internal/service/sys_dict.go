@@ -3,18 +3,27 @@ package service
 import (
 	"context"
 	"github.com/jackc/pgx/v5"
+	"go-fiber-ent-web-layout/internal/data"
 	"go-fiber-ent-web-layout/internal/tools"
+	"go-fiber-ent-web-layout/internal/tools/pool"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"log/slog"
+	"math"
+	"time"
 )
 
+// 字典缓存前缀
+const dictCachePrefix = "SYSTEM_DICT:"
+
 type SysDictService struct {
-	repo usercase.ISysDictRepo
+	repo          usercase.ISysDictRepo
+	redisTemplate *data.RedisTemplate
 }
 
-func NewSysDictService(repo usercase.ISysDictRepo) usercase.ISysDictService {
+func NewSysDictService(repo usercase.ISysDictRepo, template *data.RedisTemplate) usercase.ISysDictService {
 	return &SysDictService{
-		repo: repo,
+		repo:          repo,
+		redisTemplate: template,
 	}
 }
 
@@ -79,6 +88,10 @@ func (self *SysDictService) UpdateDict(dict *usercase.SysDict) error {
 			slog.Info("更新系统字典数据失败", "error", err.Error())
 			return err
 		}
+		// 如果key被更新了 那么删除redis缓存
+		if find.DictKey != dict.DictKey {
+			self.deleteRedisDict(find.DictKey)
+		}
 		return nil
 	})
 	if transactionErr != nil {
@@ -134,6 +147,11 @@ func (self *SysDictService) DeleteDict(dictId int64) error {
 		slog.Error("删除系统字典事务失败", "error", err.Error())
 		return tools.FiberServerError("删除失败")
 	}
+	pool.Go(func() {
+		if dictKey := self.repo.SelectDictKeyById(dictId); dictKey != "" {
+			self.deleteRedisDict(dictKey)
+		}
+	})
 	return nil
 }
 
@@ -153,17 +171,19 @@ func (self *SysDictService) SaveDictValue(value *usercase.SysDictValue) error {
 		slog.Error("保存系统字典数据失败", "error", err.Error())
 		return tools.FiberServerError("保存失败")
 	}
+	self.deleteRedisDict(value.DictKey)
 	return nil
 }
 
 func (self *SysDictService) UpdateDictValue(value *usercase.SysDictValue) error {
-	if err := self.checkDictValueIsActive(value.Value, value.DictId, 0); err != nil {
+	if err := self.checkDictValueIsActive(value.Value, value.DictId, value.ID); err != nil {
 		return err
 	}
 	if err := self.repo.UpdateDictValue(value); err != nil {
 		slog.Error("保存系统字典数据失败", "error", err.Error())
 		return tools.FiberServerError("保存失败")
 	}
+	self.deleteRedisDict(value.DictKey)
 	return nil
 }
 
@@ -184,23 +204,49 @@ func (self *SysDictService) DeleteDictValue(valueId int64) error {
 		slog.Error("删除系统字典数据失败", "error", err.Error())
 		return tools.FiberServerError("删除失败")
 	}
+	pool.Go(func() {
+		if dictKey := self.repo.SelectDictKeyByValueId(valueId); dictKey != "" {
+			self.deleteRedisDict(dictKey)
+		}
+	})
 	return nil
 }
 
 func (self *SysDictService) ListDictValueByDictKey(dictKey string) ([]usercase.SysDictValue, error) {
+	dictCacheKey := dictCachePrefix + dictKey
+	cacheValue, err := data.RedisGetSlice[usercase.SysDictValue](context.Background(), dictCacheKey, self.redisTemplate.Client())
+	if err == nil && len(cacheValue) > 0 {
+		return cacheValue, nil
+	}
 	values, err := self.repo.ListDictValueByDictKey(dictKey)
 	if err != nil {
 		slog.Error("获取字典数据列表失败", "error", err.Error(), "dictKey", dictKey)
 		return nil, tools.FiberServerError("查询失败")
 	}
+	if len(values) > 0 {
+		// 异步添加缓存
+		pool.Go(func() {
+			if err = self.redisTemplate.Set(context.Background(), dictCacheKey, values, time.Duration(math.MaxInt64)); err != nil {
+				slog.Error("系统字典添加redis缓存失败", "error", err.Error(), "dictKey", dictKey)
+			}
+		})
+	}
 	return values, err
+}
+
+func (self *SysDictService) deleteRedisDict(dictKey string) {
+	pool.Go(func() {
+		if err := self.redisTemplate.Delete(context.Background(), dictCachePrefix+dictKey); err != nil {
+			slog.Error("异步删除redis字典缓存失败", "error", err.Error(), "dictKey", dictKey)
+		}
+	})
 }
 
 func (self *SysDictService) checkDictKeyIsActive(dictKey string, dictId uint64) error {
 	count, err := self.repo.CountByKey(dictKey, dictId)
 	if err != nil || count > 0 {
 		slog.Error("检查数据字典Key是否可用失败", "dictKey", dictKey, "dictId", dictId)
-		return tools.FiberServerError("检查Key是否可用失败")
+		return tools.FiberServerError("字典KEY重复")
 	}
 	return nil
 }
@@ -208,8 +254,8 @@ func (self *SysDictService) checkDictKeyIsActive(dictKey string, dictId uint64) 
 func (self *SysDictService) checkDictValueIsActive(value string, dictId uint64, valueId uint64) error {
 	count, err := self.repo.CountValueById(value, dictId, valueId)
 	if err != nil || count > 0 {
-		slog.Error("检查数据字典Key是否可用失败", "dictId", dictId, "valueId", valueId)
-		return tools.FiberServerError("检查value是否重复失败")
+		slog.Error("检查字典数据是否重复失败", "dictId", dictId, "valueId", valueId)
+		return tools.FiberServerError("字典数据重复")
 	}
 	return nil
 }

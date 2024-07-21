@@ -56,7 +56,8 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 	iSysUserService := service.NewSysUserService(iSysUserRepo, iSysRoleRepo, iOtherService)
 	userApi := manage.NewUserApi(iSysUserService)
 	iSysDictRepo := data.NewSysDictRepo(dataData)
-	iSysDictService := service.NewSysDictService(iSysDictRepo)
+	redisTemplate := data.NewRedisTemplate(dataData)
+	iSysDictService := service.NewSysDictService(iSysDictRepo, redisTemplate)
 	dictApi := manage.NewDictApi(iSysDictService)
 	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi, roleApi, userApi, dictApi)
 	return app, func() {

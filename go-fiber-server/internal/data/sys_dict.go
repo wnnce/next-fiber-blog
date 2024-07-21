@@ -191,6 +191,20 @@ func (self *SysDictRepo) CountValueById(value string, dictId uint64, valueId uin
 	return total, err
 }
 
+func (self *SysDictRepo) SelectDictKeyById(dictId int64) string {
+	row := self.db.QueryRow(context.Background(), "select dict_key from t_system_dict where dict_id = $1", dictId)
+	var dictKey string
+	_ = row.Scan(&dictKey)
+	return dictKey
+}
+
+func (self *SysDictRepo) SelectDictKeyByValueId(valueId int64) string {
+	row := self.db.QueryRow(context.Background(), "select dict_key from t_system_dict_value where id = $1", valueId)
+	var dictKey string
+	_ = row.Scan(&dictKey)
+	return dictKey
+}
+
 func (self *SysDictRepo) PageDictValue(query *usercase.SysDictValueQueryForm) ([]*usercase.SysDictValue, int64, error) {
 	var condition strings.Builder
 	args := make([]any, 0)

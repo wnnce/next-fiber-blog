@@ -71,6 +71,8 @@ type ISysDictRepo interface {
 
 	SelectDictById(dictId uint64) (*SysDict, error)
 
+	SelectDictKeyById(dictId int64) string
+
 	DeleteDict(dictId int64, tx pgx.Tx) error
 
 	SaveDictValue(value *SysDictValue) error
@@ -82,6 +84,8 @@ type ISysDictRepo interface {
 	UpdateDictValueByDickId(value *SysDictValue, tx pgx.Tx) error
 
 	CountValueById(value string, dictId uint64, valueId uint64) (uint8, error)
+
+	SelectDictKeyByValueId(valueId int64) string
 
 	PageDictValue(query *SysDictValueQueryForm) ([]*SysDictValue, int64, error)
 
