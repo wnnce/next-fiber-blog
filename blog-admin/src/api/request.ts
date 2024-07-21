@@ -19,21 +19,36 @@ const { get, remove } = useLocalStorage();
 
 const baseUrl = import.meta.env.VITE_REQUEST_BASE_URL;
 
+// 请求Promise缓存
+const fetchCache = new Map<string, Promise<Result<any>>>;
+
 export function request<T>(url: string, method: HttpMethod, params?: any, data?: object, headers?: Record<string, string>): Promise<Result<T>> {
-  return new Promise((resolve, reject) => {
-    const token = get<string>(TOKEN_KEY);
-    const httpHeaders: Record<string, string> = {};
-    if (token && token.trim().length > 0) {
-      httpHeaders['Authorization'] = `Bearer ${token}`;
-    }
-    headers && (Object.assign(httpHeaders, headers));
-    if (params) {
-      url += '?' + new URLSearchParams(params).toString();
-    }
+  const token = get<string>(TOKEN_KEY);
+  // 计算请求缓存的key
+  const keyItems: string[] = [url, method.toString()];
+  const httpHeaders: Record<string, string> = {};
+  if (token && token.trim().length > 0) {
+    httpHeaders['Authorization'] = `Bearer ${token}`;
+  }
+  headers && (Object.assign(httpHeaders, headers));
+  if (params) {
+    const queryParams = new URLSearchParams(params).toString()
+    keyItems.push(`queryLength:${queryParams.length}`)
+    url += '?' + queryParams;
+  }
+  const requestBody = data ? JSON.stringify(data) : undefined
+  requestBody && (keyItems.push(`bodyLength:${requestBody.length}`))
+  const promiseKey = keyItems.join('');
+  // 判断请求是否在处理中 如果正在处理则直接返回缓存的Promise
+  const cachePromise = fetchCache.get(promiseKey);
+  if (cachePromise) {
+    return cachePromise
+  }
+  const fetchPromise: Promise<Result<T>> = new Promise((resolve, reject) => {
     fetch(baseUrl + url, {
       method: method,
       headers: httpHeaders,
-      body: data ? JSON.stringify(data) : undefined
+      body: requestBody
     }).then(async response => {
       const responseBody = await response.json() as Result<T>;
       const { code, message } = responseBody;
@@ -60,8 +75,13 @@ export function request<T>(url: string, method: HttpMethod, params?: any, data?:
     }).catch(err => {
       console.log(err)
       reject(undefined);
+    }).finally(() => {
+      // 请求结束后清理缓存
+      fetchCache.delete(promiseKey)
     })
   })
+  fetchCache.set(promiseKey, fetchPromise)
+  return fetchPromise;
 }
 
 /**
