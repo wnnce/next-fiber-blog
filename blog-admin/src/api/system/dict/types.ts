@@ -40,6 +40,8 @@ export interface DictValue {
 
 export interface DictValueForm {
   id?: number;
+  dictId?: number;
+  dictKey?: string;
   label?: string;
   value?: string;
   remark?: string;

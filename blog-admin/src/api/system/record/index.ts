@@ -9,13 +9,13 @@ export const recordApi = {
    * @param query 查询参数
    */
   pageLoginRecord: (query: LoginRecordQueryForm) => {
-    return sendPost<Page<LoginRecord>>('/other/record/login', query)
+    return sendPost<Page<LoginRecord>>('/system/record/login', query)
   },
   /**
    * 分页查询访问记录
    * @param query 查询参数
    */
   pageAccessRecord: (query: AccessRecordQueryForm) => {
-    return sendPost<Page<AccessRecord>>('/other/record/access', query)
+    return sendPost<Page<AccessRecord>>('/system/record/access', query)
   }
 }

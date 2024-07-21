@@ -9,7 +9,7 @@ export const menuApi = {
    * 获取菜单树形列表
    */
   listTreeMenu: () => {
-    return sendGet<Menu[]>('/system/menu/tree')
+    return sendGet<Menu[]>('/base/menu-tree')
   },
   /**
    * 获取菜单树管理列表

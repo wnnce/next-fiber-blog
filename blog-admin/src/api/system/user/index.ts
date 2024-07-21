@@ -28,14 +28,14 @@ export const userApi = {
    * 获取用户详情
    */
   queryUserInfo: () => {
-    return sendGet<User>('/system/user/info');
+    return sendGet<User>('/base/user-info');
   },
   /**
    * 用户登录
    * @param form 登录参数
    */
   login: (form: LoginForm) => {
-    return sendPost<string>('/system/user/login', form);
+    return sendPost<string>('/open/login', form);
   },
   /**
    * 删除用户
@@ -49,12 +49,12 @@ export const userApi = {
    * @param form 重置密码参数
    */
   resetPassword: (form: ResetPasswordForm) => {
-    return sendPut<null>('/system/user/password', form)
+    return sendPut<null>('/base/re-password', form)
   },
   /**
    * 退出登录
    */
   logout: () => {
-    return sendPost<null>('/system/user/logout')
+    return sendPost<null>('/base/logout')
   }
 }

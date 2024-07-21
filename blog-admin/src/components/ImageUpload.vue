@@ -101,7 +101,7 @@ const handleUpload = async () => {
     const formData = new FormData();
     formData.append('image', item.file);
     try {
-      const result = await fileUpload('/other/upload/image', formData, (event: ProgressEvent) => {
+      const result = await fileUpload('/base/upload/image', formData, (event: ProgressEvent) => {
         const { lengthComputable, loaded, total } = event;
         if (lengthComputable) {
           item.percent = parseFloat((loaded / total).toFixed(2));
