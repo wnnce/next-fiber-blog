@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-var InjectSet = wire.NewSet(NewData, NewTagRepo, NewCategoryRepo, NewConcatRepo, NewLinkRepo, NewSysMenuRepo, NewOtherRepo,
+var InjectSet = wire.NewSet(NewData, NewRedisTemplate, NewTagRepo, NewCategoryRepo, NewConcatRepo, NewLinkRepo, NewSysMenuRepo, NewOtherRepo,
 	NewSysConfigRepo, NewSysRoleRepo, NewSysUserRepo, NewSysDictRepo)
 
 type Data struct {
