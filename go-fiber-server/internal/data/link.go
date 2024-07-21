@@ -52,7 +52,7 @@ func (l *LinkRepo) UpdateStatus(linkId int64, status uint8) error {
 }
 
 func (l *LinkRepo) Page(query *usercase.PageQueryForm) ([]*usercase.Link, int64, error) {
-	condition := "where delete_at = '0' and status = 0"
+	condition := "where delete_at = 0 and status = 0"
 	total, err := l.conditionTotal(condition)
 	if err != nil {
 		return nil, 0, err
@@ -76,17 +76,14 @@ func (l *LinkRepo) Page(query *usercase.PageQueryForm) ([]*usercase.Link, int64,
 
 func (l *LinkRepo) ManagePage(query *usercase.LinkQueryForm) ([]*usercase.Link, int64, error) {
 	var condition strings.Builder
-	condition.WriteString("where delete_at = '0'")
+	condition.WriteString("where delete_at = 0")
+	args := make([]any, 0)
 	if query.Name != "" {
-		condition.WriteString(fmt.Sprintf(" and name like '%s'", "%"+query.Name+"%"))
+		args = append(args, "%"+query.Name+"%")
+		condition.WriteString(fmt.Sprintf(" and name like $%d", len(args)))
 	}
-	if query.CreateTimeBegin != nil {
-		condition.WriteString(fmt.Sprintf("create_time >= '%s'", query.CreateTimeBegin.Format("2006-04-02")))
-	}
-	if query.CreateTimeEnd != nil {
-		condition.WriteString(fmt.Sprintf("create_time <= '%s'", query.CreateTimeEnd.Format("2006-01-02")))
-	}
-	total, err := l.conditionTotal(condition.String())
+	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
+	total, err := l.conditionTotal(condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -95,7 +92,9 @@ func (l *LinkRepo) ManagePage(query *usercase.LinkQueryForm) ([]*usercase.Link, 
 		return links, 0, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	rows, err := l.db.Query(context.Background(), "select * from t_blog_link "+condition.String()+" order by sort, create_time desc limit $1 offset $2", query.Size, offset)
+	condition.WriteString(fmt.Sprintf(" order by sort, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
+	args = append(args, query.Size, offset)
+	rows, err := l.db.Query(context.Background(), "select * from t_blog_link "+condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -131,8 +130,8 @@ func (l *LinkRepo) BatchDelete(linkIds []int64) (int64, error) {
 	return result.RowsAffected(), err
 }
 
-func (l *LinkRepo) conditionTotal(condition string) (int64, error) {
-	row := l.db.QueryRow(context.Background(), "select count(link_id) from t_blog_link "+condition)
+func (l *LinkRepo) conditionTotal(condition string, args ...any) (int64, error) {
+	row := l.db.QueryRow(context.Background(), "select count(link_id) from t_blog_link "+condition, args...)
 	var total int64
 	err := row.Scan(&total)
 	return total, err

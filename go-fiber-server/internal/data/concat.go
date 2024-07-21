@@ -63,17 +63,14 @@ func (c *ConcatRepo) List() ([]*usercase.Concat, error) {
 func (c *ConcatRepo) ManageList(query *usercase.ConcatQueryForm) ([]*usercase.Concat, error) {
 	var builder strings.Builder
 	builder.WriteString("select * from t_blog_concat where delete_at = '0' ")
+	args := make([]any, 0)
 	if query.Name != "" {
-		builder.WriteString(fmt.Sprintf("and name like '%s' ", "%"+query.Name+"%"))
+		args = append(args, "%"+query.Name+"%")
+		builder.WriteString(fmt.Sprintf("and name like $%d ", len(args)))
 	}
-	if query.CreateTimeBegin != "" {
-		builder.WriteString(fmt.Sprintf("and create_time >= '%s' ", query.CreateTimeBegin))
-	}
-	if query.CreateTimeEnd != "" {
-		builder.WriteString(fmt.Sprintf("and create_time <= '%s' ", query.CreateTimeEnd))
-	}
+	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &builder, &args)
 	builder.WriteString("order by sort, create_time desc")
-	rows, err := c.db.Query(context.Background(), builder.String())
+	rows, err := c.db.Query(context.Background(), builder.String(), args...)
 	if err != nil {
 		return nil, err
 	}

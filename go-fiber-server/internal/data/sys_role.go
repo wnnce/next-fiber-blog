@@ -59,19 +59,17 @@ func (sr *SysRoleRepo) ListAll() ([]usercase.SysRole, error) {
 func (sr *SysRoleRepo) Page(query *usercase.SysRoleQueryForm) ([]*usercase.SysRole, int64, error) {
 	var condition strings.Builder
 	condition.WriteString("where delete_at = 0 ")
+	args := make([]any, 0)
 	if query.Name != "" {
-		condition.WriteString(fmt.Sprintf("and role_name like '%s' ", "%"+query.Name+"%"))
+		args = append(args, "%"+query.Name+"%")
+		condition.WriteString(fmt.Sprintf("and role_name like $%d ", len(args)))
 	}
 	if query.Key != "" {
-		condition.WriteString(fmt.Sprintf("and role_key like '%s' ", "%"+query.Key+"%"))
+		args = append(args, "%"+query.Key+"%")
+		condition.WriteString(fmt.Sprintf("and role_key like $%d ", len(args)))
 	}
-	if query.CreateTimeBegin != "" {
-		condition.WriteString(fmt.Sprintf("and create_time >= '%s' ", query.CreateTimeBegin))
-	}
-	if query.CreateTimeEnd != "" {
-		condition.WriteString(fmt.Sprintf("and create_time <= '%s' ", query.CreateTimeEnd))
-	}
-	total, err := sr.conditionToal(condition.String())
+	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
+	total, err := sr.conditionToal(condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -80,8 +78,9 @@ func (sr *SysRoleRepo) Page(query *usercase.SysRoleQueryForm) ([]*usercase.SysRo
 		return roles, total, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString(" order by sort, create_time desc limit $1 offset $2")
-	rows, err := sr.db.Query(context.Background(), "select * from t_system_role "+condition.String(), query.Size, offset)
+	condition.WriteString(fmt.Sprintf(" order by sort, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
+	args = append(args, query.Size, offset)
+	rows, err := sr.db.Query(context.Background(), "select * from t_system_role "+condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -132,8 +131,8 @@ func (sr *SysRoleRepo) ListRoleKeyByIds(ids []uint) ([]string, error) {
 	})
 }
 
-func (sr *SysRoleRepo) conditionToal(condition string) (int64, error) {
-	row := sr.db.QueryRow(context.Background(), "select count(*) from t_system_role "+condition)
+func (sr *SysRoleRepo) conditionToal(condition string, args ...any) (int64, error) {
+	row := sr.db.QueryRow(context.Background(), "select count(*) from t_system_role "+condition, args...)
 	var total int64
 	err := row.Scan(&total)
 	return total, err

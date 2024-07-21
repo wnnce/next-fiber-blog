@@ -60,31 +60,24 @@ func (self *TagRepo) UpdateViewNum(tagId int, addNum int) error {
 }
 
 func (self *TagRepo) SelectById(id int) (*usercase.Tag, error) {
-	row, err := self.db.Query(context.Background(), "select * from t_blog_tag where tag_id = $1 and delete_at = '0' and status = 0", id)
-	if err != nil {
-		return nil, err
+	rows, err := self.db.Query(context.Background(), "select * from t_blog_tag where tag_id = $1 and delete_at = '0' and status = 0", id)
+	if err == nil && rows.Next() {
+		defer rows.Close()
+		return pgx.RowToAddrOfStructByName[usercase.Tag](rows)
 	}
-	defer row.Close()
-	for row.Next() {
-		tag, err := pgx.RowToStructByName[usercase.Tag](row)
-		return &tag, err
-	}
-	return nil, nil
+	return nil, err
 }
 
-func (self *TagRepo) Page(form *usercase.TagQueryForm) ([]*usercase.Tag, int64, error) {
+func (self *TagRepo) Page(query *usercase.TagQueryForm) ([]*usercase.Tag, int64, error) {
 	var condition strings.Builder
 	condition.WriteString("where delete_at = '0'")
-	if form.TagName != "" {
-		condition.WriteString(fmt.Sprintf(" and tag_name like '%s'", "%"+form.TagName+"%"))
+	args := make([]any, 0)
+	if query.TagName != "" {
+		args = append(args, "%"+query.TagName+"%")
+		condition.WriteString(fmt.Sprintf(" and tag_name like $%d", len(args)))
 	}
-	if form.CreateTimeBegin != "" {
-		condition.WriteString(fmt.Sprintf(" and date(create_time) >= '%s'", form.CreateTimeBegin))
-	}
-	if form.CreateTimeEnd != "" {
-		condition.WriteString(fmt.Sprintf(" and date(create_time) <= '%s'", form.CreateTimeEnd))
-	}
-	total, err := self.conditionTotal(condition.String())
+	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
+	total, err := self.conditionTotal(condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -92,9 +85,10 @@ func (self *TagRepo) Page(form *usercase.TagQueryForm) ([]*usercase.Tag, int64, 
 	if total == 0 {
 		return tags, total, nil
 	}
-	offset := tools.ComputeOffset(total, form.Page, form.Size, false)
-	condition.WriteString(" order by sort asc, create_time desc limit $1 offset $2")
-	rows, err := self.db.Query(context.Background(), "select * from t_blog_tag "+condition.String(), form.Size, offset)
+	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
+	condition.WriteString(fmt.Sprintf(" order by sort asc, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
+	args = append(args, query.Size, offset)
+	rows, err := self.db.Query(context.Background(), "select * from t_blog_tag "+condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -172,8 +166,8 @@ func (self *TagRepo) DeleteByIds(ids []int) (int64, error) {
 	return result.RowsAffected(), err
 }
 
-func (self *TagRepo) conditionTotal(condition string) (int64, error) {
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_blog_tag "+condition)
+func (self *TagRepo) conditionTotal(condition string, args ...any) (int64, error) {
+	row := self.db.QueryRow(context.Background(), "select count(*) from t_blog_tag "+condition, args...)
 	var total int64
 	err := row.Scan(&total)
 	return total, err

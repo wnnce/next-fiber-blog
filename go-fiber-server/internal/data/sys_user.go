@@ -60,28 +60,29 @@ func (sur *SysUserRepo) FindUserById(userId uint64) (*usercase.SysUser, error) {
 func (sur *SysUserRepo) Page(query *usercase.SysUserQueryForm) ([]*usercase.SysUser, int64, error) {
 	var condition strings.Builder
 	condition.WriteString(" where delete_at = 0 ")
+	args := make([]any, 0)
 	if query.Username != "" {
-		condition.WriteString(fmt.Sprintf("and username like '%s' ", "%"+query.Username+"%"))
+		args = append(args, "%"+query.Username+"%")
+		condition.WriteString(fmt.Sprintf("and username like $%d ", len(args)))
 	}
 	if query.Nickname != "" {
-		condition.WriteString(fmt.Sprintf("and nickname like '%s' ", "%"+query.Nickname+"%"))
+		args = append(args, "%"+query.Nickname+"%")
+		condition.WriteString(fmt.Sprintf("and nickname like $%d ", len(args)))
 	}
 	if query.Phone != "" {
-		condition.WriteString(fmt.Sprintf("and phone like '%s' ", "%"+query.Phone+"%"))
+		args = append(args, query.Phone)
+		condition.WriteString(fmt.Sprintf("and phone = $%d ", len(args)))
 	}
 	if query.Email != "" {
-		condition.WriteString(fmt.Sprintf("and email like '%s' ", "%"+query.Email+"%"))
+		args = append(args, query.Email)
+		condition.WriteString(fmt.Sprintf("and email like $%d ", len(args)))
 	}
 	if query.RoleId > 0 {
-		condition.WriteString(fmt.Sprintf("and %d = ANY (roles) ", query.RoleId))
+		args = append(args, query.RoleId)
+		condition.WriteString(fmt.Sprintf("and $%d = ANY (roles) ", len(args)))
 	}
-	if query.CreateTimeBegin != "" {
-		condition.WriteString(fmt.Sprintf("and create_time >= '%s' ", query.CreateTimeBegin))
-	}
-	if query.CreateTimeEnd != "" {
-		condition.WriteString(fmt.Sprintf("and create_time <= '%s' ", query.CreateTimeEnd))
-	}
-	total, err := sur.conditionTotal(condition.String())
+	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
+	total, err := sur.conditionTotal(condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -90,10 +91,11 @@ func (sur *SysUserRepo) Page(query *usercase.SysUserQueryForm) ([]*usercase.SysU
 		return users, total, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString("order by sort, create_time desc limit $1 offset $2 ")
+	condition.WriteString(fmt.Sprintf("order by sort, create_time desc limit $%d offset $%d ", len(args)+1, len(args)+2))
+	args = append(args, query.Size, offset)
 	rows, err := sur.db.Query(context.Background(), `select user_id, username, nickname, email, phone, avatar, roles, 
        last_login_ip, last_login_time, create_time, update_time, sort, status, remark from t_system_user `+condition.String(),
-		query.Size, offset)
+		args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -154,8 +156,8 @@ func (sur *SysUserRepo) UpdateLoginRecord(userId uint64, ip string) {
 	}
 }
 
-func (sur *SysUserRepo) conditionTotal(condition string) (int64, error) {
-	row := sur.db.QueryRow(context.Background(), "select count(*) from t_system_user "+condition)
+func (sur *SysUserRepo) conditionTotal(condition string, args ...any) (int64, error) {
+	row := sur.db.QueryRow(context.Background(), "select count(*) from t_system_user "+condition, args...)
 	var total int64
 	err := row.Scan(&total)
 	return total, err

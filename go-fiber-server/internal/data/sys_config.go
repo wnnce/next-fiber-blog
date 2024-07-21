@@ -53,19 +53,17 @@ func (sc *SysConfigRepo) CountByKey(key string, cid uint64) (uint8, error) {
 func (sc *SysConfigRepo) ManagePage(query *usercase.SysConfigQueryForm) ([]usercase.SysConfig, int64, error) {
 	var condition strings.Builder
 	condition.WriteString("where delete_at = 0 ")
+	args := make([]any, 0)
 	if query.Name != "" {
-		condition.WriteString(fmt.Sprintf("and config_name like '%s' ", "%"+query.Name+"%"))
+		args = append(args, "%"+query.Name+"%")
+		condition.WriteString(fmt.Sprintf("and config_name like $%d ", len(args)))
 	}
 	if query.Key != "" {
-		condition.WriteString(fmt.Sprintf("and config_key like '%s' ", "%"+query.Key+"%"))
+		args = append(args, "%"+query.Key+"%")
+		condition.WriteString(fmt.Sprintf("and config_key like $%d ", len(args)))
 	}
-	if query.CreateTimeBegin != "" {
-		condition.WriteString(fmt.Sprintf("and create_time >= '%s' ", query.CreateTimeBegin))
-	}
-	if query.CreateTimeEnd != "" {
-		condition.WriteString(fmt.Sprintf("and create_time <= '%s' ", query.CreateTimeEnd))
-	}
-	total, err := sc.conditionTotal(condition.String())
+	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
+	total, err := sc.conditionTotal(condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -74,8 +72,9 @@ func (sc *SysConfigRepo) ManagePage(query *usercase.SysConfigQueryForm) ([]userc
 		return configs, total, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString("order by create_time desc limit $1 offset $2")
-	rows, err := sc.db.Query(context.Background(), "select * from t_system_config "+condition.String(), query.Size, offset)
+	condition.WriteString(fmt.Sprintf("order by create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
+	args = append(args, query.Size, offset)
+	rows, err := sc.db.Query(context.Background(), "select * from t_system_config "+condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -94,8 +93,8 @@ func (sc *SysConfigRepo) DeleteById(cid int64) error {
 	return err
 }
 
-func (sc *SysConfigRepo) conditionTotal(condition string) (int64, error) {
-	row := sc.db.QueryRow(context.Background(), "select count(*) from t_system_config "+condition)
+func (sc *SysConfigRepo) conditionTotal(condition string, args ...any) (int64, error) {
+	row := sc.db.QueryRow(context.Background(), "select count(*) from t_system_config "+condition, args...)
 	var total int64
 	err := row.Scan(&total)
 	return total, err

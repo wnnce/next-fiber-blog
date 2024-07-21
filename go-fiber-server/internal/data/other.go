@@ -34,14 +34,11 @@ func (self *OtherRepo) SaveFileRecord(file *usercase.UploadFile) {
 
 func (self *OtherRepo) QueryFileByMd5(fileMd5 string) (*usercase.UploadFile, error) {
 	rows, err := self.db.Query(context.Background(), "select * from t_upload_file where file_md5 = $1", fileMd5)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	if rows.Next() {
+	if err == nil && rows.Next() {
+		defer rows.Close()
 		return pgx.RowToAddrOfStructByName[usercase.UploadFile](rows)
 	}
-	return nil, nil
+	return nil, err
 }
 
 func (self *OtherRepo) DeleteFileByName(filename string) error {
@@ -71,22 +68,21 @@ func (self *OtherRepo) SaveAccessRecord(record *usercase.AccessLog) {
 func (self *OtherRepo) PageLoginRecord(query *usercase.LoginLogQueryForm) ([]*usercase.LoginLog, int64, error) {
 	var condition strings.Builder
 	condition.WriteString(" where id > 0")
+	args := make([]any, 0)
 	if query.Username != "" {
-		condition.WriteString(fmt.Sprintf(" and username = '%s'", query.Username))
+		args = append(args, query.Username)
+		condition.WriteString(fmt.Sprintf(" and username = $%d", len(args)))
 	}
 	if query.LoginType != nil {
-		condition.WriteString(fmt.Sprintf(" and login_type = %d", *query.LoginType))
+		args = append(args, *query.LoginType)
+		condition.WriteString(fmt.Sprintf(" and login_type = $%d", len(args)))
 	}
 	if query.Result != nil {
-		condition.WriteString(fmt.Sprintf(" and result = %d", *query.Result))
+		args = append(args, *query.Result)
+		condition.WriteString(fmt.Sprintf(" and result = $%d", len(args)))
 	}
-	if query.CreateTimeBegin != "" {
-		condition.WriteString(fmt.Sprintf(" and create_time >= '%s'", query.CreateTimeBegin))
-	}
-	if query.CreateTimeEnd != "" {
-		condition.WriteString(fmt.Sprintf(" and create_time <= '%s'", query.CreateTimeEnd))
-	}
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_login_log "+condition.String())
+	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
+	row := self.db.QueryRow(context.Background(), "select count(*) from t_login_log "+condition.String(), args...)
 	var total int64
 	if err := row.Scan(&total); err != nil {
 		return nil, 0, err
@@ -96,8 +92,9 @@ func (self *OtherRepo) PageLoginRecord(query *usercase.LoginLogQueryForm) ([]*us
 		return records, total, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString(" order by create_time desc limit $1 offset $2")
-	rows, err := self.db.Query(context.Background(), "select * from t_login_log "+condition.String(), query.Size, offset)
+	condition.WriteString(fmt.Sprintf(" order by create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
+	args = append(args, query.Size, offset)
+	rows, err := self.db.Query(context.Background(), "select * from t_login_log "+condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -111,16 +108,13 @@ func (self *OtherRepo) PageLoginRecord(query *usercase.LoginLogQueryForm) ([]*us
 func (self *OtherRepo) PageAccessRecord(query *usercase.AccessLogQueryForm) ([]*usercase.AccessLog, int64, error) {
 	var condition strings.Builder
 	condition.WriteString(" where id > 0")
+	args := make([]any, 0)
 	if query.Ip != "" {
-		condition.WriteString(fmt.Sprintf(" and access_ip = '%s'", query.Ip))
+		args = append(args, query.Ip)
+		condition.WriteString(fmt.Sprintf(" and access_ip = $%d", len(args)))
 	}
-	if query.CreateTimeBegin != "" {
-		condition.WriteString(fmt.Sprintf(" and create_time >= '%s'", query.CreateTimeBegin))
-	}
-	if query.CreateTimeEnd != "" {
-		condition.WriteString(fmt.Sprintf(" and create_time <= '%s'", query.CreateTimeEnd))
-	}
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_blog_access_log "+condition.String())
+	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
+	row := self.db.QueryRow(context.Background(), "select count(*) from t_blog_access_log "+condition.String(), args...)
 	var total int64
 	if err := row.Scan(&total); err != nil {
 		return nil, 0, err
@@ -130,8 +124,9 @@ func (self *OtherRepo) PageAccessRecord(query *usercase.AccessLogQueryForm) ([]*
 		return records, total, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString(" order by create_time desc limit $1 offset $2")
-	rows, err := self.db.Query(context.Background(), "select * from t_blog_access_log "+condition.String(), query.Size, offset)
+	condition.WriteString(fmt.Sprintf(" order by create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
+	args = append(args, query.Size, offset)
+	rows, err := self.db.Query(context.Background(), "select * from t_blog_access_log "+condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}

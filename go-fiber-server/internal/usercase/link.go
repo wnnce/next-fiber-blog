@@ -1,7 +1,5 @@
 package usercase
 
-import "time"
-
 // Link 友情链接
 type Link struct {
 	LinkId    uint64 `json:"linkId" db:"link_id"`                                             // 友情链接Id
@@ -15,9 +13,9 @@ type Link struct {
 
 // LinkQueryForm 友情链接后端查询参数
 type LinkQueryForm struct {
-	Name            string     `json:"name,omitempty"`
-	CreateTimeBegin *time.Time `json:"createTimeBegin,omitempty"`
-	CreateTimeEnd   *time.Time `json:"createTimeEnd,omitempty"`
+	Name            string `json:"name,omitempty"`
+	CreateTimeBegin string `json:"createTimeBegin,omitempty"`
+	CreateTimeEnd   string `json:"createTimeEnd,omitempty"`
 	PageQueryForm
 }
 

@@ -65,15 +65,11 @@ func (c *CategoryRepo) UpdateViewNum(catId uint, addNum uint) error {
 
 func (c *CategoryRepo) SelectById(catId int) (*usercase.Category, error) {
 	rows, err := c.db.Query(context.Background(), "select * from t_blog_category where category_id = $1 and delete_at = '0' and status = 0", catId)
-	if err != nil {
-		return nil, err
+	if err == nil && rows.Next() {
+		defer rows.Close()
+		return pgx.RowToAddrOfStructByName[usercase.Category](rows)
 	}
-	defer rows.Close()
-	for rows.Next() {
-		category, err := pgx.RowToStructByNameLax[usercase.Category](rows)
-		return &category, err
-	}
-	return nil, nil
+	return nil, err
 }
 
 func (c *CategoryRepo) List() ([]*usercase.Category, error) {
