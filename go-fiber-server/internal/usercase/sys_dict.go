@@ -31,12 +31,12 @@ type SysDictSelectiveUpdateForm struct {
 
 // SysDictValue 系统字典数据
 type SysDictValue struct {
-	ID      uint64 `json:"id" db:"id"`                                // 数据ID
-	DictId  uint64 `json:"dictId" db:"dict_Id" validate:"required"`   // 字典Id
-	DictKey string `json:"dictKey" db:"dict_key" validate:"required"` // 字典Key
-	Label   string `json:"label" db:"label" validate:"required"`      // 数据名称
-	Value   string `json:"value" db:"value" validate:"required"`      // 数据值
-	Remark  string `json:"remark" db:"remark"`                        // 备注
+	ID      uint64 `json:"id" db:"id"`                                          // 数据ID
+	DictId  uint64 `json:"dictId,omitempty" db:"dict_Id" validate:"required"`   // 字典Id
+	DictKey string `json:"dictKey,omitempty" db:"dict_key" validate:"required"` // 字典Key
+	Label   string `json:"label" db:"label" validate:"required"`                // 数据名称
+	Value   string `json:"value" db:"value" validate:"required"`                // 数据值
+	Remark  string `json:"remark,omitempty" db:"remark"`                        // 备注
 	BaseEntity
 }
 
@@ -85,9 +85,11 @@ type ISysDictRepo interface {
 
 	PageDictValue(query *SysDictValueQueryForm) ([]*SysDictValue, int64, error)
 
+	ListDictValueByDictKey(dictKey string) ([]SysDictValue, error)
+
 	DeleteDictValue(valueId int64) error
 
-	DeleteDictValueByDictId(dictId uint64, tx pgx.Tx) error
+	DeleteDictValueByDictId(dictId int64, tx pgx.Tx) error
 }
 
 type ISysDictService interface {
@@ -110,4 +112,6 @@ type ISysDictService interface {
 	UpdateSelectiveValue(form *SysDictValueSelectiveUpdateForm) error
 
 	DeleteDictValue(valueId int64) error
+
+	ListDictValueByDictKey(dictKey string) ([]SysDictValue, error)
 }

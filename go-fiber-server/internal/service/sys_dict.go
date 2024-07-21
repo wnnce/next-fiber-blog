@@ -112,14 +112,26 @@ func (self *SysDictService) UpdateSelectiveDict(form *usercase.SysDictSelectiveU
 		return nil
 	})
 	if err != nil {
+		slog.Error("事务执行失败", "error", err.Error())
 		return tools.FiberServerError("更新失败")
 	}
 	return nil
 }
 
 func (self *SysDictService) DeleteDict(dictId int64) error {
-	if err := self.repo.DeleteDict(dictId, nil); err != nil {
-		slog.Error("删除系统字典失败", "error", err.Error())
+	err := self.repo.Transaction(context.Background(), func(tx pgx.Tx) error {
+		if err := self.repo.DeleteDict(dictId, tx); err != nil {
+			slog.Error("删除系统字典失败", "error", err.Error())
+			return err
+		}
+		if err := self.repo.DeleteDictValueByDictId(dictId, tx); err != nil {
+			slog.Error("删除系统字典数据失败", "error", err.Error())
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		slog.Error("删除系统字典事务失败", "error", err.Error())
 		return tools.FiberServerError("删除失败")
 	}
 	return nil
@@ -173,6 +185,15 @@ func (self *SysDictService) DeleteDictValue(valueId int64) error {
 		return tools.FiberServerError("删除失败")
 	}
 	return nil
+}
+
+func (self *SysDictService) ListDictValueByDictKey(dictKey string) ([]usercase.SysDictValue, error) {
+	values, err := self.repo.ListDictValueByDictKey(dictKey)
+	if err != nil {
+		slog.Error("获取字典数据列表失败", "error", err.Error(), "dictKey", dictKey)
+		return nil, tools.FiberServerError("查询失败")
+	}
+	return values, err
 }
 
 func (self *SysDictService) checkDictKeyIsActive(dictKey string, dictId uint64) error {

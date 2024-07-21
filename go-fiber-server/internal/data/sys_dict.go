@@ -23,17 +23,9 @@ func NewSysDictRepo(data *Data) usercase.ISysDictRepo {
 }
 
 func (self *SysDictRepo) Transaction(ctx context.Context, fn func(tx pgx.Tx) error) error {
-	err := pgx.BeginFunc(ctx, self.db, func(tx pgx.Tx) error {
-		defer tx.Rollback(ctx)
-		err := fn(tx)
-		if err == nil {
-			if err = tx.Commit(ctx); err != nil {
-				slog.Error("pgx事务提交失败，开始回滚", "err", err.Error())
-			}
-		}
-		return err
+	return pgx.BeginFunc(ctx, self.db, func(tx pgx.Tx) error {
+		return fn(tx)
 	})
-	return err
 }
 
 func (self *SysDictRepo) SaveDict(dict *usercase.SysDict) error {
@@ -76,7 +68,7 @@ func (self *SysDictRepo) UpdateSelectiveDict(dict *usercase.SysDict, tx pgx.Tx) 
 	commonFieldUpdateBuilder(dict.Sort, dict.Status, &sql, &args)
 	args = append(args, dict.DictId)
 	sql.WriteString(fmt.Sprintf(" where dict_id = $%d", len(args)))
-	result, err := smartExec(self.db, tx, context.Background(), sql.String(), args)
+	result, err := smartExec(self.db, tx, context.Background(), sql.String(), args...)
 	if err == nil {
 		slog.Info("更新系统字典完成", "row", result.RowsAffected(), "dictId", dict.DictId)
 	}
@@ -104,7 +96,7 @@ func (self *SysDictRepo) PageDict(query *usercase.SysDictQueryForm) ([]*usercase
 		condition.WriteString(fmt.Sprintf("and dict_key like $%d ", len(args)))
 	}
 	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_system_dict "+condition.String(), args)
+	row := self.db.QueryRow(context.Background(), "select count(*) from t_system_dict "+condition.String(), args...)
 	var total int64
 	if err := row.Scan(&total); err != nil {
 		return nil, 0, err
@@ -114,9 +106,9 @@ func (self *SysDictRepo) PageDict(query *usercase.SysDictQueryForm) ([]*usercase
 		return dicts, 0, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString(fmt.Sprintf(" limit $%d offset $%d", len(args)+1, len(args)+2))
+	condition.WriteString(fmt.Sprintf(" order by sort, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
 	args = append(args, query.Size, offset)
-	rows, err := self.db.Query(context.Background(), "select * from t_system_dict "+condition.String(), args)
+	rows, err := self.db.Query(context.Background(), "select * from t_system_dict "+condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -184,7 +176,7 @@ func (self *SysDictRepo) UpdateSelectiveDictValue(value *usercase.SysDictValue, 
 	commonFieldUpdateBuilder(value.Sort, value.Status, &sql, &args)
 	args = append(args, value.ID)
 	sql.WriteString(fmt.Sprintf(" where id = $%d", len(args)))
-	result, err := smartExec(self.db, tx, context.Background(), sql.String(), args)
+	result, err := smartExec(self.db, tx, context.Background(), sql.String(), args...)
 	if err == nil {
 		slog.Info("系统字典数据更新完成", "row", result.RowsAffected(), "valueId", value.ID)
 	}
@@ -213,10 +205,10 @@ func (self *SysDictRepo) PageDictValue(query *usercase.SysDictValueQueryForm) ([
 	}
 	if query.Label != "" {
 		args = append(args, "%"+query.Label+"%")
-		condition.WriteString(fmt.Sprintf(" and label link $%d", len(args)))
+		condition.WriteString(fmt.Sprintf(" and label like $%d", len(args)))
 	}
 	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_system_dict_value "+condition.String())
+	row := self.db.QueryRow(context.Background(), "select count(*) from t_system_dict_value "+condition.String(), args...)
 	var total int64
 	if err := row.Scan(&total); err != nil {
 		return nil, 0, err
@@ -226,9 +218,9 @@ func (self *SysDictRepo) PageDictValue(query *usercase.SysDictValueQueryForm) ([
 		return values, 0, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString(fmt.Sprintf(" limit $%d offset $%d", len(args)+1, len(args)+2))
+	condition.WriteString(fmt.Sprintf(" order by sort, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
 	args = append(args, query.Size, offset)
-	rows, err := self.db.Query(context.Background(), "select * from t_system_dict_value "+condition.String())
+	rows, err := self.db.Query(context.Background(), "select * from t_system_dict_value "+condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -237,6 +229,18 @@ func (self *SysDictRepo) PageDictValue(query *usercase.SysDictValueQueryForm) ([
 		return pgx.RowToAddrOfStructByName[usercase.SysDictValue](row)
 	})
 	return values, total, err
+}
+
+func (self *SysDictRepo) ListDictValueByDictKey(dictKey string) ([]usercase.SysDictValue, error) {
+	sql := "select dv.id, dv.dict_key, dv.label, dv.value from t_system_dict_value as dv where dict_key = $1 and delete_at = 0 order by sort"
+	rows, err := self.db.Query(context.Background(), sql, dictKey)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (usercase.SysDictValue, error) {
+		return pgx.RowToStructByNameLax[usercase.SysDictValue](row)
+	})
 }
 
 func (self *SysDictRepo) DeleteDictValue(valueId int64) error {
@@ -254,27 +258,27 @@ func (self *SysDictRepo) UpdateDictValueByDickId(value *usercase.SysDictValue, t
 	sql.WriteString("update t_system_dict_value set update_time = now() ")
 	if value.DictKey != "" {
 		args = append(args, value.DictKey)
-		sql.WriteString(fmt.Sprintf(", set dict_key = $%d", len(args)))
+		sql.WriteString(fmt.Sprintf(", dict_key = $%d", len(args)))
 	}
 	if value.Status != nil {
 		args = append(args, *value.Status)
-		sql.WriteString(fmt.Sprintf(", set status = $%d", len(args)))
+		sql.WriteString(fmt.Sprintf(", status = $%d", len(args)))
 	}
 	args = append(args, value.DictId)
 	sql.WriteString(fmt.Sprintf(" where dict_id = $%d and delete_at = 0", len(args)))
-	if *value.Status == 0 {
+	if value.Status != nil && *value.Status == 0 {
 		sql.WriteString(" and status = 2")
-	} else if *value.Status == 2 {
+	} else if value.Status != nil && *value.Status == 2 {
 		sql.WriteString(" and status = 0")
 	}
-	result, err := smartExec(self.db, tx, context.Background(), sql.String(), args)
+	result, err := smartExec(self.db, tx, context.Background(), sql.String(), args...)
 	if err == nil {
 		slog.Info("通过字典Id更新字典数据完成", "row", result.RowsAffected(), "dictId", value.DictId)
 	}
 	return err
 }
 
-func (self *SysDictRepo) DeleteDictValueByDictId(dictId uint64, tx pgx.Tx) error {
+func (self *SysDictRepo) DeleteDictValueByDictId(dictId int64, tx pgx.Tx) error {
 	sql := "update t_system_dict_value set delete_at = $1 where dict_id = $2 and delete_at = 0"
 	result, err := smartExec(self.db, tx, context.Background(), sql, time.Now().UnixMilli(), dictId)
 	if err == nil {
