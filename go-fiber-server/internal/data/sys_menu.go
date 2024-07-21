@@ -61,28 +61,30 @@ func (m *SysMenuRepo) ListAll() ([]*usercase.SysMenu, error) {
 	})
 }
 
-func (self *SysMenuRepo) RecursiveByMenuIds(menuIds []uint) ([]*usercase.SysMenu, error) {
+func (self *SysMenuRepo) RecursiveByRoleKeys(roleKeys []string) ([]*usercase.SysMenu, error) {
 	sql := `WITH RECURSIVE tree_menu AS (
 				SELECT menu_id, menu_name, menu_type, parent_id, path, component, icon, is_frame, frame_url, is_cache, is_visible, is_disable, sort
 				FROM t_system_menu
-				WHERE menu_id in (%s) and delete_at = 0
+				WHERE menu_id in (select distinct unnest(menus) from t_system_role where role_key in (%s)) and delete_at = 0
 			  UNION ALL
 				SELECT n.menu_id, n.menu_name, n.menu_type, n.parent_id, n.path, n.component, n.icon, n.is_frame, n.frame_url, n.is_cache, n.is_visible, n.is_disable, n.sort
 				FROM t_system_menu n
 				JOIN tree_menu np ON np.parent_id = n.menu_id
 			)
 			SELECT distinct menu_id, menu_name, menu_type, parent_id, path, component, icon, is_frame, frame_url, is_cache, is_visible, is_disable, sort
-			FROM tree_menu`
+			FROM tree_menu order by sort`
 	var builder strings.Builder
+	args := make([]any, 0)
 	builder.WriteByte('(')
-	for index, id := range menuIds {
+	for index, key := range roleKeys {
+		args = append(args, key)
 		if index > 1 {
 			builder.WriteByte(',')
 		}
-		builder.WriteString(strconv.FormatUint(uint64(id), 10))
+		builder.WriteString("$" + strconv.Itoa(len(args)))
 	}
 	builder.WriteByte(')')
-	rows, err := self.db.Query(context.Background(), fmt.Sprintf(sql, builder.String()))
+	rows, err := self.db.Query(context.Background(), fmt.Sprintf(sql, builder.String()), args...)
 	if err != nil {
 		return nil, err
 	}

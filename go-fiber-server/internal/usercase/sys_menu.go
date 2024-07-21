@@ -50,8 +50,8 @@ type ISysMenuRepo interface {
 	Update(menu *SysMenu) error
 	// ListAll 查询所有
 	ListAll() ([]*SysMenu, error)
-	// RecursiveByMenuIds 递归查询指定的菜单id列表 会查询出父节点
-	RecursiveByMenuIds(menuIds []uint) ([]*SysMenu, error)
+	// RecursiveByRoleKeys 通过角色key 递归查询出所有角色的菜单id列表 会查询出父节点
+	RecursiveByRoleKeys(roleKeys []string) ([]*SysMenu, error)
 	// ManageListAll 管理端查询所有
 	ManageListAll() ([]*SysMenu, error)
 	// DeleteById 通过id删除
@@ -63,7 +63,7 @@ type ISysMenuService interface {
 
 	UpdateMenu(menu *SysMenu) error
 
-	TreeMenu() ([]*SysMenu, error)
+	TreeMenu(roleKeys []string) ([]*SysMenu, error)
 
 	ManageTreeMenu() ([]*SysMenu, error)
 

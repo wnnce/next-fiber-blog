@@ -2,6 +2,7 @@ package manage
 
 import (
 	"github.com/gofiber/fiber/v3"
+	"go-fiber-ent-web-layout/internal/middleware/auth"
 	"go-fiber-ent-web-layout/internal/tools/res"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"strconv"
@@ -40,7 +41,8 @@ func (h *MenuApi) Update(ctx fiber.Ctx) error {
 }
 
 func (h *MenuApi) Tree(ctx fiber.Ctx) error {
-	menus, err := h.service.TreeMenu()
+	loginUser := fiber.Locals[auth.LoginUser](ctx, "loginUser")
+	menus, err := h.service.TreeMenu(loginUser.GetRoles())
 	if err != nil {
 		return err
 	}

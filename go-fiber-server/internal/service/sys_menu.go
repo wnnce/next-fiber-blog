@@ -4,6 +4,7 @@ import (
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
 	"log/slog"
+	"slices"
 )
 
 type SysMenuService struct {
@@ -16,8 +17,8 @@ func NewMenuService(repo usercase.ISysMenuRepo) usercase.ISysMenuService {
 	}
 }
 
-func (ms *SysMenuService) CreateMenu(menu *usercase.SysMenu) error {
-	err := ms.repo.Save(menu)
+func (self *SysMenuService) CreateMenu(menu *usercase.SysMenu) error {
+	err := self.repo.Save(menu)
 	if err != nil {
 		slog.Error("菜单添加失败", "error-message", err)
 		return tools.FiberServerError("添加失败")
@@ -25,8 +26,8 @@ func (ms *SysMenuService) CreateMenu(menu *usercase.SysMenu) error {
 	return nil
 }
 
-func (ms *SysMenuService) UpdateMenu(menu *usercase.SysMenu) error {
-	err := ms.repo.Update(menu)
+func (self *SysMenuService) UpdateMenu(menu *usercase.SysMenu) error {
+	err := self.repo.Update(menu)
 	if err != nil {
 		slog.Error("菜单更新失败", "error-message", err)
 		return tools.FiberServerError("更新失败")
@@ -34,8 +35,12 @@ func (ms *SysMenuService) UpdateMenu(menu *usercase.SysMenu) error {
 	return nil
 }
 
-func (ms *SysMenuService) TreeMenu() ([]*usercase.SysMenu, error) {
-	menus, err := ms.repo.ListAll()
+func (self *SysMenuService) TreeMenu(roleKeys []string) (menus []*usercase.SysMenu, err error) {
+	if slices.Contains(roleKeys, "admin") {
+		menus, err = self.repo.ListAll()
+	} else {
+		menus, err = self.repo.RecursiveByRoleKeys(roleKeys)
+	}
 	if err != nil {
 		slog.Error("获取全部菜单失败", "error-message", err)
 		return nil, tools.FiberServerError("获取菜单失败")
@@ -43,8 +48,8 @@ func (ms *SysMenuService) TreeMenu() ([]*usercase.SysMenu, error) {
 	return tools.BuilderTree[uint](menus), nil
 }
 
-func (ms *SysMenuService) ManageTreeMenu() ([]*usercase.SysMenu, error) {
-	menus, err := ms.repo.ManageListAll()
+func (self *SysMenuService) ManageTreeMenu() ([]*usercase.SysMenu, error) {
+	menus, err := self.repo.ManageListAll()
 	if err != nil {
 		slog.Error("管理端获取全部菜单失败", "error-message", err)
 		return nil, tools.FiberServerError("获取菜单失败")
@@ -52,8 +57,8 @@ func (ms *SysMenuService) ManageTreeMenu() ([]*usercase.SysMenu, error) {
 	return tools.BuilderTree[uint](menus), nil
 }
 
-func (ms *SysMenuService) Delete(menuId int) error {
-	err := ms.repo.DeleteById(menuId)
+func (self *SysMenuService) Delete(menuId int) error {
+	err := self.repo.DeleteById(menuId)
 	if err != nil {
 		slog.Error("删除菜单失败", "error-message", err)
 		return tools.FiberServerError("删除失败")
