@@ -13,12 +13,12 @@ import (
 )
 
 var InjectSet = wire.NewSet(tag.NewHttpApi, category.NewHttpApi, concat.NewHttpApi, link.NewHttpApi, manage.NewMenuApi,
-	manage.NewConfigApi, other.NewHttpApi, manage.NewRoleApi, manage.NewUserApi, manage.NewDictApi)
+	manage.NewConfigApi, other.NewHttpApi, manage.NewRoleApi, manage.NewUserApi, manage.NewDictApi, manage.NewNoticeApi)
 
 // RegisterRoutes 全局路由绑定处理函数 在newApp函数中调用 不然wire无法处理依赖注入
 func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpApi, conApi *concat.HttpApi, linkApi *link.HttpApi,
 	menuApi *manage.MenuApi, cfgApi *manage.ConfigApi, oApi *other.HttpApi, roleApi *manage.RoleApi, userApi *manage.UserApi,
-	dictApi *manage.DictApi) {
+	dictApi *manage.DictApi, noticeApi *manage.NoticeApi) {
 	// 系统接口路由
 	sysRoute := app.Group("/system", auth.ManageAuth, auth.VerifyRoles("admin"))
 	sysRoute.Post("/record/login", oApi.PageLoginRecord)
@@ -60,6 +60,12 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	dictRoute.Put("/value/status", dictApi.UpdateDictValueStatus)
 	dictRoute.Post("/value/page", dictApi.PageDictValue)
 	dictRoute.Delete("/value/:id<int:min<1>>", dictApi.DeleteDictValue)
+	// 通知公告管理接口
+	noticeRoute := sysRoute.Group("/notice")
+	noticeRoute.Post("/", noticeApi.Save)
+	noticeRoute.Put("/", noticeApi.Update)
+	noticeRoute.Post("/page", noticeApi.Page)
+	noticeRoute.Delete("/:id<int<min:1>>", noticeApi.Delete)
 
 	// 系统公共接口路由 只需登录即可访问
 	baseRoute := app.Group("/base", auth.ManageAuth)
@@ -73,6 +79,8 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	baseRoute.Post("/logout", userApi.Logout)
 	// 图片上传
 	baseRoute.Post("/upload/image", oApi.UploadImage)
+	// 获取管理端通知公告
+	baseRoute.Post("/notice/admin", noticeApi.ListAdminNotice)
 
 	// 标签管理接口
 	tagRoute := app.Group("/tag", auth.ManageAuth)
@@ -114,4 +122,8 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	openRoute.Post("/login", userApi.Login)
 	openRoute.Get("/trace/access", oApi.AccessTrace)
 	openRoute.Get("/dict/:dictKey", dictApi.ListDictValue)
+	// 获取弹窗通知
+	openRoute.Get("/notice/index", noticeApi.ListIndexNotice)
+	// 获取公告通知
+	openRoute.Get("/notice/public", noticeApi.ListPublicNotice)
 }

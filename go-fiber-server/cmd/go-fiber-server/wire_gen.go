@@ -59,7 +59,10 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 	redisTemplate := data.NewRedisTemplate(dataData)
 	iSysDictService := service.NewSysDictService(iSysDictRepo, redisTemplate)
 	dictApi := manage.NewDictApi(iSysDictService)
-	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi, roleApi, userApi, dictApi)
+	iNoticeRepo := data.NewNoticeRepo(dataData)
+	iNoticeService := service.NewNoticeService(iNoticeRepo, redisTemplate)
+	noticeApi := manage.NewNoticeApi(iNoticeService)
+	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi, roleApi, userApi, dictApi, noticeApi)
 	return app, func() {
 		cleanup()
 	}, nil

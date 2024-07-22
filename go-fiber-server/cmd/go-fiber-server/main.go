@@ -29,7 +29,7 @@ var confPath string
 // 创建fiber app 包含注入中间件、错误处理、路由绑定等操作
 func newApp(ctx context.Context, cf *conf.Server, tagApi *tag.HttpApi, catApi *category.HttpApi, conApi *concat.HttpApi,
 	linkApi *link.HttpApi, menuApi *manage.MenuApi, cfgApi *manage.ConfigApi, oApi *other.HttpApi, roleApi *manage.RoleApi,
-	userApi *manage.UserApi, dictApi *manage.DictApi) *fiber.App {
+	userApi *manage.UserApi, dictApi *manage.DictApi, noticeApi *manage.NoticeApi) *fiber.App {
 	app := fiber.New(fiber.Config{
 		AppName:         cf.Name,                        // 应用名称
 		ErrorHandler:    hand.CustomErrorHandler,        // 自定义错误处理器
@@ -53,7 +53,7 @@ func newApp(ctx context.Context, cf *conf.Server, tagApi *tag.HttpApi, catApi *c
 		Sliding:         cf.Limiter.Sliding,
 		TokenBucket:     cf.Limiter.TokenBucket,
 	}, ctx))
-	api.RegisterRoutes(app, tagApi, catApi, conApi, linkApi, menuApi, cfgApi, oApi, roleApi, userApi, dictApi)
+	api.RegisterRoutes(app, tagApi, catApi, conApi, linkApi, menuApi, cfgApi, oApi, roleApi, userApi, dictApi, noticeApi)
 	return app
 }
 
