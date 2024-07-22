@@ -14,7 +14,7 @@ const props = withDefaults(defineProps<Props>(), {
   width: '100%'
 })
 
-const modelValue = defineModel<string | number | boolean>('modelValue', {
+const modelValue = defineModel<string | number | boolean | undefined>('modelValue', {
   required: true
 })
 
