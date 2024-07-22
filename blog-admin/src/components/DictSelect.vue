@@ -3,15 +3,21 @@ import { onMounted, ref } from 'vue'
 import type { SelectOptionData } from '@arco-design/web-vue'
 import { useDict } from '@/hooks/dict'
 
+export declare type DictValueType = 'string' | 'number' | 'boolean';
+
 const { queryDict } = useDict();
 
 interface Props {
   dictKey: string;
   width?: string | number;
+  placeholder?: string;
+  type?: DictValueType;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  width: '100%'
+  width: '100%',
+  placeholder: '请选择数据',
+  type: 'string'
 })
 
 const modelValue = defineModel<string | number | boolean | undefined>('modelValue', {
@@ -46,7 +52,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <a-select allow-clear v-model="modelValue">
+  <a-select allow-clear :model-value="modelValue" :placeholder="placeholder">
     <a-option v-for="(item, index) in options" :label="item.label" :value="item.value" :key="index" />
   </a-select>
 </template>
