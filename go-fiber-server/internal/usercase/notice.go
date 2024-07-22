@@ -10,20 +10,36 @@ type Notice struct {
 	BaseEntity
 }
 
-// NotifyQueryForm 通知管理后台查询参数
-type NotifyQueryForm struct {
+// NoticeQueryForm 通知管理后台查询参数
+type NoticeQueryForm struct {
 	Title      string `json:"title"`
-	Level      int    `json:"level"`
-	NoticeType int    `json:"noticeType"`
+	Level      *int   `json:"level"`
+	NoticeType *int   `json:"noticeType"`
 	PageQueryForm
 }
 
-type NoticeRepo interface {
+type INoticeRepo interface {
 	Save(notice *Notice) error
 
 	Update(notice *Notice) error
 
-	ListByType(t int) ([]*Notice, error)
+	ListByType(t int) ([]Notice, error)
 
-	ManageList(query *NotifyQueryForm) ([]*Notice, int64, error)
+	ManagePage(query *NoticeQueryForm) ([]*Notice, int64, error)
+
+	QueryNoticeTypeById(noticeId int64) int
+
+	DeleteById(id int64) error
+}
+
+type INoticeService interface {
+	SaveNotice(notice *Notice) error
+
+	UpdateNotice(notice *Notice) error
+
+	Page(query *NoticeQueryForm) (*PageData[Notice], error)
+
+	ListNoticeByType(noticeType int) ([]Notice, error)
+
+	Delete(noticeId int64) error
 }

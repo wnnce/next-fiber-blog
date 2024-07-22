@@ -246,7 +246,7 @@ func (self *SysDictService) checkDictKeyIsActive(dictKey string, dictId uint64) 
 	count, err := self.repo.CountByKey(dictKey, dictId)
 	if err != nil || count > 0 {
 		slog.Error("检查数据字典Key是否可用失败", "dictKey", dictKey, "dictId", dictId)
-		return tools.FiberServerError("字典KEY重复")
+		return tools.FiberRequestError("字典KEY重复")
 	}
 	return nil
 }
@@ -255,7 +255,7 @@ func (self *SysDictService) checkDictValueIsActive(value string, dictId uint64, 
 	count, err := self.repo.CountValueById(value, dictId, valueId)
 	if err != nil || count > 0 {
 		slog.Error("检查字典数据是否重复失败", "dictId", dictId, "valueId", valueId)
-		return tools.FiberServerError("字典数据重复")
+		return tools.FiberRequestError("字典数据重复")
 	}
 	return nil
 }
