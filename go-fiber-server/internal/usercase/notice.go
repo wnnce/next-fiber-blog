@@ -6,7 +6,7 @@ type Notice struct {
 	Title      string `json:"title,omitempty" db:"title" validate:"required"`                        // 通知标题
 	Message    string `json:"message,omitempty" db:"message" validate:"required"`                    // 通知内容
 	Level      int    `json:"level,omitempty" db:"level" validate:"required,gte=1,lte=4"`            // 通知级别 1:普通 2:警告 3:严重
-	NoticeType int    `json:"noticeType,omitempty" db:"notice_type" validate:"requires,gte=1,lte=3"` // 通知类型 1：首页弹窗通知 2：公告板通知 3：后台通知
+	NoticeType int    `json:"noticeType,omitempty" db:"notice_type" validate:"required,gte=1,lte=3"` // 通知类型 1：首页弹窗通知 2：公告板通知 3：后台通知
 	BaseEntity
 }
 

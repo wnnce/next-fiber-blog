@@ -4,8 +4,8 @@ import (
 	"context"
 	"go-fiber-ent-web-layout/internal/data"
 	"go-fiber-ent-web-layout/internal/tools"
-	"go-fiber-ent-web-layout/internal/tools/pool"
 	"go-fiber-ent-web-layout/internal/usercase"
+	"go-fiber-ent-web-layout/pkg/pool"
 	"log/slog"
 	"math"
 	"strconv"
@@ -36,11 +36,14 @@ func (self *NoticeService) SaveNotice(notice *usercase.Notice) error {
 }
 
 func (self *NoticeService) UpdateNotice(notice *usercase.Notice) error {
+	originType := self.repo.QueryNoticeTypeById(int64(notice.NoticeId))
 	if err := self.repo.Update(notice); err != nil {
 		slog.Error("更新系统通知失败", "error", err.Error())
 		return tools.FiberServerError("更新失败")
 	}
-	self.deleteRedisNoticeByType(notice.NoticeType)
+	if originType >= 0 {
+		self.deleteRedisNoticeByType(originType)
+	}
 	return nil
 }
 
