@@ -80,10 +80,10 @@ defineExpose({
         <a-textarea v-model="formData.message" placeholder="请输入通知或公告内容" />
       </a-form-item>
       <a-form-item label="级别" field="level">
-        <dict-select dict-key="notice_level" v-model="formData.level" placeholder="请选择通知级别" />
+        <dict-select dict-key="notice_level" v-model="formData.level" placeholder="请选择通知级别" type="number" />
       </a-form-item>
       <a-form-item label="类型" field="noticeType">
-        <dict-select dict-key="notice_type" v-model="formData.noticeType" placeholder="请选择通知类型" />
+        <dict-select dict-key="notice_type" v-model="formData.noticeType" placeholder="请选择通知类型" type="number" />
       </a-form-item>
       <a-form-item label="显示顺序" field="sort">
         <a-input-number v-model="formData.sort" placeholder="请输入显示顺序" />

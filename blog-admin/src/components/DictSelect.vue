@@ -31,9 +31,9 @@ const queryDictValues = async () => {
   if (dictValues && dictValues.length > 0) {
     options.value = dictValues.map(item => {
       let newValue: string | number | boolean | undefined = undefined;
-      if (typeof modelValue.value === 'string') {
+      if (props.type === 'string') {
         newValue = item.value;
-      } else if (typeof modelValue.value === 'number') {
+      } else if (props.type === 'number') {
         newValue = Number(item.value);
       } else {
         newValue = Boolean(item.value);
@@ -52,7 +52,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <a-select allow-clear :model-value="modelValue" :placeholder="placeholder">
+  <a-select allow-clear v-model="modelValue" :placeholder="placeholder">
     <a-option v-for="(item, index) in options" :label="item.label" :value="item.value" :key="index" />
   </a-select>
 </template>

@@ -21,3 +21,10 @@ export const ROW_SELECTION: TableRowSelection = {
   showCheckedAll: true,
   onlyCurrent: false
 }
+
+// arco 组件库的颜色缓存，可以通过不同的key获取arco中定义好的颜色
+export const arcoColorCache = new Map<string | number | boolean, string>([
+  ['notice_level_1', 'green'],
+  ['notice_level_2', 'orange'],
+  ['notice_level_3', 'red']
+])

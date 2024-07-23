@@ -2,17 +2,13 @@
 import { onMounted, reactive, ref } from 'vue'
 import RightOperate from '@/components/RightOperate.vue'
 import { useArcoMessage } from '@/hooks/message'
-import { constant } from '@/assets/script/constant'
-import type { Dict, DictQueryForm } from '@/api/system/dict/types'
-import { dictApi } from '@/api/system/dict'
-import DictForm from '@/views/system/dict/dict-form.vue'
-import DictValueDrawer from '@/views/system/dict/dict-value-drawer.vue'
+import { arcoColorCache, constant } from '@/assets/script/constant'
 import type { Notice, NoticeQueryForm } from '@/api/system/notice/types'
 import { noticeApi } from '@/api/system/notice'
 import DictLabel from '@/components/DictLabel.vue'
 import NoticeForm from '@/views/system/notice/notice-form.vue'
 
-const { successMessage, loading, errorMessage } = useArcoMessage();
+const { successMessage, loading } = useArcoMessage();
 
 const tableLoading = ref<boolean>(false);
 const recordTotal = ref<number>(0);
@@ -127,7 +123,9 @@ onMounted(() => {
         <a-table-column title="标题" data-index="title" />
         <a-table-column title="级别">
           <template #cell="{ record }">
-            <dict-label dict-key="notice_level" :value="record.level" />
+            <a-tag bordered :color="arcoColorCache.get(`notice_level_${record.level}`)">
+              <dict-label dict-key="notice_level" :value="record.level" />
+            </a-tag>
           </template>
         </a-table-column>
         <a-table-column title="类型">
@@ -135,9 +133,15 @@ onMounted(() => {
             <dict-label dict-key="notice_type" :value="record.noticeType" />
           </template>
         </a-table-column>
+        <a-table-column title="内容">
+          <template #cell="{ record }">
+            <a-tooltip :content="record.message">
+              <p>{{ record.message }}</p>
+            </a-tooltip>
+          </template>
+        </a-table-column>
         <a-table-column title="排序" data-index="sort" />
         <a-table-column title="创建时间" data-index="createTime" />
-        <a-table-column title="备注" data-index="remark" />
         <a-table-column title="状态">
           <template #cell="{ record }">
             <a-switch :checked-value="0" :unchecked-value="1" :model-value="record.status" />
