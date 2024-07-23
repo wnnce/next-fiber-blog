@@ -2,7 +2,7 @@ package clog
 
 import (
 	"fmt"
-	"go-fiber-ent-web-layout/internal/tools/pool"
+	"go-fiber-ent-web-layout/pkg/pool"
 	"io"
 	"log/slog"
 	"os"

@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/bytedance/sonic"
 	"github.com/redis/go-redis/v9"
-	"go-fiber-ent-web-layout/internal/tools/pool"
+	"go-fiber-ent-web-layout/pkg/pool"
 	"log/slog"
 	"sync"
 	"sync/atomic"

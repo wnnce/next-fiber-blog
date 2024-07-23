@@ -1,10 +1,5 @@
 package cache
 
-import "github.com/google/wire"
-
-// InjectSet 依赖注入
-var InjectSet = wire.NewSet(NewRedisOptional)
-
 // 默认的分片大小
 const defaultShardSize = 16
 
@@ -38,9 +33,6 @@ func (c *memoryCache) Set(key string, value []byte) error {
 		return err
 	}
 	index := hasher & (c.shardSize - 1)
-	if err != nil {
-		return err
-	}
 	c.shards[index].Set(hasher, value)
 	return nil
 }
@@ -51,9 +43,6 @@ func (c *memoryCache) Get(key string) ([]byte, error) {
 		return nil, err
 	}
 	index := hasher & (c.shardSize - 1)
-	if err != nil {
-		return nil, err
-	}
 	return c.shards[index].Get(hasher), err
 }
 

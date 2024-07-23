@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"go-fiber-ent-web-layout/internal/tools/pool"
+	"go-fiber-ent-web-layout/pkg/pool"
 	"sync"
 	"time"
 )
