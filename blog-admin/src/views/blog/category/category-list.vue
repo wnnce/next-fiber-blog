@@ -2,10 +2,10 @@
 import { onMounted, ref } from 'vue'
 import RightOperate from '@/components/RightOperate.vue'
 import { useArcoMessage } from '@/hooks/message'
-import { categoryApi } from '@/api/blog/category/idnex'
-import type { Category } from '@/api/blog/category/types'
+import type { Category, CategoryUpdateForm } from '@/api/blog/category/types'
 import LoadImage from '@/components/LoadImage.vue'
 import CategoryForm from '@/views/blog/category/category-form.vue'
+import { categoryApi } from '@/api/blog/category'
 
 const { successMessage, loading } = useArcoMessage();
 
@@ -34,7 +34,15 @@ const handleDelete = async (record: Category) => {
   } finally {
     loadingMsg.close();
   }
+}
 
+const handleUpdateStatus = async (form: CategoryUpdateForm) => {
+  const result = await categoryApi.updateCategoryStatus(form);
+  if (result.code === 200) {
+    successMessage('更新成功');
+    return true;
+  }
+  return false;
 }
 
 const formRef = ref();
@@ -71,17 +79,26 @@ onMounted(() => {
         <a-table-column title="创建时间" data-index="createTime" align="center"/>
         <a-table-column title="热门" :width="60">
           <template #cell="{ record }">
-            <a-switch :checked-value="true" :unchecked-value="false" :model-value="record.isHot" />
+            <a-switch :checked-value="true" :unchecked-value="false"
+                      v-model="record.isHot"
+                      :before-change="newValue => handleUpdateStatus({ categoryId: record.categoryId, isHot: Boolean(newValue) })"
+            />
           </template>
         </a-table-column>
         <a-table-column title="置顶" :width="60">
           <template #cell="{ record }">
-            <a-switch :checked-value="true" :unchecked-value="false" :model-value="record.isTop" />
+            <a-switch :checked-value="true" :unchecked-value="false"
+                      v-model="record.isTop"
+                      :before-change="newValue => handleUpdateStatus({ categoryId: record.categoryId, isTop: Boolean(newValue) })"
+            />
           </template>
         </a-table-column>
         <a-table-column title="状态" :width="60">
           <template #cell="{ record }">
-            <a-switch :checked-value="0" :unchecked-value="1" :model-value="record.status" />
+            <a-switch :checked-value="0" :unchecked-value="1"
+                      v-model="record.status"
+                      :before-change="newValue => handleUpdateStatus({ categoryId: record.categoryId, status: Number(newValue) })"
+            />
           </template>
         </a-table-column>
         <a-table-column title="操作" align="center">

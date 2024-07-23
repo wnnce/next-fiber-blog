@@ -38,3 +38,11 @@ export interface CategoryForm {
   sort: number;
   status: number;
 }
+
+// 分类快捷更新表单
+export interface CategoryUpdateForm {
+  categoryId: number;
+  isHot?: boolean;
+  isTop?: boolean;
+  status?: number
+}

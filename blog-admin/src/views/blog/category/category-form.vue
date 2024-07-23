@@ -4,9 +4,10 @@ import type { FileItem, TreeNodeData } from '@arco-design/web-vue'
 import type { Result } from '@/api/request'
 import { useArcoMessage } from '@/hooks/message'
 import type { Category, CategoryForm } from '@/api/blog/category/types'
-import { categoryApi } from '@/api/blog/category/idnex'
+import { categoryApi } from '@/api/blog/category'
 import type { FieldRule } from '@arco-design/web-vue/es/form/interface'
 import ImageUpload from '@/components/ImageUpload.vue'
+import DictSelect from '@/components/DictSelect.vue'
 
 const { successMessage } = useArcoMessage();
 
@@ -122,7 +123,9 @@ defineExpose({
   <a-modal :title="formData.categoryId ? '修改分类' : '新增分类'" v-model:visible="modalShow" @close="onClose" :footer="false">
     <a-form :model="formData" @submit="formSubmit" auto-label-width :rules="formRules">
       <a-form-item label="上级分类" field="parentId">
-        <a-tree-select v-model="formData.parentId" :data="treeSelectData" placeholder="请选择上级菜单"/>
+        <a-tree-select v-model="formData.parentId" :data="treeSelectData" :tree-props="{ defaultExpandAll: false }"
+                       placeholder="请选择上级菜单"
+        />
       </a-form-item>
       <a-form-item label="分类名称" field="categoryName">
         <a-input v-model="formData.categoryName" placeholder="请输入分类名称" />
@@ -143,7 +146,7 @@ defineExpose({
         <a-input-number v-model="formData.sort" placeholder="请输入显示顺序" />
       </a-form-item>
       <a-form-item label="状态" field="status" required>
-        <a-switch :checked-value="0" :unchecked-value="1" v-model="formData.status" />
+        <dict-select dict-key="dict_status" v-model="formData.status" type="number" />
       </a-form-item>
       <div class="flex justify-between" style="width: 100%; column-gap: 24px">
         <a-button html-type="submit" type="primary" size="large" long :loading="submitButtonLoading">

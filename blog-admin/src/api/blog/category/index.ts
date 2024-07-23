@@ -1,5 +1,5 @@
 import { sendDelete, sendGet, sendPost, sendPut } from '@/api/request'
-import type { Category, CategoryForm } from '@/api/blog/category/types'
+import type { Category, CategoryForm, CategoryUpdateForm } from '@/api/blog/category/types'
 
 export const categoryApi = {
   /**
@@ -21,6 +21,13 @@ export const categoryApi = {
    */
   updateCategory: (form: CategoryForm) => {
     return sendPut<null>('/category', form)
+  },
+  /**
+   * 快捷更新分类
+   * @param form 快捷更新分类表单
+   */
+  updateCategoryStatus: (form: CategoryUpdateForm) => {
+    return sendPut<null>('/category/status', form)
   },
   /**
    * 删除分类
