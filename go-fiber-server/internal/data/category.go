@@ -47,10 +47,27 @@ func (c *CategoryRepo) Update(cat *usercase.Category) error {
 	return err
 }
 
-func (c *CategoryRepo) UpdateStatus(catId int, status uint8) error {
-	result, err := c.db.Exec(context.Background(), "update t_blog_category set status = $s where category_id = $2", status, catId)
+func (c *CategoryRepo) UpdateSelective(form *usercase.CategoryUpdateForm) error {
+	var builder strings.Builder
+	builder.WriteString("update t_blog_category set update_time = now() ")
+	args := make([]any, 0)
+	if form.Status != nil {
+		args = append(args, *form.Status)
+		builder.WriteString(fmt.Sprintf(", status = $%d", len(args)))
+	}
+	if form.IsHot != nil {
+		args = append(args, *form.IsHot)
+		builder.WriteString(fmt.Sprintf(", is_hot = $%d", len(args)))
+	}
+	if form.IsTop != nil {
+		args = append(args, *form.IsTop)
+		builder.WriteString(fmt.Sprintf(", is_top = $%d", len(args)))
+	}
+	builder.WriteString(fmt.Sprintf(" where category_id = $%d", len(args)+1))
+	args = append(args, form.CategoryId)
+	result, err := c.db.Exec(context.Background(), builder.String(), args...)
 	if err == nil {
-		slog.Info(fmt.Sprintf("分类状态更新完成，row:%d,id:%d,status:%d", result.RowsAffected(), catId, status))
+		slog.Info("分类快捷更新完成", "row", result.RowsAffected(), "categoryId", form.CategoryId)
 	}
 	return err
 }

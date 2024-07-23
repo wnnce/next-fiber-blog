@@ -41,6 +41,17 @@ func (h *HttpApi) Update(ctx fiber.Ctx) error {
 	return ctx.JSON(res.OkByMessage("ok"))
 }
 
+func (self *HttpApi) UpdateSelective(ctx fiber.Ctx) error {
+	form := &usercase.CategoryUpdateForm{}
+	if err := ctx.Bind().JSON(form); err != nil {
+		return err
+	}
+	if err := self.service.UpdateSelectiveCategory(form); err != nil {
+		return err
+	}
+	return ctx.JSON(res.SimpleOK())
+}
+
 // List 博客端查询分类列表 tree
 func (h *HttpApi) List(ctx fiber.Ctx) error {
 	categorys, err := h.service.ListCategory()

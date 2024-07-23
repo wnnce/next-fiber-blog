@@ -96,7 +96,7 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	catRoute.Get("/:id<int;min=<1>>", catApi.QueryInfo)
 	catRoute.Post("/", catApi.Save)
 	catRoute.Put("/", catApi.Update)
-	catRoute.Get("/list", catApi.List)
+	catRoute.Put("/status", catApi.UpdateSelective)
 	catRoute.Get("/manage/list", catApi.ManageList)
 	catRoute.Delete("/:id<int;min=<1>>", catApi.Delete)
 
@@ -126,4 +126,6 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	openRoute.Get("/notice/index", noticeApi.ListIndexNotice)
 	// 获取公告通知
 	openRoute.Get("/notice/public", noticeApi.ListPublicNotice)
+	// 获取分类树形列表
+	openRoute.Get("/category/list", catApi.List)
 }

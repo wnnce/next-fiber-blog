@@ -14,6 +14,14 @@ type Category struct {
 	Children []*Category `json:"children,omitempty"` // 子分类
 }
 
+// CategoryUpdateForm 分类快捷更新表单
+type CategoryUpdateForm struct {
+	CategoryId uint  `json:"categoryId" validate:"required"`
+	IsHot      *bool `json:"isHot"`
+	IsTop      *bool `json:"isTop"`
+	Status     *int  `json:"status"`
+}
+
 func (c *Category) GetId() uint {
 	return c.CategoryId
 }
@@ -36,8 +44,8 @@ type ICategoryRepo interface {
 	Save(cat *Category) error
 	// Update 更新分类
 	Update(cat *Category) error
-	// UpdateStatus 更新分类状态
-	UpdateStatus(catId int, status uint8) error
+	// UpdateSelective 更新分类状态
+	UpdateSelective(from *CategoryUpdateForm) error
 	// UpdateViewNum 更新分类的查看数量
 	UpdateViewNum(catId uint, addNum uint) error
 	// SelectById 通过Id查询分类
@@ -60,6 +68,8 @@ type ICategoryService interface {
 	CreateCategory(cat *Category) error
 
 	UpdateCategory(cat *Category) error
+
+	UpdateSelectiveCategory(form *CategoryUpdateForm) error
 
 	ListCategory() ([]*Category, error)
 
