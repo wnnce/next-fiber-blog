@@ -40,6 +40,17 @@ func (u *UserApi) Update(ctx fiber.Ctx) error {
 	return ctx.JSON(res.SimpleOK())
 }
 
+func (self *UserApi) UpdateSelective(ctx fiber.Ctx) error {
+	form := &usercase.SysUserUpdateForm{}
+	if err := ctx.Bind().JSON(form); err != nil {
+		return nil
+	}
+	if err := self.service.UpdateSelectiveUser(form); err != nil {
+		return nil
+	}
+	return ctx.JSON(res.SimpleOK())
+}
+
 func (u *UserApi) UserInfo(ctx fiber.Ctx) error {
 	loginUser := fiber.Locals[auth.LoginUser](ctx, "loginUser")
 	userInfo, err := u.service.QueryUserInfo(loginUser.GetUserId())

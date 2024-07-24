@@ -57,6 +57,12 @@ type UpdatePasswordForm struct {
 	UserId      uint64 `json:"-"`
 }
 
+// SysUserUpdateForm 用户快捷更新表单
+type SysUserUpdateForm struct {
+	UserId uint64 `json:"userId" validate:"required"`
+	Status *uint8 `json:"status" validate:"required"`
+}
+
 // SysUserQueryForm 系统用户查询表单
 type SysUserQueryForm struct {
 	Username        string `json:"username"`
@@ -75,6 +81,8 @@ type ISysUserRepo interface {
 	Save(user *SysUser) error
 	// Update 更新用户
 	Update(user *SysUser) error
+	// UpdateSelective 用户快捷更新
+	UpdateSelective(form *SysUserUpdateForm) error
 	// FindUserById 查询用户详情
 	FindUserById(userId uint64) (*SysUser, error)
 	// Page 分页查询用户
@@ -98,6 +106,8 @@ type ISysUserService interface {
 	SaveUser(user *SysUser) error
 
 	UpdateUser(user *SysUser) error
+
+	UpdateSelectiveUser(form *SysUserUpdateForm) error
 
 	QueryUserInfo(userId uint64) (*SysUser, error)
 

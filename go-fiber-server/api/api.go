@@ -47,6 +47,7 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	userRoute := sysRoute.Group("/user")
 	userRoute.Post("/", userApi.Save)
 	userRoute.Put("/", userApi.Update)
+	userRoute.Put("/status", userApi.UpdateSelective)
 	userRoute.Post("/page", userApi.Page)
 	userRoute.Delete("/:id<int;min<1>>", userApi.Delete)
 	// 字典管理接口
