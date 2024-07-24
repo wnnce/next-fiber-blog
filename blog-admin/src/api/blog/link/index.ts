@@ -1,4 +1,4 @@
-import type { Link, LinkForm, LinkQueryForm } from '@/api/blog/link/types'
+import type { Link, LinkForm, LinkQueryForm, LinkUpdateForm } from '@/api/blog/link/types'
 import { sendDelete, sendPost, sendPut } from '@/api/request'
 import type { Page } from '@/assets/script/types'
 
@@ -24,6 +24,13 @@ export const linkApi = {
    */
   updateLink: (form: LinkForm) => {
     return sendPut<null>('/link', form)
+  },
+  /**
+   * 友情链接快捷更新
+   * @param form 更新表单参数
+   */
+  updateSelective: (form: LinkUpdateForm) => {
+    return sendPut<null>('/link/status', form)
   },
   /**
    * 删除友情链接

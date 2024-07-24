@@ -24,6 +24,12 @@ export interface LinkForm {
   status: number;
 }
 
+// 友情链接快捷更新表单
+export interface LinkUpdateForm {
+  linkId: number;
+  status: number;
+}
+
 // 友情链接查询表单
 export interface LinkQueryForm extends PageQuery {
   name?: string;
