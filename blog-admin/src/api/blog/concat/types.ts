@@ -21,6 +21,13 @@ export interface ConcatForm {
   status: number;
 }
 
+// 联系方式快捷更新表单
+export interface ConcatUpdateForm {
+  concatId: number;
+  isMain?: boolean;
+  status?: number;
+}
+
 // 联系方式查询表单
 export interface ConcatQueryForm {
   name?: string;

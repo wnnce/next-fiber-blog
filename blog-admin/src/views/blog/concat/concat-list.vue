@@ -3,9 +3,11 @@ import { onMounted, reactive, ref } from 'vue'
 import RightOperate from '@/components/RightOperate.vue'
 import { useArcoMessage } from '@/hooks/message'
 import LoadImage from '@/components/LoadImage.vue'
-import type { Concat, ConcatQueryForm } from '@/api/blog/concat/types'
+import type { Concat, ConcatQueryForm, ConcatUpdateForm } from '@/api/blog/concat/types'
 import { concatApi } from '@/api/blog/concat'
 import ConcatForm from '@/views/blog/concat/concat-form.vue'
+import type { CategoryUpdateForm } from '@/api/blog/category/types'
+import { categoryApi } from '@/api/blog/category'
 
 const { successMessage, loading } = useArcoMessage();
 
@@ -73,6 +75,15 @@ const handleDelete = async (record: Concat) => {
   }
 }
 
+const handleUpdateStatus = async (form: ConcatUpdateForm) => {
+  const result = await concatApi.updateSelective(form);
+  if (result.code === 200) {
+    successMessage('更新成功');
+    return true;
+  }
+  return false;
+}
+
 const formRef = ref();
 const showForm = (record?: Concat) => {
   formRef.value.show(record);
@@ -132,12 +143,16 @@ onMounted(() => {
         <a-table-column title="创建时间" data-index="createTime" align="center" :width="280" />
         <a-table-column title="主要联系方式" align="center">
           <template #cell="{ record }">
-            <a-switch :model-value="record.isMain" />
+            <a-switch v-model="record.isMain"
+                      :before-change="newValue => handleUpdateStatus({ concatId: record.concatId, isMain: Boolean(newValue) })"
+            />
           </template>
         </a-table-column>
         <a-table-column title="状态" :width="60">
           <template #cell="{ record }">
-            <a-switch :checked-value="0" :unchecked-value="1" :model-value="record.status" />
+            <a-switch :checked-value="0" :unchecked-value="1" v-model="record.status"
+                      :before-change="newValue => handleUpdateStatus({ concatId: record.concatId, status: Number(newValue) })"
+            />
           </template>
         </a-table-column>
         <a-table-column title="操作" align="center">

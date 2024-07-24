@@ -8,6 +8,7 @@ import type { FieldRule } from '@arco-design/web-vue/es/form/interface'
 import ImageUpload from '@/components/ImageUpload.vue'
 import type { Concat, ConcatForm } from '@/api/blog/concat/types'
 import { concatApi } from '@/api/blog/concat'
+import DictSelect from '@/components/DictSelect.vue'
 
 const emits = defineEmits<{
   (e: 'reload'): void
@@ -89,7 +90,7 @@ defineExpose({
 <template>
   <a-modal :title="formData.concatId ? '修改联系方式' : '添加联系方式'" v-model:visible="modalShow" @close="onClose" :footer="false">
     <a-form :model="formData" auto-label-width @submit="formSubmit" :rules="formRules">
-      <a-form-item label="联系方式名称" field="name">
+      <a-form-item label="名称" field="name">
         <a-input v-model="formData.name" placeholder="请输入联系方式名称" />
       </a-form-item>
       <a-form-item label="源链接" field="targetUrl">
@@ -98,14 +99,14 @@ defineExpose({
       <a-form-item label="Logo" field="logoUrl">
         <image-upload v-model:file-list="fileList" v-model:file-url="formData.logoUrl" width="60px" height="60px" />
       </a-form-item>
-      <a-form-item label="主要联系方式" field="isMain">
+      <a-form-item label="是否主要" field="isMain">
         <a-switch v-model="formData.isMain" />
       </a-form-item>
       <a-form-item label="显示顺序" field="sort">
         <a-input-number v-model="formData.sort" placeholder="请输入显示顺序" />
       </a-form-item>
       <a-form-item label="状态" field="status" required>
-        <a-switch :checked-value="0" :unchecked-value="1" v-model="formData.status" />
+        <dict-select dict-key="dict_status" v-model="formData.status" type="number" />
       </a-form-item>
       <div class="flex justify-between" style="width: 100%; column-gap: 24px">
         <a-button html-type="submit" type="primary" size="large" long :loading="submitButtonLoading">

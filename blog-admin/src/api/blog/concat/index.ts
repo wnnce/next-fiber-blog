@@ -1,4 +1,4 @@
-import type { Concat, ConcatForm, ConcatQueryForm } from '@/api/blog/concat/types'
+import type { Concat, ConcatForm, ConcatQueryForm, ConcatUpdateForm } from '@/api/blog/concat/types'
 import { sendDelete, sendPost, sendPut } from '@/api/request'
 
 // 联系方式api
@@ -23,6 +23,13 @@ export const concatApi = {
    */
   updateConcat: (form: ConcatForm) => {
     return sendPut<null>('/concat', form);
+  },
+  /**
+   * 快捷更新联系方式
+   * @param form 表单参数
+   */
+  updateSelective: (form: ConcatUpdateForm) => {
+    return sendPut<null>('/concat/status', form)
   },
   /**
    * 删除联系方式
