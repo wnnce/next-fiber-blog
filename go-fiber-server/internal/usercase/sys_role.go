@@ -10,6 +10,12 @@ type SysRole struct {
 	Menus  []uint `json:"menus,omitempty" db:"menus"`
 }
 
+// SysRoleUpdateForm 系统角色快捷更新表单
+type SysRoleUpdateForm struct {
+	RoleId uint   `json:"roleId" validate:"required"`
+	Status *uint8 `json:"status" validate:"required"`
+}
+
 // SysRoleQueryForm 系统角色查询表单
 type SysRoleQueryForm struct {
 	Name            string `json:"name"`
@@ -24,6 +30,8 @@ type ISysRoleRepo interface {
 	Save(role *SysRole) error
 
 	Update(role *SysRole) error
+
+	UpdateSelective(form *SysRoleUpdateForm) error
 
 	ListAll() ([]SysRole, error)
 
@@ -41,6 +49,8 @@ type ISysRoleService interface {
 	SaveRole(role *SysRole) error
 
 	UpdateRole(role *SysRole) error
+
+	UpdateSelectiveRole(form *SysRoleUpdateForm) error
 
 	List() ([]SysRole, error)
 
