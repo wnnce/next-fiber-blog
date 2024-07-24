@@ -67,9 +67,9 @@ export function request<T>(url: string, method: HttpMethod, params?: any, data?:
       } else if (code === 400) {
         errorMessage(message);
       } else if (code === 500) {
-        errorMessage('服务器错误，请稍后再试');
+        errorMessage(import.meta.env.DEV ? message : '服务器错误，请稍后再试');
       } else {
-        errorMessage('未知错误，请联系管理员');
+        errorMessage(import.meta.env.DEV ? message : '未知错误，请联系管理员');
       }
       reject(undefined);
     }).catch(err => {

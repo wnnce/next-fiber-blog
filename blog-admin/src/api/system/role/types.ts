@@ -23,6 +23,12 @@ export interface RoleForm {
   menus: number[];
 }
 
+// 系统角色快捷更新表单
+export interface RoleUpdateForm {
+  roleId: number;
+  status: number;
+}
+
 // 系统角色查询参数
 export interface RoleQueryForm extends PageQuery{
   name?: string;

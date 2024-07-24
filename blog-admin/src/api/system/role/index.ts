@@ -1,4 +1,4 @@
-import type { Role, RoleForm, RoleQueryForm } from '@/api/system/role/types'
+import type { Role, RoleForm, RoleQueryForm, RoleUpdateForm } from '@/api/system/role/types'
 import { sendDelete, sendGet, sendPost, sendPut } from '@/api/request'
 import type { Page } from '@/assets/script/types'
 
@@ -29,6 +29,13 @@ export const roleApi = {
    */
   updateSysRole: (form: RoleForm) => {
     return sendPut<null>('/system/role', form);
+  },
+  /**
+   * 快捷更新系统角色
+   * @param form
+   */
+  updateSelective: (form: RoleUpdateForm) => {
+    return sendPut<null>('/system/role/status', form)
   },
   /**
    * 删除系统角色

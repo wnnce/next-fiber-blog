@@ -89,6 +89,15 @@ const handleDelete = async (record: User) => {
   }
 }
 
+const handleUpdateStatus = async (newStatus: string | number | boolean, userId: number) => {
+  const result = await userApi.updateSelective({ userId: userId, status: Number(newStatus) })
+  if (result.code === 200) {
+    successMessage('更新成功')
+    return true;
+  }
+  return false;
+}
+
 const roleSelectOption = ref<OptionItem[]>([]);
 const queryRoleSelectData = async () => {
   const result = await roleApi.listAllSysROle();
@@ -183,7 +192,9 @@ onMounted(() => {
         <a-table-column title="最后登录时间" data-index="lastLoginTime" />
         <a-table-column title="状态">
           <template #cell="{ record }">
-            <a-switch :checked-value="0" :unchecked-value="1" :model-value="record.status" />
+            <a-switch :checked-value="0" :unchecked-value="1" v-model="record.status"
+                      :before-change="newValue => handleUpdateStatus(newValue, record.userId)"
+            />
           </template>
         </a-table-column>
         <a-table-column title="操作" align="center">

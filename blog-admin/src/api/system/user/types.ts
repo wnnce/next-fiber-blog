@@ -32,6 +32,12 @@ export interface UserForm {
   remark?: string
 }
 
+// 用户快捷更新表单
+export interface UserUpdateForm {
+  userId: number;
+  status: number;
+}
+
 // 用户查询表单
 export interface UserQueryForm extends PageQuery {
   username?: string;

@@ -1,4 +1,11 @@
-import type { LoginForm, ResetPasswordForm, User, UserForm, UserQueryForm } from '@/api/system/user/types'
+import type {
+  LoginForm,
+  ResetPasswordForm,
+  User,
+  UserForm,
+  UserQueryForm,
+  UserUpdateForm
+} from '@/api/system/user/types'
 import { sendDelete, sendGet, sendPost, sendPut } from '@/api/request'
 import type { Page } from '@/assets/script/types'
 
@@ -16,6 +23,13 @@ export const userApi = {
    */
   updateSysUser: (form: UserForm) => {
     return sendPut<null>('/system/user', form);
+  },
+  /**
+   * 系统用户快捷更新
+   * @param form
+   */
+  updateSelective: (form: UserUpdateForm) => {
+    return sendPut<null>('/system/user/status', form)
   },
   /**
    * 分页查询系统用户
