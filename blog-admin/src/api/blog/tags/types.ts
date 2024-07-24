@@ -22,6 +22,12 @@ export interface TagForm {
   status: number;
 }
 
+// TagUpdateForm 博客标签快捷更新表单
+export interface TagUpdateForm {
+  tagId: number;
+  status: number
+}
+
 // 博客标签查询表单
 export interface TagQueryForm extends PageQuery{
   tagName?: string;

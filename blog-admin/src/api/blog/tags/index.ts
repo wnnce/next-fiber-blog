@@ -1,4 +1,4 @@
-import type { Tag, TagForm, TagQueryForm } from '@/api/blog/tags/types'
+import type { Tag, TagForm, TagQueryForm, TagUpdateForm } from '@/api/blog/tags/types'
 import { sendDelete, sendPost, sendPut } from '@/api/request'
 import type { Page } from '@/assets/script/types'
 
@@ -24,6 +24,13 @@ export const tagApi = {
    */
   updateTag: (form: TagForm) => {
     return sendPut<null>('/tag', form);
+  },
+  /**
+   * 快捷更新博客标签
+   * @param form 表单参数
+   */
+  updateSelective: (form: TagUpdateForm) => {
+    return sendPut<null>('/tag/status', form)
   },
   /**
    * 删除博客标签

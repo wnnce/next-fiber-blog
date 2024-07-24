@@ -8,6 +8,7 @@ import type { FieldRule } from '@arco-design/web-vue/es/form/interface'
 import ImageUpload from '@/components/ImageUpload.vue'
 import type { Tag, TagForm } from '@/api/blog/tags/types'
 import { tagApi } from '@/api/blog/tags'
+import DictSelect from '@/components/DictSelect.vue'
 
 const emits = defineEmits<{
   (e: 'reload'): void
@@ -101,7 +102,7 @@ defineExpose({
         <a-input-number v-model="formData.sort" placeholder="请输入显示顺序" />
       </a-form-item>
       <a-form-item label="状态" field="status" required>
-        <a-switch :checked-value="0" :unchecked-value="1" v-model="formData.status" />
+        <dict-select dict-key="dict_status" v-model="formData.status" type="number" />
       </a-form-item>
       <div class="flex justify-between" style="width: 100%; column-gap: 24px">
         <a-button html-type="submit" type="primary" size="large" long :loading="submitButtonLoading">

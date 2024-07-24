@@ -7,6 +7,8 @@ import { tagApi } from '@/api/blog/tags'
 import type { Tag, TagQueryForm } from '@/api/blog/tags/types'
 import LoadImage from '@/components/LoadImage.vue'
 import TagsForm from '@/views/blog/tags/tags-form.vue'
+import type { CategoryUpdateForm } from '@/api/blog/category/types'
+import { categoryApi } from '@/api/blog/category'
 
 const { successMessage, loading } = useArcoMessage();
 
@@ -80,6 +82,15 @@ const handleDelete = async (record: Tag) => {
   }
 }
 
+const handleUpdateStatus = async (newStatus: string | number | boolean, tagId: number) => {
+  const result = await tagApi.updateSelective({ tagId: tagId, status: Number(newStatus) });
+  if (result.code === 200) {
+    successMessage('更新成功');
+    return true;
+  }
+  return false;
+}
+
 const formRef = ref();
 const showForm = (record?: Tag) => {
   formRef.value.show(record);
@@ -144,7 +155,10 @@ onMounted(() => {
         <a-table-column title="创建时间" data-index="createTime" align="center" :width="280" />
         <a-table-column title="状态" :width="60">
           <template #cell="{ record }">
-            <a-switch :checked-value="0" :unchecked-value="1" :model-value="record.status" />
+            <a-switch :checked-value="0" :unchecked-value="1"
+                      v-model="record.status"
+                      :before-change="newValue => handleUpdateStatus(newValue, record.tagId)"
+            />
           </template>
         </a-table-column>
         <a-table-column title="操作" align="center">
