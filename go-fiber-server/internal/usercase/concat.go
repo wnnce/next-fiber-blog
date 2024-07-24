@@ -10,6 +10,13 @@ type Concat struct {
 	BaseEntity
 }
 
+// ConcatUpdateForm 联系方式快捷更新表单
+type ConcatUpdateForm struct {
+	ConcatId uint   `json:"concatId" validate:"required"`
+	IsMain   *bool  `json:"isMain"`
+	Status   *uint8 `json:"status"`
+}
+
 // ConcatQueryForm 联系方式查询表单
 type ConcatQueryForm struct {
 	Name            string `json:"name"`
@@ -22,7 +29,7 @@ type IConcatRepo interface {
 
 	Update(concat *Concat) error
 
-	UpdateStatus(cid int, status uint) error
+	UpdateSelective(form *ConcatUpdateForm) error
 
 	List() ([]*Concat, error)
 
@@ -37,6 +44,8 @@ type IConcatService interface {
 	CreateConcat(concat *Concat) error
 
 	UpdateConcat(concat *Concat) error
+
+	UpdateSelectiveConcat(form *ConcatUpdateForm) error
 
 	ListConcat() ([]*Concat, error)
 

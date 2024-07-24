@@ -36,7 +36,7 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 	iCategoryService := service.NewCategoryService(iCategoryRepo, redisTemplate)
 	categoryHttpApi := category.NewHttpApi(iCategoryService)
 	iConcatRepo := data.NewConcatRepo(dataData)
-	iConcatService := service.NewConcatService(iConcatRepo)
+	iConcatService := service.NewConcatService(iConcatRepo, redisTemplate)
 	concatHttpApi := concat.NewHttpApi(iConcatService)
 	iLinkRepo := data.NewLinkRepo(dataData)
 	iLinkService := service.NewLinkService(iLinkRepo)

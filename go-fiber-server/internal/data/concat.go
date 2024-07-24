@@ -41,16 +41,29 @@ func (c *ConcatRepo) Update(concat *usercase.Concat) error {
 	return err
 }
 
-func (c *ConcatRepo) UpdateStatus(cid int, status uint) error {
-	result, err := c.db.Exec(context.Background(), "update t_blog_concat set update_time = now(), status = $1 where concat_id = $2", status, cid)
+func (c *ConcatRepo) UpdateSelective(form *usercase.ConcatUpdateForm) error {
+	var builder strings.Builder
+	builder.WriteString("update t_blog_concat set update_time = now() ")
+	args := make([]any, 0)
+	if form.IsMain != nil {
+		args = append(args, *form.IsMain)
+		builder.WriteString(fmt.Sprintf(", is_main = $%d", len(args)))
+	}
+	if form.Status != nil {
+		args = append(args, *form.Status)
+		builder.WriteString(fmt.Sprintf(", status = $%d", len(args)))
+	}
+	builder.WriteString(fmt.Sprintf(" where concat_id = $%d", len(args)+1))
+	args = append(args, form.ConcatId)
+	result, err := c.db.Exec(context.Background(), builder.String(), args...)
 	if err == nil {
-		slog.Info(fmt.Sprintf("更新联系方式状态完成，row:%d,id:%d,status:%d", result.RowsAffected(), cid, status))
+		slog.Info("联系方式快捷更新完成", "row", result.RowsAffected(), "concatId", form.ConcatId)
 	}
 	return err
 }
 
 func (c *ConcatRepo) List() ([]*usercase.Concat, error) {
-	rows, err := c.db.Query(context.Background(), "select concat_id, name, logo_url, target_url, is_main, sort, status from t_blog_concat where delete_at = '0' and status = 0 order by sort, create_time desc")
+	rows, err := c.db.Query(context.Background(), "select concat_id, name, logo_url, target_url, is_main from t_blog_concat where delete_at = '0' and status = 0 order by sort, create_time desc")
 	if err != nil {
 		return nil, err
 	}

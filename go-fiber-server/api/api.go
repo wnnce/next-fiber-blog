@@ -108,6 +108,7 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	conRoute.Delete("/:id<int;min<1>>", conApi.Delete)
 	conRoute.Post("/", conApi.Save)
 	conRoute.Put("/", conApi.Update)
+	conRoute.Put("/status", conApi.UpdateSelective)
 
 	// 友情链接接口
 	linkRoute := app.Group("/link", auth.ManageAuth)
@@ -131,4 +132,6 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	openRoute.Get("/category/list", catApi.List)
 	// 获取标签列表
 	openRoute.Get("/tag/list", tagApi.List)
+	// 获取联系方式列表
+	openRoute.Get("/concat/list", conApi.List)
 }
