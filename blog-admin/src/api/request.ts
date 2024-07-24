@@ -158,9 +158,10 @@ export function fileUpload(url: string, formData: FormData, onProgress?: (event:
         resolve(result);
       }
     })
-    // const token = get<string>(TOKEN_KEY);
-    // xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     xhr.open('POST', baseUrl + url);
+    // 添加验证Token
+    const token = get<string>(TOKEN_KEY);
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     xhr.send(formData);
   })
 }
