@@ -18,40 +18,41 @@ func NewLinkService(repo usercase.ILinkRepo) usercase.ILinkService {
 	}
 }
 
-func (l *LinkService) CreateLike(link *usercase.Link) error {
-	if err := l.repo.Save(link); err != nil {
+func (self *LinkService) CreateLink(link *usercase.Link) error {
+	if err := self.repo.Save(link); err != nil {
 		slog.Error(fmt.Sprintf("新增友情链接失败，错误信息：%s", err))
 		return tools.FiberServerError("保存失败")
 	}
 	return nil
 }
 
-func (l *LinkService) UpdateLike(like *usercase.Link) error {
-	if err := l.repo.Update(like); err != nil {
+func (self *LinkService) UpdateLink(link *usercase.Link) error {
+	if err := self.repo.Update(link); err != nil {
 		slog.Error(fmt.Sprintf("更新友情链接失败，错误信息：%s", err))
 		return tools.FiberServerError("更新失败")
 	}
 	return nil
 }
 
-func (l *LinkService) PageLike(query *usercase.PageQueryForm) (*usercase.PageData[usercase.Link], error) {
-	links, total, err := l.repo.Page(query)
-	if err != nil {
-		slog.Error(fmt.Sprintf("分页查询友情链接失败，错误信息：%s", err))
-		return nil, tools.FiberServerError("查询失败")
+func (self *LinkService) UpdateSelectiveLink(form *usercase.LinkUpdateForm) error {
+	if err := self.repo.UpdateSelective(form); err != nil {
+		slog.Error("快捷更新友情链接失败", "error", err.Error())
+		return tools.FiberServerError("更新失败")
 	}
-	pages := int(math.Ceil(float64(total) / float64(query.Size)))
-	return &usercase.PageData[usercase.Link]{
-		Current: query.Page,
-		Pages:   pages,
-		Size:    query.Size,
-		Total:   total,
-		Records: links,
-	}, nil
+	return nil
 }
 
-func (l *LinkService) ManagePageLike(query *usercase.LinkQueryForm) (*usercase.PageData[usercase.Link], error) {
-	links, total, err := l.repo.ManagePage(query)
+func (self *LinkService) List() ([]*usercase.Link, error) {
+	links, err := self.repo.List()
+	if err != nil {
+		slog.Error("获取友情链接列表失败", "error", err.Error())
+		return nil, tools.FiberServerError("查询失败")
+	}
+	return links, nil
+}
+
+func (self *LinkService) ManagePageLink(query *usercase.LinkQueryForm) (*usercase.PageData[usercase.Link], error) {
+	links, total, err := self.repo.ManagePage(query)
 	if err != nil {
 		slog.Error(fmt.Sprintf("管理端分页查询友情链接失败，错误信息：%s", err))
 		return nil, tools.FiberServerError("查询失败")
@@ -66,8 +67,8 @@ func (l *LinkService) ManagePageLike(query *usercase.LinkQueryForm) (*usercase.P
 	}, nil
 }
 
-func (l *LinkService) Delete(linkId int64) error {
-	err := l.repo.DeleteById(linkId)
+func (self *LinkService) Delete(linkId int64) error {
+	err := self.repo.DeleteById(linkId)
 	if err != nil {
 		slog.Error(fmt.Sprintf("删除友情链接失败，错误信息：%s", err))
 		return tools.FiberServerError("删除失败")

@@ -40,7 +40,7 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 	concatHttpApi := concat.NewHttpApi(iConcatService)
 	iLinkRepo := data.NewLinkRepo(dataData)
 	iLinkService := service.NewLinkService(iLinkRepo)
-	linkHttpApi := link.NewHttpApi(iLinkService)
+	linkHttpApi := link.NewHttpApi(iLinkService, redisTemplate)
 	iSysMenuRepo := data.NewSysMenuRepo(dataData)
 	iSysMenuService := service.NewMenuService(iSysMenuRepo)
 	menuApi := manage.NewMenuApi(iSysMenuService)

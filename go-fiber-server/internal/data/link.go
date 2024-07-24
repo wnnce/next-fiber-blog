@@ -22,8 +22,8 @@ func NewLinkRepo(data *Data) usercase.ILinkRepo {
 	}
 }
 
-func (l *LinkRepo) Save(link *usercase.Link) error {
-	row := l.db.QueryRow(context.Background(), "insert into t_blog_link (name, summary, cover_url, target_url, sort, status) values ($1, $2, $3, $4, $5, $6) returning link_id",
+func (self *LinkRepo) Save(link *usercase.Link) error {
+	row := self.db.QueryRow(context.Background(), "insert into t_blog_link (name, summary, cover_url, target_url, sort, status) values ($1, $2, $3, $4, $5, $6) returning link_id",
 		link.Name, link.Summary, link.CoverUrl, link.TargetUrl, link.Sort, link.Status)
 	var linkId uint64
 	err := row.Scan(&linkId)
@@ -34,8 +34,8 @@ func (l *LinkRepo) Save(link *usercase.Link) error {
 	return err
 }
 
-func (l *LinkRepo) Update(link *usercase.Link) error {
-	result, err := l.db.Exec(context.Background(), "update t_blog_link set update_time = now(), name = $1, summary = $2, cover_url = $3, target_url = $4, sort = $5, status = $6 where link_id = $7",
+func (self *LinkRepo) Update(link *usercase.Link) error {
+	result, err := self.db.Exec(context.Background(), "update t_blog_link set update_time = now(), name = $1, summary = $2, cover_url = $3, target_url = $4, sort = $5, status = $6 where link_id = $7",
 		link.Name, link.Summary, link.CoverUrl, link.TargetUrl, link.Sort, link.Status, link.LinkId)
 	if err == nil {
 		slog.Info(fmt.Sprintf("更新友情链接完成，row:%d,id:%d", result.RowsAffected(), link.LinkId))
@@ -43,38 +43,36 @@ func (l *LinkRepo) Update(link *usercase.Link) error {
 	return err
 }
 
-func (l *LinkRepo) UpdateStatus(linkId int64, status uint8) error {
-	result, err := l.db.Exec(context.Background(), "update t_blog_link set update_time = now(), status = $1 where link_id = $2", status, linkId)
+func (self *LinkRepo) UpdateSelective(form *usercase.LinkUpdateForm) error {
+	var builder strings.Builder
+	builder.WriteString("update t_blog_link set update_time = now() ")
+	args := make([]any, 0)
+	if form.Status != nil {
+		args = append(args, *form.Status)
+		builder.WriteString(fmt.Sprintf(", status = $%d", len(args)))
+	}
+	builder.WriteString(fmt.Sprintf(" where link_id = $%d", len(args)+1))
+	args = append(args, form.LinkId)
+	result, err := self.db.Exec(context.Background(), builder.String(), args...)
 	if err == nil {
-		slog.Info(fmt.Sprintf("联系方式状态更新完成，row:%d,id:%d,status:%d", result.RowsAffected(), linkId, status))
+		slog.Info("快捷更新友情链接完成", "row", result.RowsAffected(), "linkId", form.LinkId)
 	}
 	return err
 }
 
-func (l *LinkRepo) Page(query *usercase.PageQueryForm) ([]*usercase.Link, int64, error) {
-	condition := "where delete_at = 0 and status = 0"
-	total, err := l.conditionTotal(condition)
+func (self *LinkRepo) List() ([]*usercase.Link, error) {
+	sql := "select link_id, name, summary, cover_url, target_url from t_blog_link where status = 0 and delete_at = 0 order by sort, create_time desc"
+	rows, err := self.db.Query(context.Background(), sql)
 	if err != nil {
-		return nil, 0, err
-	}
-	links := make([]*usercase.Link, 0)
-	if total == 0 {
-		return links, 0, nil
-	}
-	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	rows, err := l.db.Query(context.Background(), "select link_id, name, summary, cover_url, target_url, click_num, create_time from t_blog_link "+condition+
-		" order by sort, create_time desc limit $1 offset $2", query.Size, offset)
-	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	defer rows.Close()
-	links, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Link, error) {
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Link, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.Link](row)
 	})
-	return links, total, err
 }
 
-func (l *LinkRepo) ManagePage(query *usercase.LinkQueryForm) ([]*usercase.Link, int64, error) {
+func (self *LinkRepo) ManagePage(query *usercase.LinkQueryForm) ([]*usercase.Link, int64, error) {
 	var condition strings.Builder
 	condition.WriteString("where delete_at = 0")
 	args := make([]any, 0)
@@ -83,7 +81,7 @@ func (l *LinkRepo) ManagePage(query *usercase.LinkQueryForm) ([]*usercase.Link, 
 		condition.WriteString(fmt.Sprintf(" and name like $%d", len(args)))
 	}
 	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
-	total, err := l.conditionTotal(condition.String(), args...)
+	total, err := self.conditionTotal(condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -94,7 +92,7 @@ func (l *LinkRepo) ManagePage(query *usercase.LinkQueryForm) ([]*usercase.Link, 
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
 	condition.WriteString(fmt.Sprintf(" order by sort, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
 	args = append(args, query.Size, offset)
-	rows, err := l.db.Query(context.Background(), "select * from t_blog_link "+condition.String(), args...)
+	rows, err := self.db.Query(context.Background(), "select * from t_blog_link "+condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -105,15 +103,15 @@ func (l *LinkRepo) ManagePage(query *usercase.LinkQueryForm) ([]*usercase.Link, 
 	return links, total, err
 }
 
-func (l *LinkRepo) DeleteById(linkId int64) error {
-	result, err := l.db.Exec(context.Background(), "update t_blog_link set delete_at = $1 where link_id = $2", time.Now().UnixMilli(), linkId)
+func (self *LinkRepo) DeleteById(linkId int64) error {
+	result, err := self.db.Exec(context.Background(), "update t_blog_link set delete_at = $1 where link_id = $2", time.Now().UnixMilli(), linkId)
 	if err == nil {
 		slog.Info(fmt.Sprintf("友情链接删除完成，row：%d，linkId：%d", result.RowsAffected(), linkId))
 	}
 	return err
 }
 
-func (l *LinkRepo) BatchDelete(linkIds []int64) (int64, error) {
+func (self *LinkRepo) BatchDelete(linkIds []int64) (int64, error) {
 	if len(linkIds) == 0 {
 		return 0, nil
 	}
@@ -126,12 +124,12 @@ func (l *LinkRepo) BatchDelete(linkIds []int64) (int64, error) {
 		builder.WriteRune(rune(v))
 	}
 	builder.WriteByte(')')
-	result, err := l.db.Exec(context.Background(), builder.String(), time.Now().UnixMilli())
+	result, err := self.db.Exec(context.Background(), builder.String(), time.Now().UnixMilli())
 	return result.RowsAffected(), err
 }
 
-func (l *LinkRepo) conditionTotal(condition string, args ...any) (int64, error) {
-	row := l.db.QueryRow(context.Background(), "select count(link_id) from t_blog_link "+condition, args...)
+func (self *LinkRepo) conditionTotal(condition string, args ...any) (int64, error) {
+	row := self.db.QueryRow(context.Background(), "select count(link_id) from t_blog_link "+condition, args...)
 	var total int64
 	err := row.Scan(&total)
 	return total, err
