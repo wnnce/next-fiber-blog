@@ -12,9 +12,9 @@ import { useLocalUserStore } from '@/stores/user'
       <header-layout />
     </div>
     <div class="content flex">
-      <div class="content-side">
+      <aside class="content-side">
         <side-layout />
-      </div>
+      </aside>
       <div class="content-main flex flex-column">
         <div class="page-tabs">
           <page-tabs />

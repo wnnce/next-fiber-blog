@@ -10,7 +10,6 @@ import Breadcrumd from '@/layout/components/Breadcrumd.vue'
 import { useI18nLanguage } from '@/i18n'
 import SettingDrawer from '@/layout/components/SettingDrawer.vue'
 import { useLocalUserStore } from '@/stores/user'
-import { useRouter } from 'vue-router'
 import LogoutModal from '@/layout/components/LogoutModal.vue'
 
 const configStore = useAppConfigStore();
