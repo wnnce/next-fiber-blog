@@ -43,10 +43,19 @@ func (self *TagRepo) Update(form *usercase.TagForm) error {
 	return err
 }
 
-func (self *TagRepo) UpdateStatus(tagId int, status uint8) error {
-	result, err := self.db.Exec(context.Background(), "update t_blog_tag set update_time = now(), status = $1 where tag_id = $2", status, tagId)
+func (self *TagRepo) UpdateSelective(form *usercase.TagUpdateForm) error {
+	var builder strings.Builder
+	builder.WriteString("update t_blog_tag set update_time = now() ")
+	args := make([]any, 0)
+	if form.Status != nil {
+		args = append(args, *form.Status)
+		builder.WriteString(fmt.Sprintf(", status = $%d", len(args)))
+	}
+	builder.WriteString(fmt.Sprintf(" where tag_id = $%d", len(args)+1))
+	args = append(args, form.TagId)
+	result, err := self.db.Exec(context.Background(), builder.String(), args...)
 	if err == nil {
-		slog.Info(fmt.Sprintf("标签状态更新完成，row:%d,id:%d,status:%d", result.RowsAffected(), tagId, status))
+		slog.Info("标签快捷更新完成", "row", result.RowsAffected(), "tagId", form.TagId)
 	}
 	return err
 }
@@ -100,7 +109,7 @@ func (self *TagRepo) Page(query *usercase.TagQueryForm) ([]*usercase.Tag, int64,
 }
 
 func (self *TagRepo) List() ([]*usercase.Tag, error) {
-	rows, err := self.db.Query(context.Background(), "select tag_id, tag_name, cover_url, view_num, color, create_time from t_blog_tag where delete_at = '0' and status = 0 order by sort asc, create_time desc")
+	rows, err := self.db.Query(context.Background(), "select tag_id, tag_name, cover_url, view_num, color from t_blog_tag where delete_at = 0 and status = 0 order by sort, create_time desc")
 	if err != nil {
 		return nil, err
 	}

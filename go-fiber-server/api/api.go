@@ -89,6 +89,7 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	tagRoute.Post("/page", tagApi.Page)
 	tagRoute.Post("/", tagApi.Sava)
 	tagRoute.Put("/", tagApi.Update)
+	tagRoute.Put("/status", tagApi.UpdateStatus)
 	tagRoute.Delete("/:id<int;min<1>>", tagApi.Delete)
 
 	// 分类管理接口
@@ -128,4 +129,6 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	openRoute.Get("/notice/public", noticeApi.ListPublicNotice)
 	// 获取分类树形列表
 	openRoute.Get("/category/list", catApi.List)
+	// 获取标签列表
+	openRoute.Get("/tag/list", tagApi.List)
 }

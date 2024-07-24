@@ -19,6 +19,12 @@ type TagForm struct {
 	CommonField
 }
 
+// TagUpdateForm 标签的快捷更新表单
+type TagUpdateForm struct {
+	TagId  uint   `json:"tagId" validate:"required"`
+	Status *uint8 `json:"status"`
+}
+
 // TagQueryForm 标签查询表单
 type TagQueryForm struct {
 	TagName         string `json:"tagName,omitempty"`
@@ -33,8 +39,8 @@ type ITagRepo interface {
 	Save(form *TagForm) error
 	// Update 更新标签
 	Update(form *TagForm) error
-	// UpdateStatus 更新标签状态
-	UpdateStatus(tagId int, status uint8) error
+	// UpdateSelective 更新标签状态
+	UpdateSelective(form *TagUpdateForm) error
 	// UpdateViewNum 更新标签的查看次数
 	UpdateViewNum(tagId int, addNum int) error
 	// SelectById 通过Id获取标签数据
@@ -59,6 +65,8 @@ type ITagService interface {
 	CreateTag(form *TagForm) error
 	// UpdateTag 更新标签
 	UpdateTag(form *TagForm) error
+	// UpdateSelectiveTag 快捷更新标签
+	UpdateSelectiveTag(form *TagUpdateForm) error
 	// QueryTagInfo 查询标签详情
 	QueryTagInfo(id int) (*Tag, error)
 	// PageTag 查询标签列表

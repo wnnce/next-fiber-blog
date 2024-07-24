@@ -40,6 +40,17 @@ func (h *HttpApi) Update(ctx fiber.Ctx) error {
 	return ctx.JSON(res.OkByMessage("ok"))
 }
 
+func (self *HttpApi) UpdateStatus(ctx fiber.Ctx) error {
+	form := &usercase.TagUpdateForm{}
+	if err := ctx.Bind().JSON(form); err != nil {
+		return err
+	}
+	if err := self.service.UpdateSelectiveTag(form); err != nil {
+		return err
+	}
+	return ctx.JSON(res.SimpleOK())
+}
+
 func (h *HttpApi) QueryInfo(ctx fiber.Ctx) error {
 	id, _ := strconv.ParseInt(ctx.Params("id"), 10, 0)
 	info, err := h.service.QueryTagInfo(int(id))

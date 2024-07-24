@@ -29,10 +29,10 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 		return nil, nil, err
 	}
 	iTagRepo := data.NewTagRepo(dataData)
-	iTagService := service.NewTagService(iTagRepo)
+	redisTemplate := data.NewRedisTemplate(dataData)
+	iTagService := service.NewTagService(iTagRepo, redisTemplate)
 	httpApi := tag.NewHttpApi(iTagService)
 	iCategoryRepo := data.NewCategoryRepo(dataData)
-	redisTemplate := data.NewRedisTemplate(dataData)
 	iCategoryService := service.NewCategoryService(iCategoryRepo, redisTemplate)
 	categoryHttpApi := category.NewHttpApi(iCategoryService)
 	iConcatRepo := data.NewConcatRepo(dataData)
