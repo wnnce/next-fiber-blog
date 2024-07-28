@@ -101,7 +101,9 @@ defineExpose({
   <a-modal :title="formData.menuName ? '修改参数配置' : '添加参数配置'" v-model:visible="modalShow" @close="onClose" :footer="false">
     <a-form :model="formData" @submit="formSubmit" auto-label-width>
       <a-form-item label="上级菜单" field="parentId" :rules="[ {required: true, message: '上级菜单不能为空'} ]">
-        <a-tree-select v-model="formData.parentId" :data="treeSelectData" placeholder="请选择上级菜单"/>
+        <a-tree-select v-model="formData.parentId" :data="treeSelectData" placeholder="请选择上级菜单"
+                       :tree-props="{ defaultExpandAll: false }"
+        />
       </a-form-item>
       <a-form-item label="菜单名称" field="menuName" :rules="[ {required: true, message: '菜单名称不能为空'} ]">
         <a-input v-model="formData.menuName" placeholder="菜单名称不能为空" />
@@ -136,30 +138,33 @@ defineExpose({
       <a-form-item label="路由地址" field="path" :rules="[ {required: true, message: '路由地址不能为空'} ]">
         <a-input v-model="formData.path" placeholder="请输入路由地址" />
       </a-form-item>
-      <template v-if="formData.menuType === 2">
-        <div class="flex">
-          <a-form-item label="外链" field="isFrame" required>
-            <a-radio-group v-model="formData.isFrame">
-              <a-radio :value="true">是</a-radio>
-              <a-radio :value="false">否</a-radio>
-            </a-radio-group>
-          </a-form-item>
-          <a-form-item label="是否缓存" field="isCache" required>
-            <a-radio-group v-model="formData.isCache">
-              <a-radio :value="true">是</a-radio>
-              <a-radio :value="false">否</a-radio>
-            </a-radio-group>
-          </a-form-item>
+      <transition name="switch" mode="out-in">
+        <div v-if="formData.menuType === 2">
+          <div class="flex">
+            <a-form-item label="外链" field="isFrame" required>
+              <a-radio-group v-model="formData.isFrame">
+                <a-radio :value="true">是</a-radio>
+                <a-radio :value="false">否</a-radio>
+              </a-radio-group>
+            </a-form-item>
+            <a-form-item label="是否缓存" field="isCache" required>
+              <a-radio-group v-model="formData.isCache">
+                <a-radio :value="true">是</a-radio>
+                <a-radio :value="false">否</a-radio>
+              </a-radio-group>
+            </a-form-item>
+          </div>
+          <transition name="switch" mode="out-in">
+            <a-form-item label="外链地址" field="frameUrl" v-if="formData.isFrame">
+              <a-input v-model="formData.frameUrl" placeholder="请输入外链地址" />
+            </a-form-item>
+            <a-form-item label="组件地址" field="component" v-else>
+              <a-input v-model="formData.component" placeholder="请输入组件地址" />
+            </a-form-item>
+          </transition>
         </div>
-        <transition name="switch" mode="out-in">
-          <a-form-item label="外链地址" field="frameUrl" v-if="formData.isFrame">
-            <a-input v-model="formData.frameUrl" placeholder="请输入外链地址" />
-          </a-form-item>
-          <a-form-item label="组件地址" field="component" v-else>
-            <a-input v-model="formData.component" placeholder="请输入组件地址" />
-          </a-form-item>
-        </transition>
-      </template>
+      </transition>
+
       <div class="flex">
         <a-form-item label="显示状态" field="isVisible" :rules="[ {required: true, message: '显示状态不能为空'} ]">
           <a-radio-group v-model="formData.isVisible">
