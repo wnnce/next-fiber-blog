@@ -6,6 +6,7 @@ import (
 	"go-fiber-ent-web-layout/internal/tools/qiniu"
 	"go-fiber-ent-web-layout/internal/tools/region"
 	"go-fiber-ent-web-layout/internal/usercase"
+	"go-fiber-ent-web-layout/pkg/optimize"
 	"go-fiber-ent-web-layout/pkg/pool"
 	"io"
 	"log/slog"
@@ -38,8 +39,8 @@ func (self *OtherService) UploadImage(fileHeader *multipart.FileHeader) (string,
 	originName := fileHeader.Filename
 	var buffer *bytes.Buffer
 	var suffix string
-	if tools.CheckWebpFormatSupport(originName) {
-		if buffer, err = tools.ImageToWebp(file, false, 95); err == nil {
+	if optimize.CheckWebpFormatSupport(originName) {
+		if buffer, err = optimize.CompressImageWithWebp(file, false, 95); err == nil {
 			suffix = ".webp"
 		}
 	}
@@ -48,7 +49,7 @@ func (self *OtherService) UploadImage(fileHeader *multipart.FileHeader) (string,
 		_, _ = io.Copy(buffer, file)
 		suffix = originName[strings.LastIndexByte(originName, '.'):]
 	}
-	sign := tools.ComputeMd5(buffer.Bytes())
+	sign := optimize.ComputeMd5(buffer.Bytes())
 	// 查询图片是否已经上传
 	uploadFile, err := self.repo.QueryFileByMd5(sign)
 	if err != nil {
@@ -94,7 +95,7 @@ func (self *OtherService) UploadFile(fileHeader *multipart.FileHeader) (string, 
 		slog.Error("读取文件失败", "err", err)
 		return "", tools.FiberServerError("文件读取失败")
 	}
-	sign := tools.ComputeMd5(fileBytes)
+	sign := optimize.ComputeMd5(fileBytes)
 	originName := fileHeader.Filename
 	suffix := originName[strings.LastIndexByte(originName, '.'):]
 	newFileName := sign + suffix

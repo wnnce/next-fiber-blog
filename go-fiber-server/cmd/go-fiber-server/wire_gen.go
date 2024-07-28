@@ -9,6 +9,7 @@ package main
 import (
 	"context"
 	"github.com/gofiber/fiber/v3"
+	"go-fiber-ent-web-layout/api/article/v1"
 	"go-fiber-ent-web-layout/api/category/v1"
 	"go-fiber-ent-web-layout/api/concat/v1"
 	"go-fiber-ent-web-layout/api/link/v1"
@@ -62,7 +63,10 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 	iNoticeRepo := data.NewNoticeRepo(dataData)
 	iNoticeService := service.NewNoticeService(iNoticeRepo, redisTemplate)
 	noticeApi := manage.NewNoticeApi(iNoticeService)
-	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi, roleApi, userApi, dictApi, noticeApi)
+	iArticleRepo := data.NewArticleRepo(dataData)
+	iArticleService := service.NewArticleService(iArticleRepo, redisTemplate)
+	articleHttpApi := article.NewHttpApi(iArticleService)
+	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi, roleApi, userApi, dictApi, noticeApi, articleHttpApi)
 	return app, func() {
 		cleanup()
 	}, nil

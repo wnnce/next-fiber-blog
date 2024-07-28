@@ -13,7 +13,7 @@ import (
 )
 
 var InjectSet = wire.NewSet(NewData, NewRedisTemplate, NewTagRepo, NewCategoryRepo, NewConcatRepo, NewLinkRepo, NewSysMenuRepo, NewOtherRepo,
-	NewSysConfigRepo, NewSysRoleRepo, NewSysUserRepo, NewSysDictRepo, NewNoticeRepo)
+	NewSysConfigRepo, NewSysRoleRepo, NewSysUserRepo, NewSysDictRepo, NewNoticeRepo, NewArticleRepo)
 
 type Data struct {
 	Db *pgxpool.Pool // pgx连接

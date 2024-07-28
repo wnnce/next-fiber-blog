@@ -1,4 +1,4 @@
-package tools
+package optimize
 
 import (
 	"bytes"
@@ -25,8 +25,8 @@ func initPool() {
 	}
 }
 
-// ImageToWebp 图片格式化为Webp格式
-func ImageToWebp(reader io.Reader, lossless bool, quality float32) (*bytes.Buffer, error) {
+// CompressImageWithWebp 图片格式化为Webp格式
+func CompressImageWithWebp(reader io.Reader, lossless bool, quality float32) (*bytes.Buffer, error) {
 	img, _, err := image.Decode(reader)
 	if err != nil {
 		return nil, err

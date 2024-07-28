@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/wire"
+	"go-fiber-ent-web-layout/api/article/v1"
 	"go-fiber-ent-web-layout/api/category/v1"
 	"go-fiber-ent-web-layout/api/concat/v1"
 	"go-fiber-ent-web-layout/api/link/v1"
@@ -12,13 +13,13 @@ import (
 	"go-fiber-ent-web-layout/internal/middleware/auth"
 )
 
-var InjectSet = wire.NewSet(tag.NewHttpApi, category.NewHttpApi, concat.NewHttpApi, link.NewHttpApi, manage.NewMenuApi,
-	manage.NewConfigApi, other.NewHttpApi, manage.NewRoleApi, manage.NewUserApi, manage.NewDictApi, manage.NewNoticeApi)
+var InjectSet = wire.NewSet(tag.NewHttpApi, category.NewHttpApi, concat.NewHttpApi, link.NewHttpApi, article.NewHttpApi,
+	manage.NewMenuApi, manage.NewConfigApi, other.NewHttpApi, manage.NewRoleApi, manage.NewUserApi, manage.NewDictApi, manage.NewNoticeApi)
 
 // RegisterRoutes 全局路由绑定处理函数 在newApp函数中调用 不然wire无法处理依赖注入
 func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpApi, conApi *concat.HttpApi, linkApi *link.HttpApi,
 	menuApi *manage.MenuApi, cfgApi *manage.ConfigApi, oApi *other.HttpApi, roleApi *manage.RoleApi, userApi *manage.UserApi,
-	dictApi *manage.DictApi, noticeApi *manage.NoticeApi) {
+	dictApi *manage.DictApi, noticeApi *manage.NoticeApi, articleApi *article.HttpApi) {
 	// 系统接口路由
 	sysRoute := app.Group("/system", auth.ManageAuth, auth.VerifyRoles("admin"))
 	sysRoute.Post("/record/login", oApi.PageLoginRecord)
@@ -34,7 +35,7 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	cfgRoute.Post("/", cfgApi.Save)
 	cfgRoute.Put("/", cfgApi.Update)
 	cfgRoute.Post("/page", cfgApi.ManagePage)
-	cfgRoute.Delete("/:id<int:;min<1>>", cfgApi.Delete)
+	cfgRoute.Delete("/:id<int;min<1>>", cfgApi.Delete)
 	// 角色管理接口
 	roleRoute := sysRoute.Group("/role")
 	roleRoute.Post("/", roleApi.Save)
@@ -56,12 +57,12 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	dictRoute.Put("/", dictApi.UpdateDict)
 	dictRoute.Put("/status", dictApi.UpdateDictStatus)
 	dictRoute.Post("/page", dictApi.PageDict)
-	dictRoute.Delete("/:id<int:min<1>>", dictApi.DeleteDict)
+	dictRoute.Delete("/:id<int;min<1>>", dictApi.DeleteDict)
 	dictRoute.Post("/value", dictApi.SaveDictValue)
 	dictRoute.Put("/value", dictApi.UpdateDictValue)
 	dictRoute.Put("/value/status", dictApi.UpdateDictValueStatus)
 	dictRoute.Post("/value/page", dictApi.PageDictValue)
-	dictRoute.Delete("/value/:id<int:min<1>>", dictApi.DeleteDictValue)
+	dictRoute.Delete("/value/:id<int;min<1>>", dictApi.DeleteDictValue)
 	// 通知公告管理接口
 	noticeRoute := sysRoute.Group("/notice")
 	noticeRoute.Post("/", noticeApi.Save)
@@ -118,7 +119,15 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	linkRoute.Post("/", linkApi.Save)
 	linkRoute.Put("/", linkApi.Update)
 	linkRoute.Put("/status", linkApi.UpdateSelective)
-	linkRoute.Delete("/:id<int;min=<1>>", linkApi.Delete)
+	linkRoute.Delete("/:id<int;min<1>>", linkApi.Delete)
+
+	articleRoute := app.Group("/article", auth.ManageAuth)
+	articleRoute.Post("/", articleApi.Save)
+	articleRoute.Put("/", articleApi.Update)
+	articleRoute.Put("/status", articleApi.UpdateSelective)
+	articleRoute.Post("/manage/page", articleApi.ManagePage)
+	articleRoute.Delete("/:id", articleApi.Delete)
+	articleRoute.Get("/info/:id", articleApi.ManageQueryInfo)
 
 	// 开放接口
 	openRoute := app.Group("/open")

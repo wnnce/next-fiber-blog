@@ -19,7 +19,7 @@ type Article struct {
 	IsTop       bool   `json:"isTop" db:"is_top"`                                           // 文章是否置顶
 	IsComment   bool   `json:"isComment" db:"is_comment"`                                   // 文章是否开启评论
 	IsPrivate   bool   `json:"isPrivate" db:"is_private"`                                   // 是否私密文章
-	*BaseEntity
+	BaseEntity
 }
 
 // ArticleUpdateForm 文章更新表单
@@ -51,11 +51,27 @@ type IArticleRepo interface {
 
 	Page(query *ArticleQueryForm) ([]*Article, int64, error)
 
-	SelectById(articleId int64, checkStatus bool) (*Article, error)
+	SelectById(articleId uint64, checkStatus bool) (*Article, error)
 
 	CountByTagId(tagId int) (int64, error)
 
 	CountByCategoryId(categoryId int) (int64, error)
 
-	DeleteById(articleId int64) error
+	CountByTitle(title string, articleId uint64) (uint8, error)
+
+	DeleteById(articleId uint64) error
+}
+
+type IArticleService interface {
+	SaveArticle(article *Article) error
+
+	UpdateArticle(article *Article) error
+
+	UpdateSelectiveArticle(form *ArticleUpdateForm) error
+
+	Page(query *ArticleQueryForm) (*PageData[Article], error)
+
+	SelectById(articleId uint64, checkStatus bool) (*Article, error)
+
+	DeleteArticleById(articleId uint64) error
 }

@@ -115,7 +115,7 @@ func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Art
 		return articles, 0, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString(fmt.Sprintf("order by is_top desc, sort, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
+	condition.WriteString(fmt.Sprintf(" order by is_top desc, sort, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
 	args = append(args, query.Size, offset)
 	rows, err := self.db.Query(context.Background(), `select article_id, title, summary, cover_url, category_ids, 
        tag_ids, view_num, share_num, protocol, tips, password, is_hot, is_top, is_comment, is_private, create_time, sort, 
@@ -130,7 +130,7 @@ func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Art
 	return articles, total, err
 }
 
-func (self *ArticleRepo) SelectById(articleId int64, checkStatus bool) (*usercase.Article, error) {
+func (self *ArticleRepo) SelectById(articleId uint64, checkStatus bool) (*usercase.Article, error) {
 	sql := "select * from t_blog_article where article_id = $1 and delete_at = 0"
 	if checkStatus {
 		sql += " and status = 0"
@@ -158,7 +158,15 @@ func (self *ArticleRepo) CountByCategoryId(categoryId int) (int64, error) {
 	return total, err
 }
 
-func (self ArticleRepo) DeleteById(articleId int64) error {
+func (self *ArticleRepo) CountByTitle(title string, articleId uint64) (uint8, error) {
+	sql := "select count(*) from t_blog_article where article_id != $1 and title = $2 and delete_at = 0"
+	row := self.db.QueryRow(context.Background(), sql, articleId, title)
+	var total uint8
+	err := row.Scan(&total)
+	return total, err
+}
+
+func (self ArticleRepo) DeleteById(articleId uint64) error {
 	sql := "update t_blog_article set delete_at = $1 where article_id = $2"
 	result, err := self.db.Exec(context.Background(), sql, time.Now().UnixMilli(), articleId)
 	if err == nil {
