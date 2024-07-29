@@ -14,7 +14,7 @@ const tableData = ref<Category[]>([]);
 const queryTableData = async () => {
   tableLoading.value = true;
   try {
-    const result = await categoryApi.listTree();
+    const result = await categoryApi.manageTree();
     if (result && result.code === 200) {
       tableData.value = result.data;
     }

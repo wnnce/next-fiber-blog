@@ -7,8 +7,6 @@ import LoadImage from '@/components/LoadImage.vue'
 import type { Link, LinkQueryForm } from '@/api/blog/link/types'
 import { linkApi } from '@/api/blog/link'
 import LinksForm from '@/views/blog/links/links-form.vue'
-import type { ConcatUpdateForm } from '@/api/blog/concat/types'
-import { concatApi } from '@/api/blog/concat'
 
 const { successMessage, loading } = useArcoMessage();
 

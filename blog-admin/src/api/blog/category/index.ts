@@ -5,8 +5,8 @@ export const categoryApi = {
   /**
    * 获取分类树型结构数据
    */
-  listTree: () => {
-    return sendGet<Category[]>('/category/manage/list');
+  manageTree: () => {
+    return sendGet<Category[]>('/category/manage/tree');
   },
   /**
    * 保存分类
@@ -35,5 +35,8 @@ export const categoryApi = {
    */
   deleteCategory: (id: number) => {
     return sendDelete<null>(`/category/${id}`)
+  },
+  tree: () => {
+    return sendGet<Category[]>('/open/category/list')
   }
 }

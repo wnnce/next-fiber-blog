@@ -4,10 +4,14 @@ import RightOperate from '@/components/RightOperate.vue'
 import { useArcoMessage } from '@/hooks/message'
 import { constant } from '@/assets/script/constant'
 import LoadImage from '@/components/LoadImage.vue'
-import LinksForm from '@/views/blog/links/links-form.vue'
 import type { Article, ArticleQueryForm, ArticleUpdateFrom } from '@/api/blog/article/types'
 import { articleApi } from '@/api/blog/article'
 import ArticleForm from '@/views/blog/article/article-form.vue'
+import type { OptionItem } from '@/assets/script/types'
+import { tagApi } from '@/api/blog/tags'
+import type { SelectOptionData, TreeNodeData } from '@arco-design/web-vue'
+import { categoryApi } from '@/api/blog/category'
+import type { Category } from '@/api/blog/category/types'
 
 const { successMessage, loading } = useArcoMessage();
 
@@ -93,6 +97,42 @@ const handleUpdateStatus = async (form: ArticleUpdateFrom) => {
   return false;
 }
 
+const tagsSelectOption = ref<SelectOptionData[]>([]);
+const queryTagSelectData = async () => {
+  const result = await tagApi.listTag();
+  const { code, data } = result;
+  if (code === 200 && data) {
+    tagsSelectOption.value = data.map(item => {
+      return {
+        label: item.tagName,
+        value: item.tagId,
+      }
+    })
+  }
+}
+
+const categoryTreeSelectOption = ref<TreeNodeData[]>([]);
+const queryCategorySelectData = async () => {
+  const result = await categoryApi.tree();
+  const { code, data } = result;
+  if (code === 200 && data) {
+    categoryTreeSelectOption.value = parseCategoryToSelectOption(data);
+  }
+}
+
+const parseCategoryToSelectOption = (categorys: Category[]): TreeNodeData[] => {
+  if (!categorys || categorys.length === 0) {
+    return [];
+  }
+  return categorys.map(item => {
+    return {
+      key: item.categoryId,
+      title: item.categoryName,
+      children: item.children && item.children.length > 0 ? parseCategoryToSelectOption(item.children) : undefined,
+    }
+  })
+}
+
 const formRef = ref();
 const showForm = (record?: Article) => {
   formRef.value.show(record);
@@ -100,6 +140,8 @@ const showForm = (record?: Article) => {
 
 onMounted(() => {
   queryTableData();
+  queryTagSelectData();
+  queryCategorySelectData();
 })
 </script>
 
@@ -109,6 +151,23 @@ onMounted(() => {
       <div class="search-item">
         <label>文章标题</label>
         <a-input v-model="queryForm.title" placeholder="请输入文章标题" />
+      </div>
+      <div class="search-item">
+        <label>标签</label>
+        <a-select v-model="queryForm.tagId" :options="tagsSelectOption"
+                  placeholder="请选择文章标签"
+                  allow-clear
+                  style="width: 200px"
+                  @clear="queryForm.tagId = undefined"
+        />
+      </div>
+      <div class="search-item">
+        <label>分类</label>
+        <a-tree-select v-model="queryForm.categoryId" :data="categoryTreeSelectOption"
+                       placeholder="请选择文章分类"
+                       allow-clear
+                       style="width: 240px"
+        />
       </div>
       <div class="search-item">
         <label>创建时间</label>
@@ -223,8 +282,16 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .article-list {
-  row-gap: var(--space-sm);
+  .article-item:last-child {
+    border-bottom: none;
+  }
+  .article-item:hover {
+    background-color: var(--color-border-1);
+  }
   .article-item {
+    padding: var(--space-sm);
+    border-bottom: 1px solid var(--color-border-2);
+    transition: background-color 300ms ease;
     > div {
       column-gap: var(--space-sm);
     }

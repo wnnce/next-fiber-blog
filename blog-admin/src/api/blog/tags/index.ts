@@ -1,5 +1,5 @@
 import type { Tag, TagForm, TagQueryForm, TagUpdateForm } from '@/api/blog/tags/types'
-import { sendDelete, sendPost, sendPut } from '@/api/request'
+import { sendDelete, sendGet, sendPost, sendPut } from '@/api/request'
 import type { Page } from '@/assets/script/types'
 
 // 系统标签API
@@ -38,5 +38,11 @@ export const tagApi = {
    */
   deleteTag: (id: number) => {
     return sendDelete<null>(`/tag/${id}`)
+  },
+  /**
+   * 获取标签列表
+   */
+  listTag: () => {
+    return sendGet<Tag[]>('/open/tag/list')
   }
 }

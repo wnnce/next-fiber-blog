@@ -15,6 +15,7 @@
   "dependencies": {
     "nprogress": "^0.2.0",
     "pinia": "^2.1.7",
+    "vditor": "^3.10.4",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
   },
@@ -30,6 +31,7 @@
     "@vue/tsconfig": "^0.5.1",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.23.0",
+    "less": "^4.2.0",
     "npm-run-all2": "^6.1.2",
     "prettier": "^3.2.5",
     "sass": "^1.77.5",

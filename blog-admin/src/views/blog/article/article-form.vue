@@ -1,16 +1,17 @@
 <script setup lang="ts">
 
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useArcoMessage } from '@/hooks/message'
 import type { Result } from '@/api/request'
-import type { FileItem } from '@arco-design/web-vue'
+import type { FileItem, SelectOptionData, TreeNodeData } from '@arco-design/web-vue'
 import type { FieldRule } from '@arco-design/web-vue/es/form/interface'
 import ImageUpload from '@/components/ImageUpload.vue'
-import type { Concat, ConcatForm } from '@/api/blog/concat/types'
-import { concatApi } from '@/api/blog/concat'
 import DictSelect from '@/components/DictSelect.vue'
 import type { Article, ArticleForm } from '@/api/blog/article/types'
 import { articleApi } from '@/api/blog/article'
+import type { Category } from '@/api/blog/category/types'
+import { tagApi } from '@/api/blog/tags'
+import { categoryApi } from '@/api/blog/category'
 
 const emits = defineEmits<{
   (e: 'reload'): void
@@ -19,12 +20,13 @@ const emits = defineEmits<{
 const { successMessage } = useArcoMessage();
 
 const modalShow = ref<boolean>(false);
-const show = (record?: Article) => {
+const show = (record?: Article, content?: string) => {
   if (record) {
     const { articleId, title, summary, coverUrl, categoryIds, tagIds, protocol, tips, password, isTop, isHot, isComment, isPrivate, sort, status } = record;
     Object.assign(formData, { articleId, title, summary, coverUrl : coverUrl || '', categoryIds, tagIds, protocol, tips, password, isTop, isHot, isComment, isPrivate, sort, status })
     formatAvatarToFileList();
   }
+  content && (formData.content = content);
   modalShow.value = true;
 }
 const onClose = () => {
@@ -44,7 +46,7 @@ const defaultFormData: ArticleForm = {
   password: undefined,
   isTop: false,
   isHot: false,
-  isComment: false,
+  isComment: true,
   isPrivate: false,
   sort: 1,
   status: 0,
@@ -94,6 +96,47 @@ const formatAvatarToFileList = () => {
   }]
 }
 
+const tagsSelectOption = ref<SelectOptionData[]>([]);
+const queryTagSelectData = async () => {
+  const result = await tagApi.listTag();
+  const { code, data } = result;
+  if (code === 200 && data) {
+    tagsSelectOption.value = data.map(item => {
+      return {
+        label: item.tagName,
+        value: item.tagId,
+      }
+    })
+  }
+}
+
+const categoryTreeSelectOption = ref<TreeNodeData[]>([]);
+const queryCategorySelectData = async () => {
+  const result = await categoryApi.tree();
+  const { code, data } = result;
+  if (code === 200 && data) {
+    categoryTreeSelectOption.value = parseCategoryToSelectOption(data);
+  }
+}
+
+const parseCategoryToSelectOption = (categorys: Category[]): TreeNodeData[] => {
+  if (!categorys || categorys.length === 0) {
+    return [];
+  }
+  return categorys.map(item => {
+    return {
+      key: item.categoryId,
+      title: item.categoryName,
+      children: item.children && item.children.length > 0 ? parseCategoryToSelectOption(item.children) : undefined,
+    }
+  })
+}
+
+onMounted(() => {
+  queryTagSelectData();
+  queryCategorySelectData();
+})
+
 defineExpose({
   show
 })
@@ -110,13 +153,13 @@ defineExpose({
         <a-textarea v-model="formData.summary" placeholder="请输入文章简介" />
       </a-form-item>
       <a-form-item label="封面" field="coverUrl">
-        <image-upload v-model:file-list="fileList" v-model:file-url="formData.coverUrl" width="300px" height="160px" />
+        <image-upload v-model:file-list="fileList" v-model:file-url="formData.coverUrl" width="260px" height="140px" />
       </a-form-item>
       <a-form-item label="分类" field="categoryIds">
-        <a-input v-model="formData.title" placeholder="请输入文章标题" />
+        <a-tree-select v-model="formData.categoryIds" :data="categoryTreeSelectOption" multiple placeholder="请选择文章分类" />
       </a-form-item>
       <a-form-item label="标签" field="tagIds">
-        <a-input v-model="formData.title" placeholder="请输入文章标题" />
+        <a-select v-model="formData.tagIds" :options="tagsSelectOption" multiple placeholder="请选择文章标签" />
       </a-form-item>
       <a-form-item label="许可协议" field="protocol">
         <a-input v-model="formData.protocol" placeholder="请输入许可协议" />
