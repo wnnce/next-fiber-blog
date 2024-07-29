@@ -71,9 +71,9 @@ type ICategoryService interface {
 
 	UpdateSelectiveCategory(form *CategoryUpdateForm) error
 
-	ListCategory() ([]*Category, error)
+	TreeCategory() ([]*Category, error)
 
-	ManageListCategory() ([]*Category, error)
+	ManageTreeCategory() ([]*Category, error)
 
 	QueryCategoryInfo(catId int) (*Category, error)
 

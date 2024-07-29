@@ -52,18 +52,18 @@ func (self *HttpApi) UpdateSelective(ctx fiber.Ctx) error {
 	return ctx.JSON(res.SimpleOK())
 }
 
-// List 博客端查询分类列表 tree
-func (h *HttpApi) List(ctx fiber.Ctx) error {
-	categorys, err := h.service.ListCategory()
+// Tree 博客端查询分类列表 tree
+func (h *HttpApi) Tree(ctx fiber.Ctx) error {
+	categorys, err := h.service.TreeCategory()
 	if err != nil {
 		return err
 	}
 	return ctx.JSON(res.OkByData(categorys))
 }
 
-// ManageList 管理端查询分类列表 tree
-func (h *HttpApi) ManageList(ctx fiber.Ctx) error {
-	categorys, err := h.service.ManageListCategory()
+// ManageTree 管理端查询分类列表 tree
+func (h *HttpApi) ManageTree(ctx fiber.Ctx) error {
+	categorys, err := h.service.ManageTreeCategory()
 	if err != nil {
 		return err
 	}

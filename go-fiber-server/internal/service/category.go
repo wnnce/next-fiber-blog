@@ -62,7 +62,7 @@ func (self *CategoryService) UpdateSelectiveCategory(form *usercase.CategoryUpda
 	return nil
 }
 
-func (self *CategoryService) ListCategory() ([]*usercase.Category, error) {
+func (self *CategoryService) TreeCategory() ([]*usercase.Category, error) {
 	categoryTree, err := data.RedisGetSlice[*usercase.Category](context.Background(), categoryTreeListCacheKey, self.redisTemplate.Client())
 	if err == nil && len(categoryTree) > 0 {
 		return categoryTree, nil
@@ -81,7 +81,7 @@ func (self *CategoryService) ListCategory() ([]*usercase.Category, error) {
 	return categoryTree, err
 }
 
-func (self *CategoryService) ManageListCategory() ([]*usercase.Category, error) {
+func (self *CategoryService) ManageTreeCategory() ([]*usercase.Category, error) {
 	categorys, err := self.repo.ManageList()
 	if err != nil {
 		slog.Error(fmt.Sprintf("获取分类列表失败，错误信息：%s", err))
