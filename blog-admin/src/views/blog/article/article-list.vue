@@ -7,13 +7,15 @@ import LoadImage from '@/components/LoadImage.vue'
 import type { Article, ArticleQueryForm, ArticleUpdateFrom } from '@/api/blog/article/types'
 import { articleApi } from '@/api/blog/article'
 import ArticleForm from '@/views/blog/article/article-form.vue'
-import type { OptionItem } from '@/assets/script/types'
 import { tagApi } from '@/api/blog/tags'
 import type { SelectOptionData, TreeNodeData } from '@arco-design/web-vue'
 import { categoryApi } from '@/api/blog/category'
 import type { Category } from '@/api/blog/category/types'
+import { useLocalStorage } from '@/hooks/local-storage'
+import { useRouter } from 'vue-router'
 
 const { successMessage, loading } = useArcoMessage();
+const router = useRouter();
 
 const tableLoading = ref<boolean>(false);
 const recordTotal = ref<number>(0);
@@ -138,6 +140,14 @@ const showForm = (record?: Article) => {
   formRef.value.show(record);
 }
 
+const routeArticlePublish = (articleId?: number) => {
+  console.log(articleId);
+  if (articleId) {
+    useLocalStorage().set<number>('edit-article', articleId, undefined);
+  }
+  router.push({ path: '/article/publish' })
+}
+
 onMounted(() => {
   queryTableData();
   queryTagSelectData();
@@ -186,7 +196,7 @@ onMounted(() => {
     </div>
     <div class="flex justify-between">
       <div class="flex" style="column-gap: 12px">
-        <a-button type="primary">
+        <a-button type="primary" @click="routeArticlePublish(undefined)">
           <template #icon><icon-plus /></template>
           新增
         </a-button>
@@ -202,9 +212,9 @@ onMounted(() => {
             </div>
             <div class="item-text">
               <h3 class="title">{{ item.title }}</h3>
-              <p class="summary info-text">{{ item.summary }}</p>
+              <p class="summary desc-text">{{ item.summary }}</p>
             </div>
-            <div class="flex item-center info-text">
+            <div class="flex item-center desc-text">
               <ul>
                 <li><icon-eye/><span>{{ item.viewNum }}</span></li>
                 <li><icon-share-alt/><span>{{ item.shareNum }}</span></li>
@@ -241,7 +251,7 @@ onMounted(() => {
                 />
               </li>
               <li>
-                <a-button type="text" shape="round">
+                <a-button type="text" shape="round" @click="routeArticlePublish(item.articleId)">
                   <template #icon>
                     <icon-edit />
                   </template>

@@ -22,11 +22,13 @@ const { successMessage } = useArcoMessage();
 const modalShow = ref<boolean>(false);
 const show = (record?: Article, content?: string) => {
   if (record) {
-    const { articleId, title, summary, coverUrl, categoryIds, tagIds, protocol, tips, password, isTop, isHot, isComment, isPrivate, sort, status } = record;
-    Object.assign(formData, { articleId, title, summary, coverUrl : coverUrl || '', categoryIds, tagIds, protocol, tips, password, isTop, isHot, isComment, isPrivate, sort, status })
+    const { articleId, title, summary, coverUrl, categoryIds, tagIds, content, protocol, tips, password, isTop, isHot, isComment, isPrivate, sort, status } = record;
+    Object.assign(formData, { articleId, title, summary, coverUrl : coverUrl || '', categoryIds, tagIds, content, protocol, tips, password, isTop, isHot, isComment, isPrivate, sort, status })
     formatAvatarToFileList();
   }
-  content && (formData.content = content);
+  if (!formData.content && content) {
+    formData.content = content;
+  }
   modalShow.value = true;
 }
 const onClose = () => {

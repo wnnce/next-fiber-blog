@@ -1,8 +1,6 @@
 <script setup lang="ts">
 
 import { onMounted, ref } from 'vue'
-import type { Config } from '@/api/system/config/types'
-import { configApi } from '@/api/system/config'
 import RightOperate from '@/components/RightOperate.vue'
 import { useArcoMessage } from '@/hooks/message'
 import type { Menu } from '@/api/system/menu/types'

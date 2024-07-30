@@ -69,7 +69,7 @@ const clear = () => {
 }
 
 defineExpose({
-  getMarkdownValue, getHtmlValue, setValue,clear
+  getMarkdownValue, getHtmlValue, getVditor, setValue, clear
 })
 
 onMounted(() => {
