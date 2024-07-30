@@ -118,8 +118,8 @@ func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Art
 	condition.WriteString(fmt.Sprintf(" order by is_top desc, sort, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
 	args = append(args, query.Size, offset)
 	rows, err := self.db.Query(context.Background(), `select article_id, title, summary, cover_url, category_ids, 
-       tag_ids, view_num, share_num, protocol, tips, password, is_hot, is_top, is_comment, is_private, create_time, sort, 
-       status from t_blog_article `+condition.String(), args...)
+       tag_ids, view_num, share_num, vote_up, protocol, tips, password, is_hot, is_top, is_comment, is_private, create_time, 
+       sort, status from t_blog_article `+condition.String(), args...)
 	if err != nil {
 		return nil, 0, err
 	}
