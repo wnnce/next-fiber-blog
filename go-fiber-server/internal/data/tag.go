@@ -7,9 +7,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
+	sqlbuild "go-fiber-ent-web-layout/pkg/sql-build"
 	"log/slog"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -24,8 +24,11 @@ func NewTagRepo(data *Data) usercase.ITagRepo {
 }
 
 func (self *TagRepo) Save(form *usercase.TagForm) error {
-	row := self.db.QueryRow(context.Background(), "Insert Into t_blog_tag (tag_name, cover_url, color, sort, status) values ($1,$2,$3,$4,$5) returning tag_id",
-		form.TagName, form.CoverUrl, form.Color, *form.Sort, *form.Status)
+	builder := sqlbuild.NewInsertBuilder("t_blog_tag").
+		Fields("tag_name", "cover_url", "color", "sort", "status").
+		Values(form.TagName, form.CoverUrl, form.Color, *form.Sort, *form.Status).
+		Returning("tag_id")
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args())
 	var insertId int
 	err := row.Scan(&insertId)
 	if err == nil {
@@ -35,8 +38,17 @@ func (self *TagRepo) Save(form *usercase.TagForm) error {
 }
 
 func (self *TagRepo) Update(form *usercase.TagForm) error {
-	result, err := self.db.Exec(context.Background(), "update t_blog_tag set update_time = now(), tag_name = $1, cover_url = $2, color = $3, sort = $4, status = $5 where tag_id = $6",
-		form.TagName, form.CoverUrl, form.Color, *form.Sort, *form.Status, form.TagId)
+	builder := sqlbuild.NewUpdateBuilder("t_blog_tag").
+		SetRaw("update_time", "now()").
+		SetByMap(map[string]any{
+			"tag_name":  form.TagName,
+			"cover_url": form.CoverUrl,
+			"color":     form.Color,
+			"sort":      *form.Sort,
+			"status":    *form.Status,
+		}).
+		Where("tag_id").Eq(form.TagId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info(fmt.Sprintf("标签更新完成，row:%d,id:%d", result.RowsAffected(), form.TagId))
 	}
@@ -44,16 +56,11 @@ func (self *TagRepo) Update(form *usercase.TagForm) error {
 }
 
 func (self *TagRepo) UpdateSelective(form *usercase.TagUpdateForm) error {
-	var builder strings.Builder
-	builder.WriteString("update t_blog_tag set update_time = now() ")
-	args := make([]any, 0)
-	if form.Status != nil {
-		args = append(args, *form.Status)
-		builder.WriteString(fmt.Sprintf(", status = $%d", len(args)))
-	}
-	builder.WriteString(fmt.Sprintf(" where tag_id = $%d", len(args)+1))
-	args = append(args, form.TagId)
-	result, err := self.db.Exec(context.Background(), builder.String(), args...)
+	builder := sqlbuild.NewUpdateBuilder("t_blog_tag").
+		SetRaw("update_time", "now()").
+		SetByCondition(form.Status != nil, "status", form.Status).
+		Where("tag_id").Eq(form.TagId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("标签快捷更新完成", "row", result.RowsAffected(), "tagId", form.TagId)
 	}
@@ -61,7 +68,11 @@ func (self *TagRepo) UpdateSelective(form *usercase.TagUpdateForm) error {
 }
 
 func (self *TagRepo) UpdateViewNum(tagId int, addNum int) error {
-	result, err := self.db.Exec(context.Background(), "update t_blog_tag set update_time = now(), view_num = view_num + $1 where tag_id = $2", addNum, tagId)
+	builder := sqlbuild.NewUpdateBuilder("t_blog_tag").
+		SetRaw("update_time", "now()").
+		SetRaw("view_num", "view_num"+strconv.Itoa(addNum)).
+		Where("tag_id").Eq(tagId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), tagId)
 	if err == nil {
 		slog.Info(fmt.Sprintf("更新标签查看次数完成，row:%d,id:%d,addnum:%d", result.RowsAffected(), tagId, addNum))
 	}
@@ -69,7 +80,11 @@ func (self *TagRepo) UpdateViewNum(tagId int, addNum int) error {
 }
 
 func (self *TagRepo) SelectById(id int) (*usercase.Tag, error) {
-	rows, err := self.db.Query(context.Background(), "select * from t_blog_tag where tag_id = $1 and delete_at = '0' and status = 0", id)
+	builder := sqlbuild.NewSelectBuilder("t_blog_tag").
+		Where("tag_id").Eq(id).
+		And("status").EqRaw("0").
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	rows, err := self.db.Query(context.Background(), builder.Sql(), id)
 	if err == nil && rows.Next() {
 		defer rows.Close()
 		return pgx.RowToAddrOfStructByName[usercase.Tag](rows)
@@ -78,16 +93,15 @@ func (self *TagRepo) SelectById(id int) (*usercase.Tag, error) {
 }
 
 func (self *TagRepo) Page(query *usercase.TagQueryForm) ([]*usercase.Tag, int64, error) {
-	var condition strings.Builder
-	condition.WriteString("where delete_at = '0'")
-	args := make([]any, 0)
-	if query.TagName != "" {
-		args = append(args, "%"+query.TagName+"%")
-		condition.WriteString(fmt.Sprintf(" and tag_name like $%d", len(args)))
-	}
-	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
-	total, err := self.conditionTotal(condition.String(), args...)
-	if err != nil {
+	builder := sqlbuild.NewSelectBuilder("t_blog_tag").
+		WhereByCondition(query.TagName != "", "tag_name").Like("%"+query.TagName+"%").
+		AndByCondition(query.CreateTimeBegin != "", "create_time").Ge(query.CreateTimeBegin).
+		AndByCondition(query.CreateTimeEnd != "", "create_time").Le(query.CreateTimeEnd).
+		And("delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("sort", "create_time desc")
+	var total int64
+	row := self.db.QueryRow(context.Background(), builder.CountSql(), builder.Args()...)
+	if err := row.Scan(&total); err != nil {
 		return nil, 0, err
 	}
 	tags := make([]*usercase.Tag, 0)
@@ -95,9 +109,8 @@ func (self *TagRepo) Page(query *usercase.TagQueryForm) ([]*usercase.Tag, int64,
 		return tags, total, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString(fmt.Sprintf(" order by sort asc, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
-	args = append(args, query.Size, offset)
-	rows, err := self.db.Query(context.Background(), "select * from t_blog_tag "+condition.String(), args...)
+	builder.Limit(int64(query.Size)).Offset(offset)
+	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -109,7 +122,12 @@ func (self *TagRepo) Page(query *usercase.TagQueryForm) ([]*usercase.Tag, int64,
 }
 
 func (self *TagRepo) List() ([]*usercase.Tag, error) {
-	rows, err := self.db.Query(context.Background(), "select tag_id, tag_name, cover_url, view_num, color from t_blog_tag where delete_at = 0 and status = 0 order by sort, create_time desc")
+	builder := sqlbuild.NewSelectBuilder("t_blog_tag").
+		Select("tag_id", "tag_name", "cover_url", "view_num", "color").
+		Where("status").EqRaw("0").
+		And("delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("sort", "create_time desc")
+	rows, err := self.db.Query(context.Background(), builder.Sql())
 	if err != nil {
 		return nil, err
 	}
@@ -123,16 +141,12 @@ func (self *TagRepo) ListByIds(ids []uint) ([]*usercase.Tag, error) {
 	if len(ids) == 0 {
 		return make([]*usercase.Tag, 0), nil
 	}
-	var builder strings.Builder
-	builder.WriteString("select tag_id, tag_name, color from t_blog_tag where delete_at = '0' and status = 0 and tag_id in (")
-	for i, id := range ids {
-		if i > 0 {
-			builder.WriteByte(',')
-		}
-		builder.WriteRune(rune(id))
-	}
-	builder.WriteByte(')')
-	rows, err := self.db.Query(context.Background(), builder.String())
+	builder := sqlbuild.NewSelectBuilder("t_blog_tag").
+		Select("tag_id", "tag_name", "color").
+		Where("tag_id").In(sqlbuild.SliceToAnySlice[uint](ids)...).
+		And("status").EqRaw("0").
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		return nil, err
 	}
@@ -143,15 +157,22 @@ func (self *TagRepo) ListByIds(ids []uint) ([]*usercase.Tag, error) {
 }
 
 func (self *TagRepo) CountByTagName(name string, tagId uint) (uint8, error) {
-	row := self.db.QueryRow(context.Background(), "select count(tag_id) from t_blog_tag where tag_name = $1 and delete_at = '0' and tag_id != $2", name, tagId)
+	builder := sqlbuild.NewSelectBuilder("t_blog_tag").
+		Select("count(*)").
+		Where("tag_id").Ne(tagId).
+		And("tag_name").Eq(name).
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var total uint8
 	err := row.Scan(&total)
 	return total, err
 }
 
 func (self *TagRepo) DeleteById(id int) error {
-	result, err := self.db.Exec(context.Background(), "update t_blog_tag set delete_at = $1 where tag_id = $2",
-		time.Now().UnixMilli(), id)
+	builder := sqlbuild.NewUpdateBuilder("t_blog_tag").
+		Set("delete_at", time.Now().UnixMilli()).
+		Where("tag_id").Eq(id).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info(fmt.Sprintf("删除标签完成，row：%d,id:%d", result.RowsAffected(), id))
 	}
@@ -162,22 +183,9 @@ func (self *TagRepo) DeleteByIds(ids []int) (int64, error) {
 	if len(ids) == 0 {
 		return 0, nil
 	}
-	var builder strings.Builder
-	builder.WriteString("update t_blog_tag set delete_at = $1 where tag_id in (")
-	for i, id := range ids {
-		if i > 0 {
-			builder.WriteByte(',')
-		}
-		builder.WriteString(strconv.Itoa(id))
-	}
-	builder.WriteByte(')')
-	result, err := self.db.Exec(context.Background(), builder.String(), time.Now().UnixMilli())
+	builder := sqlbuild.NewUpdateBuilder("t_blog_tag").
+		Set("delete_at", time.Now().UnixMilli()).
+		Where("tag_id").In(sqlbuild.SliceToAnySlice[int](ids)...).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	return result.RowsAffected(), err
-}
-
-func (self *TagRepo) conditionTotal(condition string, args ...any) (int64, error) {
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_blog_tag "+condition, args...)
-	var total int64
-	err := row.Scan(&total)
-	return total, err
 }
