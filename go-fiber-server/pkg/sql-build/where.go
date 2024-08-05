@@ -79,7 +79,9 @@ func (self *WhereBuilder) addRawConditon(field, operator, prefix, value string) 
 }
 
 func (self *WhereBuilder) build() SqlBuilder {
-	self.whereBuffer.addCondition(self.buffer.String())
+	if self.buffer.Len() > 0 {
+		self.whereBuffer.addCondition(self.buffer.String())
+	}
 	defaultPool.RecycleStringBuilder(self.buffer)
 	return self.builder
 }
