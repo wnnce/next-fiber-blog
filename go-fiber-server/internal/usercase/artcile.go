@@ -22,6 +22,12 @@ type Article struct {
 	BaseEntity
 }
 
+// ArticleVo 博客文章Vo类
+type ArticleVo struct {
+	Article
+	CommentNum int64 `json:"commentNum" db:"comment_num"`
+}
+
 // ArticleUpdateForm 文章更新表单
 type ArticleUpdateForm struct {
 	ArticleId uint64 `json:"articleId" validate:"required"`
@@ -49,9 +55,9 @@ type IArticleRepo interface {
 
 	UpdateSelective(form *ArticleUpdateForm) error
 
-	Page(query *ArticleQueryForm) ([]*Article, int64, error)
+	Page(query *ArticleQueryForm) ([]*ArticleVo, int64, error)
 
-	SelectById(articleId uint64, checkStatus bool) (*Article, error)
+	SelectById(articleId uint64, checkStatus bool) (*ArticleVo, error)
 
 	CountByTagId(tagId int) (int64, error)
 
@@ -69,9 +75,9 @@ type IArticleService interface {
 
 	UpdateSelectiveArticle(form *ArticleUpdateForm) error
 
-	Page(query *ArticleQueryForm) (*PageData[Article], error)
+	Page(query *ArticleQueryForm) (*PageData[ArticleVo], error)
 
-	SelectById(articleId uint64, checkStatus bool) (*Article, error)
+	SelectById(articleId uint64, checkStatus bool) (*ArticleVo, error)
 
 	DeleteArticleById(articleId uint64) error
 }

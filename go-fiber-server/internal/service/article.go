@@ -56,7 +56,7 @@ func (self *ArticleService) UpdateSelectiveArticle(form *usercase.ArticleUpdateF
 	return nil
 }
 
-func (self *ArticleService) Page(query *usercase.ArticleQueryForm) (*usercase.PageData[usercase.Article], error) {
+func (self *ArticleService) Page(query *usercase.ArticleQueryForm) (*usercase.PageData[usercase.ArticleVo], error) {
 	articles, total, err := self.repo.Page(query)
 	if err != nil {
 		slog.Error("分页查询博客文章失败", "error", err.Error())
@@ -65,7 +65,7 @@ func (self *ArticleService) Page(query *usercase.ArticleQueryForm) (*usercase.Pa
 	return usercase.NewPageData(articles, total, query.Page, query.Size), nil
 }
 
-func (self *ArticleService) SelectById(articleId uint64, checkStatus bool) (*usercase.Article, error) {
+func (self *ArticleService) SelectById(articleId uint64, checkStatus bool) (*usercase.ArticleVo, error) {
 	article, err := self.repo.SelectById(articleId, checkStatus)
 	if err != nil {
 		slog.Error("查询博客文章详情失败", "error", err.Error())

@@ -2,13 +2,12 @@ package data
 
 import (
 	"context"
-	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
+	sqlbuild "go-fiber-ent-web-layout/pkg/sql-build"
 	"log/slog"
-	"strings"
 )
 
 type OtherRepo struct {
@@ -22,18 +21,24 @@ func NewOtherRepo(data *Data) usercase.IOtherRepo {
 }
 
 func (self *OtherRepo) SaveFileRecord(file *usercase.UploadFile) {
-	row := self.db.QueryRow(context.Background(), "insert into t_upload_file (file_md5, origin_name, file_name, file_path, file_size, file_type) VALUES ($1, $2, $3, $4, $5, $6) returning id",
-		file.FileMd5, file.OriginName, file.FileName, file.FilePath, file.FileSize, file.FileType)
+	builder := sqlbuild.NewInsertBuilder("t_upload_file").
+		Fields("file_md5", "origin_name", "file_name", "file_path", "file_size", "file_type").
+		Values(file.FileMd5, file.OriginName, file.FileName, file.FilePath, file.FileSize, file.FileType).
+		Returning("id")
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args())
 	var fileId int64
 	if err := row.Scan(&fileId); err != nil {
 		slog.Error("保存文件上传记录信息失败", "err", err.Error())
 	} else {
+		file.ID = fileId
 		slog.Info("保存文件上传记录信息成功", "fileId", fileId)
 	}
 }
 
 func (self *OtherRepo) QueryFileByMd5(fileMd5 string) (*usercase.UploadFile, error) {
-	rows, err := self.db.Query(context.Background(), "select * from t_upload_file where file_md5 = $1", fileMd5)
+	builder := sqlbuild.NewSelectBuilder("t_upload_file").
+		Where("file_md5").Eq(fileMd5).BuildAsSelect()
+	rows, err := self.db.Query(context.Background(), builder.Sql(), fileMd5)
 	if err == nil && rows.Next() {
 		defer rows.Close()
 		return pgx.RowToAddrOfStructByName[usercase.UploadFile](rows)
@@ -42,7 +47,9 @@ func (self *OtherRepo) QueryFileByMd5(fileMd5 string) (*usercase.UploadFile, err
 }
 
 func (self *OtherRepo) DeleteFileByName(filename string) error {
-	result, err := self.db.Exec(context.Background(), "delete from t_upload_file where file_path = $1", filename)
+	builder := sqlbuild.NewDeleteBuilder("t_upload_file").
+		Where("file_path").Eq(filename).BuildSaDelete()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), filename)
 	if err == nil {
 		slog.Info("文件上传记录删除成功", "row", result.RowsAffected())
 	}
@@ -50,39 +57,34 @@ func (self *OtherRepo) DeleteFileByName(filename string) error {
 }
 
 func (self *OtherRepo) SaveLoginRecord(record *usercase.LoginLog) {
-	_, err := self.db.Exec(context.Background(), "insert into t_login_log (user_id, user_type, username, login_ip, location, login_ua, remark, result, login_type) values ($1, $2, $3, $4, $5, $6, $7, $8, $9 ) returning id",
-		record.UserId, record.UserType, record.Username, record.LoginIP, record.Location, record.LoginUa, record.Remark, record.Result, record.LoginType)
+	builder := sqlbuild.NewInsertBuilder("t_login_log").
+		Fields("user_id", "user_type", "username", "login_ip", "location", "login_ua", "remark", "result", "login_type").
+		Values(record.UserId, record.UserType, record.Username, record.LoginIP, record.Location, record.LoginUa, record.Remark, record.Result, record.LoginType)
+	_, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		slog.Error("保存登录日志失败", "err", err)
 	}
 }
 
 func (self *OtherRepo) SaveAccessRecord(record *usercase.AccessLog) {
-	_, err := self.db.Exec(context.Background(), "insert into t_blog_access_log (location, referee, access_ip, access_ua) values ($1, $2, $3, $4)",
-		record.Location, record.Referee, record.AccessIp, record.AccessUa)
+	builder := sqlbuild.NewInsertBuilder("t_blog_access_log").
+		Fields("location", "referee", "access_ip", "access_ua").
+		Values(record.Location, record.Referee, record.AccessIp, record.AccessUa)
+	_, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		slog.Error("保存访问日志失败", "err", err)
 	}
 }
 
 func (self *OtherRepo) PageLoginRecord(query *usercase.LoginLogQueryForm) ([]*usercase.LoginLog, int64, error) {
-	var condition strings.Builder
-	condition.WriteString(" where id > 0")
-	args := make([]any, 0)
-	if query.Username != "" {
-		args = append(args, query.Username)
-		condition.WriteString(fmt.Sprintf(" and username = $%d", len(args)))
-	}
-	if query.LoginType != nil {
-		args = append(args, *query.LoginType)
-		condition.WriteString(fmt.Sprintf(" and login_type = $%d", len(args)))
-	}
-	if query.Result != nil {
-		args = append(args, *query.Result)
-		condition.WriteString(fmt.Sprintf(" and result = $%d", len(args)))
-	}
-	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_login_log "+condition.String(), args...)
+	builder := sqlbuild.NewSelectBuilder("t_login_log").
+		WhereByCondition(query.Username != "", "username").Eq(query.Username).
+		AndByCondition(query.LoginType != nil, "login_type").Eq(query.LoginType).
+		AndByCondition(query.Result != nil, "result").Eq(query.Result).
+		AndByCondition(query.CreateTimeBegin != "", "create_time").Ge(query.CreateTimeBegin).
+		AndByCondition(query.CreateTimeEnd != "", "create_time").Le(query.CreateTimeEnd).BuildAsSelect().
+		OrderBy("create_time desc")
+	row := self.db.QueryRow(context.Background(), builder.CountSql(), builder.Args()...)
 	var total int64
 	if err := row.Scan(&total); err != nil {
 		return nil, 0, err
@@ -92,9 +94,8 @@ func (self *OtherRepo) PageLoginRecord(query *usercase.LoginLogQueryForm) ([]*us
 		return records, total, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString(fmt.Sprintf(" order by create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
-	args = append(args, query.Size, offset)
-	rows, err := self.db.Query(context.Background(), "select * from t_login_log "+condition.String(), args...)
+	builder.Limit(int64(query.Size)).Offset(offset)
+	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -106,15 +107,12 @@ func (self *OtherRepo) PageLoginRecord(query *usercase.LoginLogQueryForm) ([]*us
 }
 
 func (self *OtherRepo) PageAccessRecord(query *usercase.AccessLogQueryForm) ([]*usercase.AccessLog, int64, error) {
-	var condition strings.Builder
-	condition.WriteString(" where id > 0")
-	args := make([]any, 0)
-	if query.Ip != "" {
-		args = append(args, query.Ip)
-		condition.WriteString(fmt.Sprintf(" and access_ip = $%d", len(args)))
-	}
-	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_blog_access_log "+condition.String(), args...)
+	builder := sqlbuild.NewSelectBuilder("t_blog_access_log").
+		WhereByCondition(query.Ip != "", "access_ip").Eq(query.Ip).
+		AndByCondition(query.CreateTimeBegin != "", "create_time").Ge(query.CreateTimeBegin).
+		AndByCondition(query.CreateTimeEnd != "", "create_time").Le(query.CreateTimeEnd).BuildAsSelect().
+		OrderBy("create_time desc")
+	row := self.db.QueryRow(context.Background(), builder.CountSql(), builder.Args()...)
 	var total int64
 	if err := row.Scan(&total); err != nil {
 		return nil, 0, err
@@ -124,9 +122,8 @@ func (self *OtherRepo) PageAccessRecord(query *usercase.AccessLogQueryForm) ([]*
 		return records, total, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString(fmt.Sprintf(" order by create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
-	args = append(args, query.Size, offset)
-	rows, err := self.db.Query(context.Background(), "select * from t_blog_access_log "+condition.String(), args...)
+	builder.Limit(int64(query.Size)).Offset(offset)
+	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		return nil, 0, err
 	}

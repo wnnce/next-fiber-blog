@@ -7,9 +7,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
+	sqlbuild "go-fiber-ent-web-layout/pkg/sql-build"
 	"log/slog"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -24,8 +23,11 @@ func NewSysRoleRepo(data *Data) usercase.ISysRoleRepo {
 }
 
 func (self *SysRoleRepo) Save(role *usercase.SysRole) error {
-	sql := "insert into t_system_role (role_name, role_key, menus, sort, status, remark) values ($1, $2, $3, $4, $5, $6) returning role_id"
-	row := self.db.QueryRow(context.Background(), sql, role.RoleName, role.RoleKey, role.Menus, role.Sort, role.Status, role.Remark)
+	builder := sqlbuild.NewInsertBuilder("t_system_role").
+		Fields("role_name", "role_key", "menus", "sort", "status", "remark").
+		Values(role.RoleName, role.RoleKey, role.Menus, role.Sort, role.Status, role.Remark).
+		Returning("role_id")
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var roleId uint
 	err := row.Scan(&roleId)
 	if err == nil {
@@ -36,9 +38,17 @@ func (self *SysRoleRepo) Save(role *usercase.SysRole) error {
 }
 
 func (self *SysRoleRepo) Update(role *usercase.SysRole) error {
-	sql := `update t_system_role set update_time = now(), role_name = $1, role_key = $2, menus = $3, sort = $4, status = $5, remark = $6 
-                     where role_id = $7`
-	result, err := self.db.Exec(context.Background(), sql, role.RoleName, role.RoleKey, role.Menus, role.Sort, role.Status, role.Remark, role.RoleId)
+	builder := sqlbuild.NewUpdateBuilder("t_system_role").
+		SetRaw("update_time", "now()").
+		SetByMap(map[string]any{
+			"role_name": role.RoleName,
+			"role_key":  role.RoleKey,
+			"menus":     role.Menus,
+			"sort":      role.Sort,
+			"status":    role.Status,
+			"remark":    role.Remark,
+		}).Where("role_id").Eq(role.RoleId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info(fmt.Sprintf("更新系统角色完成，row:%d,roleId:%d", result.RowsAffected(), role.RoleId))
 	}
@@ -46,16 +56,11 @@ func (self *SysRoleRepo) Update(role *usercase.SysRole) error {
 }
 
 func (self *SysRoleRepo) UpdateSelective(form *usercase.SysRoleUpdateForm) error {
-	var builder strings.Builder
-	builder.WriteString("update t_system_role set update_time = now()")
-	args := make([]any, 0)
-	if form.Status != nil {
-		args = append(args, *form.Status)
-		builder.WriteString(fmt.Sprintf(", status = $%d", len(args)))
-	}
-	builder.WriteString(fmt.Sprintf(" where role_id = $%d", len(args)+1))
-	args = append(args, form.RoleId)
-	result, err := self.db.Exec(context.Background(), builder.String(), args...)
+	builder := sqlbuild.NewUpdateBuilder("t_system_role").
+		SetRaw("update_time", "now()").
+		SetByCondition(form.Status != nil, "status", form.Status).
+		Where("role_id").Eq(form.RoleId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("快捷更新系统角色完成", "row", result.RowsAffected(), "roleId", form.RoleId)
 	}
@@ -63,7 +68,11 @@ func (self *SysRoleRepo) UpdateSelective(form *usercase.SysRoleUpdateForm) error
 }
 
 func (self *SysRoleRepo) ListAll() ([]usercase.SysRole, error) {
-	rows, err := self.db.Query(context.Background(), "select role_id, role_key, role_name, sort from t_system_role where delete_at = 0 and status = 0")
+	builder := sqlbuild.NewSelectBuilder("t_system_role").
+		Select("role_id", "role_key", "role_name", "sort").
+		Where("status").EqRaw("0").
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	rows, err := self.db.Query(context.Background(), builder.Sql())
 	if err != nil {
 		return nil, err
 	}
@@ -74,20 +83,17 @@ func (self *SysRoleRepo) ListAll() ([]usercase.SysRole, error) {
 }
 
 func (self *SysRoleRepo) Page(query *usercase.SysRoleQueryForm) ([]*usercase.SysRole, int64, error) {
-	var condition strings.Builder
-	condition.WriteString("where delete_at = 0 ")
-	args := make([]any, 0)
-	if query.Name != "" {
-		args = append(args, "%"+query.Name+"%")
-		condition.WriteString(fmt.Sprintf("and role_name like $%d ", len(args)))
-	}
-	if query.Key != "" {
-		args = append(args, "%"+query.Key+"%")
-		condition.WriteString(fmt.Sprintf("and role_key like $%d ", len(args)))
-	}
-	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
-	total, err := self.conditionToal(condition.String(), args...)
-	if err != nil {
+	builder := sqlbuild.NewSelectBuilder("t_system_role").
+		WhereByCondition(query.Name != "", "role_name").Like("%"+query.Name+"%").
+		AndByCondition(query.Key != "", "role_key").Like("%"+query.Key+"%").
+		AndByCondition(query.CreateTimeBegin != "", "create_time").Ge(query.CreateTimeBegin).
+		AndByCondition(query.CreateTimeEnd != "", "create_time").Le(query.CreateTimeEnd).
+		And("delete_at").EqRaw("0").
+		BuildAsSelect().
+		OrderBy("sort", "create_time desc")
+	var total int64
+	row := self.db.QueryRow(context.Background(), builder.CountSql(), builder.Args()...)
+	if err := row.Scan(&total); err != nil {
 		return nil, 0, err
 	}
 	roles := make([]*usercase.SysRole, 0)
@@ -95,9 +101,8 @@ func (self *SysRoleRepo) Page(query *usercase.SysRoleQueryForm) ([]*usercase.Sys
 		return roles, total, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString(fmt.Sprintf(" order by sort, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
-	args = append(args, query.Size, offset)
-	rows, err := self.db.Query(context.Background(), "select * from t_system_role "+condition.String(), args...)
+	builder.Limit(int64(query.Size)).Offset(offset)
+	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -109,7 +114,10 @@ func (self *SysRoleRepo) Page(query *usercase.SysRoleQueryForm) ([]*usercase.Sys
 }
 
 func (self *SysRoleRepo) DeleteById(roleId int) error {
-	result, err := self.db.Exec(context.Background(), "update t_system_role set delete_at = $1 where role_id = $2", time.Now().UnixMilli(), roleId)
+	builder := sqlbuild.NewUpdateBuilder("t_system_role").
+		Set("delete_at", time.Now().UnixMilli()).
+		Where("role_id").Eq(roleId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("删除系统角色完成", "row", result.RowsAffected(), "roleId", roleId)
 	}
@@ -117,25 +125,24 @@ func (self *SysRoleRepo) DeleteById(roleId int) error {
 }
 
 func (self *SysRoleRepo) CountByRoleKey(roleKey string, roleId uint) (uint8, error) {
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_system_role where role_key = $1 and delete_at = 0 and role_id != $2",
-		roleKey, roleId)
+	builder := sqlbuild.NewSelectBuilder("t_system_role").
+		Select("count(*)").
+		Where("role_id").Ne(roleId).
+		And("role_key").Eq(roleKey).
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var total uint8
 	err := row.Scan(&total)
 	return total, err
 }
 
 func (self *SysRoleRepo) ListRoleKeyByIds(ids []uint) ([]string, error) {
-	var builder strings.Builder
-	builder.WriteString("select role_key from t_system_role where role_id in (")
-	for i, id := range ids {
-		if i > 0 {
-			builder.WriteByte(',')
-		}
-		builder.WriteString(strconv.FormatUint(uint64(id), 10))
-	}
-	builder.WriteString(") and delete_at = 0 and status = 0")
-	fmt.Println(builder.String())
-	rows, err := self.db.Query(context.Background(), builder.String())
+	builder := sqlbuild.NewSelectBuilder("t_system_role").
+		Select("role_key").
+		Where("role_id").In(sqlbuild.SliceToAnySlice[uint](ids)...).
+		And("status").EqRaw("0").
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		slog.Error("查询角色Key列表失败", "err", err)
 		return nil, err
@@ -146,11 +153,4 @@ func (self *SysRoleRepo) ListRoleKeyByIds(ids []uint) ([]string, error) {
 		err = row.Scan(&key)
 		return key, err
 	})
-}
-
-func (self *SysRoleRepo) conditionToal(condition string, args ...any) (int64, error) {
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_system_role "+condition, args...)
-	var total int64
-	err := row.Scan(&total)
-	return total, err
 }

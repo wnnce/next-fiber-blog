@@ -6,9 +6,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go-fiber-ent-web-layout/internal/usercase"
+	sqlbuild "go-fiber-ent-web-layout/pkg/sql-build"
 	"log/slog"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -22,48 +21,59 @@ func NewConcatRepo(data *Data) usercase.IConcatRepo {
 	}
 }
 
-func (c *ConcatRepo) Save(concat *usercase.Concat) error {
-	var insertId uint
-	err := c.db.QueryRow(context.Background(), "insert into t_blog_concat (name, logo_url, target_url, is_main, sort, status) values ($1, $2, $3, $4, $5, $6) returning concat_id",
-		concat.Name, concat.LogoUrl, concat.TargetUrl, concat.IsMain, concat.Sort, concat.Status).Scan(&insertId)
+func (self *ConcatRepo) Save(concat *usercase.Concat) error {
+	builder := sqlbuild.NewInsertBuilder("t_blog_concat").
+		Fields("name", "logo_url", "target_url", "is_main", "sort", "status").
+		Values(concat.Name, concat.LogoUrl, concat.TargetUrl, concat.IsMain, concat.Sort, concat.Status).
+		Returning("concat_id")
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
+	var concatId uint
+	err := row.Scan(&concatId)
 	if err == nil {
-		slog.Info("联系方式添加完成，id：" + strconv.Itoa(int(insertId)))
+		slog.Info("联系方式添加完成", "concatId", concatId)
+		concat.ConcatId = concatId
 	}
 	return err
 }
 
-func (c *ConcatRepo) Update(concat *usercase.Concat) error {
-	sql := "update t_blog_concat set update_time = now(), name = $1, logo_url = $2, target_url = $3, is_main = $4, sort = $5, status = $6 where concat_id = $7"
-	result, err := c.db.Exec(context.Background(), sql, concat.Name, concat.LogoUrl, concat.TargetUrl, concat.IsMain, concat.Sort, concat.Status, concat.ConcatId)
+func (self *ConcatRepo) Update(concat *usercase.Concat) error {
+	builder := sqlbuild.NewUpdateBuilder("t_blog_concat").
+		SetRaw("update_time", "now()").
+		SetByMap(map[string]any{
+			"name":       concat.Name,
+			"logo_url":   concat.LogoUrl,
+			"target_url": concat.TargetUrl,
+			"is_main":    concat.IsMain,
+			"sort":       concat.Sort,
+			"status":     concat.Status,
+		}).Where("concat_id").Eq(concat.ConcatId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
-		slog.Info(fmt.Sprintf("联系方式更新完成，id：%d，row：%d"), concat.ConcatId, result.RowsAffected())
+		slog.Info("联系方式更新完成", "row", result.RowsAffected(), "concatId", concat.ConcatId)
 	}
 	return err
 }
 
-func (c *ConcatRepo) UpdateSelective(form *usercase.ConcatUpdateForm) error {
-	var builder strings.Builder
-	builder.WriteString("update t_blog_concat set update_time = now() ")
-	args := make([]any, 0)
-	if form.IsMain != nil {
-		args = append(args, *form.IsMain)
-		builder.WriteString(fmt.Sprintf(", is_main = $%d", len(args)))
-	}
-	if form.Status != nil {
-		args = append(args, *form.Status)
-		builder.WriteString(fmt.Sprintf(", status = $%d", len(args)))
-	}
-	builder.WriteString(fmt.Sprintf(" where concat_id = $%d", len(args)+1))
-	args = append(args, form.ConcatId)
-	result, err := c.db.Exec(context.Background(), builder.String(), args...)
+func (self *ConcatRepo) UpdateSelective(form *usercase.ConcatUpdateForm) error {
+	builder := sqlbuild.NewUpdateBuilder("t_blog_concat").
+		SetRaw("update_time", "now()").
+		SetByCondition(form.Status != nil, "status", form.Status).
+		SetByCondition(form.IsMain != nil, "is_main", form.IsMain).
+		Where("concat_id").Eq(form.ConcatId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("联系方式快捷更新完成", "row", result.RowsAffected(), "concatId", form.ConcatId)
 	}
 	return err
 }
 
-func (c *ConcatRepo) List() ([]*usercase.Concat, error) {
-	rows, err := c.db.Query(context.Background(), "select concat_id, name, logo_url, target_url, is_main from t_blog_concat where delete_at = '0' and status = 0 order by sort, create_time desc")
+func (self *ConcatRepo) List() ([]*usercase.Concat, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_concat").
+		Select("concat_id", "name", "logo_url", "target_url", "is_main").
+		Where("status").EqRaw("0").
+		And("delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("sort", "create_time desc")
+	rows, err := self.db.Query(context.Background(), builder.Sql())
 	if err != nil {
 		return nil, err
 	}
@@ -73,17 +83,14 @@ func (c *ConcatRepo) List() ([]*usercase.Concat, error) {
 	})
 }
 
-func (c *ConcatRepo) ManageList(query *usercase.ConcatQueryForm) ([]*usercase.Concat, error) {
-	var builder strings.Builder
-	builder.WriteString("select * from t_blog_concat where delete_at = '0' ")
-	args := make([]any, 0)
-	if query.Name != "" {
-		args = append(args, "%"+query.Name+"%")
-		builder.WriteString(fmt.Sprintf("and name like $%d ", len(args)))
-	}
-	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &builder, &args)
-	builder.WriteString("order by sort, create_time desc")
-	rows, err := c.db.Query(context.Background(), builder.String(), args...)
+func (self *ConcatRepo) ManageList(query *usercase.ConcatQueryForm) ([]*usercase.Concat, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_concat").
+		WhereByCondition(query.Name != "", "name").Like("%"+query.Name+"%").
+		AndByCondition(query.CreateTimeBegin != "", "create_time").Ge(query.CreateTimeBegin).
+		AndByCondition(query.CreateTimeEnd != "", "create_time").Le(query.CreateTimeEnd).
+		And("delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("sort", "create_time desc")
+	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		return nil, err
 	}
@@ -93,15 +100,23 @@ func (c *ConcatRepo) ManageList(query *usercase.ConcatQueryForm) ([]*usercase.Co
 	})
 }
 
-func (c *ConcatRepo) CountByName(name string, cid uint) (uint8, error) {
-	row := c.db.QueryRow(context.Background(), "select count(concat_id) from t_blog_concat where name = $1 and concat_id != $2", name, cid)
+func (self *ConcatRepo) CountByName(name string, cid uint) (uint8, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_concat").
+		Select("count(*)").
+		Where("concat_id").Ne(cid).
+		And("name").Eq(name).
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var total uint8
 	err := row.Scan(&total)
 	return total, err
 }
 
-func (c *ConcatRepo) DeleteById(cid int) error {
-	result, err := c.db.Exec(context.Background(), "update t_blog_concat set delete_at = $1 where concat_id = $2", time.Now().UnixMilli(), cid)
+func (self *ConcatRepo) DeleteById(cid int) error {
+	builder := sqlbuild.NewUpdateBuilder("t_blog_concat").
+		Set("delete_at", time.Now().UnixMilli()).
+		Where("concat_id").Eq(cid).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info(fmt.Sprintf("删除联系方式完成，concatId:%d,row:%d", cid, result.RowsAffected()))
 	}

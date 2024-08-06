@@ -12,9 +12,11 @@ type Notice struct {
 
 // NoticeQueryForm 通知管理后台查询参数
 type NoticeQueryForm struct {
-	Title      string `json:"title"`
-	Level      *int   `json:"level"`
-	NoticeType *int   `json:"noticeType"`
+	Title           string `json:"title"`
+	Level           *int   `json:"level"`
+	NoticeType      *int   `json:"noticeType"`
+	CreateTimeBegin string `json:"createTimeBegin"`
+	CreateTimeEnd   string `json:"createTimeEnd"`
 	PageQueryForm
 }
 

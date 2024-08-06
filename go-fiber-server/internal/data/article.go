@@ -7,7 +7,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
+	sqlbuild "go-fiber-ent-web-layout/pkg/sql-build"
 	"log/slog"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -23,12 +25,14 @@ func NewArticleRepo(data *Data) usercase.IArticleRepo {
 }
 
 func (self *ArticleRepo) Save(article *usercase.Article) error {
-	sql := `insert into t_blog_article 
-    		(title, summary, cover_url, category_ids, tag_ids, content, protocol, tips, password, is_hot, is_top, is_comment, is_private, sort, status) 
-			values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15 ) returning article_id`
-	row := self.db.QueryRow(context.Background(), sql, article.Title, article.Summary, article.CoverUrl, article.CategoryIds,
-		article.TagIds, article.Content, article.Protocol, article.Tips, article.Password, article.IsHot, article.IsTop,
-		article.IsComment, article.IsPrivate, *article.Sort, *article.Status)
+	builder := sqlbuild.NewInsertBuilder("t_blog_article").
+		Fields("title", "summary", "cover_url", "category_ids", "tag_ids", "content", "protocol", "tips",
+			"password", "is_hot", "is_top", "is_comment", "is_private", "sort", "status").
+		Values(article.Title, article.Summary, article.CoverUrl, article.CategoryIds, article.TagIds, article.Content,
+			article.Protocol, article.Tips, article.Password, article.IsHot, article.IsTop, article.IsComment,
+			article.IsPrivate, *article.Sort, *article.Status).
+		Returning("article_id")
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var articleId uint64
 	err := row.Scan(&articleId)
 	if err == nil {
@@ -39,20 +43,29 @@ func (self *ArticleRepo) Save(article *usercase.Article) error {
 }
 
 func (self *ArticleRepo) Update(article *usercase.Article) error {
-	var builder strings.Builder
-	builder.WriteString(`update t_blog_article set update_time = now(), title = $1, summary = $2, cover_url = $3, category_ids = $4,
-                          tag_ids = $5, protocol = $6, tips = $7, password = $8, is_hot = $9, is_top = $10, is_comment = $11, 
-                          is_private = $12, sort = $13, status = $14`)
-	args := []any{article.Title, article.Summary, article.CoverUrl, article.CategoryIds, article.TagIds, article.Protocol,
-		article.Tips, article.Password, article.IsHot, article.IsTop, article.IsComment, article.IsPrivate, *article.Sort,
-		*article.Status}
+	builder := sqlbuild.NewUpdateBuilder("t_blog_article").
+		SetRaw("update_time", "now()").
+		SetByMap(map[string]any{
+			"title":        article.Title,
+			"summary":      article.Summary,
+			"cover_url":    article.CoverUrl,
+			"category_ids": article.CategoryIds,
+			"tag_ids":      article.TagIds,
+			"protocol":     article.Protocol,
+			"tips":         article.Tips,
+			"password":     article.Password,
+			"is_hot":       article.IsHot,
+			"is_top":       article.IsTop,
+			"is_comment":   article.IsComment,
+			"is_private":   article.IsPrivate,
+			"sort":         article.Sort,
+			"status":       article.Status,
+		})
 	if strings.TrimSpace(article.Content) != "" {
-		args = append(args, article.Content)
-		builder.WriteString(fmt.Sprintf(", content = $%d", len(args)))
+		builder.Set("content", article.Content)
 	}
-	builder.WriteString(fmt.Sprintf(" where article_id = $%d", len(args)+1))
-	args = append(args, article.ArticleId)
-	result, err := self.db.Exec(context.Background(), builder.String(), args...)
+	builder.Where("article_id").Eq(article.ArticleId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("更新博客文章完成", "row", result.RowsAffected(), "articleId", article.ArticleId)
 	}
@@ -60,115 +73,121 @@ func (self *ArticleRepo) Update(article *usercase.Article) error {
 }
 
 func (self *ArticleRepo) UpdateSelective(form *usercase.ArticleUpdateForm) error {
-	var builder strings.Builder
-	builder.WriteString("update t_blog_article set update_time = now() ")
-	args := make([]any, 0)
-	if form.IsHot != nil {
-		args = append(args, *form.IsHot)
-		builder.WriteString(fmt.Sprintf(", is_hot = $%d", len(args)))
-	}
-	if form.IsTop != nil {
-		args = append(args, *form.IsTop)
-		builder.WriteString(fmt.Sprintf(", is_top = $%d", len(args)))
-	}
-	if form.IsComment != nil {
-		args = append(args, *form.IsComment)
-		builder.WriteString(fmt.Sprintf(", is_comment = $%d", len(args)))
-	}
-	if form.Status != nil {
-		args = append(args, *form.Status)
-		builder.WriteString(fmt.Sprintf(", status = $%d", len(args)))
-	}
-	builder.WriteString(fmt.Sprintf(" where article_id = $%d", len(args)+1))
-	args = append(args, form.ArticleId)
-	result, err := self.db.Exec(context.Background(), builder.String(), args...)
+	builder := sqlbuild.NewUpdateBuilder("t_blog_article").
+		SetRaw("update_time", "now()").
+		SetByCondition(form.IsHot != nil, "is_hot", form.IsHot).
+		SetByCondition(form.IsTop != nil, "is_top", form.IsTop).
+		SetByCondition(form.IsComment != nil, "is_comment", form.IsComment).
+		SetByCondition(form.Status != nil, "status", form.Status).
+		Where("article_id").Eq(form.ArticleId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("快捷更新博客文章完成", "row", result.RowsAffected(), "articleId", form.ArticleId)
 	}
 	return err
 }
 
-func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Article, int64, error) {
-	var condition strings.Builder
-	condition.WriteString("where delete_at = 0")
-	args := make([]any, 0)
-	if query.Title != "" {
-		args = append(args, "%"+query.Title+"%")
-		condition.WriteString(fmt.Sprintf(" and title like $%d", len(args)))
-	}
-	if query.TagId != nil {
-		args = append(args, *query.TagId)
-		condition.WriteString(fmt.Sprintf(" and $%d = ANY(tag_ids)", len(args)))
-	}
-	if query.CategoryId != nil {
-		args = append(args, *query.CategoryId)
-		condition.WriteString(fmt.Sprintf(" and $%d = ANY(category_ids)", len(args)))
-	}
-	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_blog_article "+condition.String(), args...)
+func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.ArticleVo, int64, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_article as ba").
+		Select("ba.article_id", "ba.title", "ba.summary", "ba.cover_url", "ba.category_ids", "ba.tag_ids",
+			"ba.view_num", "ba.share_num", "ba.vote_up", "ba.protocol", "ba.tips", "ba.password", "ba.is_hot", "ba.is_top",
+			"ba.is_comment", "ba.is_private", "ba.create_time", "ba.sort", "ba.status").
+		LeftJoin("t_blog_comment as bc").
+		On("bc.article_id").EqRaw("ba.article_id").
+		And("bc.status").EqRaw("0").
+		And("bc.delete_at").EqRaw("0").BuildAsSelect().
+		Select("count(bc.*) as comment_num").
+		WhereByCondition(query.Title != "", "ba.title").Like("%"+query.Title+"%").
+		AndByCondition(query.TagId != nil, fmt.Sprintf("%d", query.TagId)).EqRaw("ANY(ba.tag_ids)").
+		AndByCondition(query.CategoryId != nil, fmt.Sprintf("%d", query.CategoryId)).EqRaw("ANY(ba.category_ids)").
+		AndByCondition(query.Status != nil, "ba.status").Eq(query.Status).
+		AndByCondition(query.CreateTimeBegin != "", "ba.create_time").Ge(query.CreateTimeBegin).
+		AndByCondition(query.CreateTimeEnd != "", "ba.create_time").Le(query.CreateTimeEnd).
+		And("ba.delete_at").EqRaw("0").BuildAsSelect().
+		GroupBy("ba.article_id").
+		OrderBy("ba.is_top desc", "ba.sort", "ba.create_time desc")
+	row := self.db.QueryRow(context.Background(), builder.CountSql(), builder.Args()...)
 	var total int64
 	if err := row.Scan(&total); err != nil {
 		return nil, 0, err
 	}
-	articles := make([]*usercase.Article, 0)
+	articles := make([]*usercase.ArticleVo, 0)
 	if total == 0 {
 		return articles, 0, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString(fmt.Sprintf(" order by is_top desc, sort, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
-	args = append(args, query.Size, offset)
-	rows, err := self.db.Query(context.Background(), `select article_id, title, summary, cover_url, category_ids, 
-       tag_ids, view_num, share_num, vote_up, protocol, tips, password, is_hot, is_top, is_comment, is_private, create_time, 
-       sort, status from t_blog_article `+condition.String(), args...)
+	builder.Limit(int64(query.Size)).Offset(offset)
+	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		return nil, 0, err
 	}
 	defer rows.Close()
-	articles, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Article, error) {
-		return pgx.RowToAddrOfStructByNameLax[usercase.Article](row)
+	articles, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.ArticleVo, error) {
+		return pgx.RowToAddrOfStructByNameLax[usercase.ArticleVo](row)
 	})
 	return articles, total, err
 }
 
-func (self *ArticleRepo) SelectById(articleId uint64, checkStatus bool) (*usercase.Article, error) {
-	sql := "select * from t_blog_article where article_id = $1 and delete_at = 0"
-	if checkStatus {
-		sql += " and status = 0"
-	}
-	rows, err := self.db.Query(context.Background(), sql, articleId)
+func (self *ArticleRepo) SelectById(articleId uint64, checkStatus bool) (*usercase.ArticleVo, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_article as ba").
+		Select("ba.*").
+		LeftJoin("t_blog_comment as bc").
+		On("bc.article_id").EqRaw("ba.article_id").
+		And("bc.status").EqRaw("0").
+		And("bc.delete_at").EqRaw("0").BuildAsSelect().
+		Select("count(bc.*) as comment_num").
+		Where("ba.article_id").Eq(articleId).
+		AndByCondition(checkStatus, "ba.status").EqRaw("0").
+		And("ba.delete_at").EqRaw("0").BuildAsSelect().
+		GroupBy("ba.article_id")
+	rows, err := self.db.Query(context.Background(), builder.Sql(), articleId)
 	if err == nil && rows.Next() {
-		return pgx.RowToAddrOfStructByName[usercase.Article](rows)
+		return pgx.RowToAddrOfStructByNameLax[usercase.ArticleVo](rows)
 	}
 	return nil, err
 }
 
 func (self *ArticleRepo) CountByTagId(tagId int) (int64, error) {
-	sql := "select count(*) from t_blog_article where $1 = ANY(tag_ids) and status = 0 and delete_at = 0"
-	row := self.db.QueryRow(context.Background(), sql, tagId)
+	builder := sqlbuild.NewSelectBuilder("t_blog_article").
+		Select("count(*)").
+		Where(strconv.Itoa(tagId)).EqRaw("ANY(tag_ids)").
+		And("status").EqRaw("0").
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	row := self.db.QueryRow(context.Background(), builder.Sql())
 	var total int64
 	err := row.Scan(&total)
 	return total, err
 }
 
 func (self *ArticleRepo) CountByCategoryId(categoryId int) (int64, error) {
-	sql := "select count(*) from t_blog_article where $1 = ANY(category_ids) and status = 0 and delete_at = 0"
-	row := self.db.QueryRow(context.Background(), sql, categoryId)
+	builder := sqlbuild.NewSelectBuilder("t_blog_article").
+		Select("count(*)").
+		Where(strconv.Itoa(categoryId)).EqRaw("ANY(category_ids)").
+		And("status").EqRaw("0").
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	row := self.db.QueryRow(context.Background(), builder.Sql())
 	var total int64
 	err := row.Scan(&total)
 	return total, err
 }
 
 func (self *ArticleRepo) CountByTitle(title string, articleId uint64) (uint8, error) {
-	sql := "select count(*) from t_blog_article where article_id != $1 and title = $2 and delete_at = 0"
-	row := self.db.QueryRow(context.Background(), sql, articleId, title)
+	builder := sqlbuild.NewSelectBuilder("t_blog_article").
+		Select("count(*)").
+		Where("article_id").Ne(articleId).
+		And("title").Eq(title).
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var total uint8
 	err := row.Scan(&total)
 	return total, err
 }
 
 func (self ArticleRepo) DeleteById(articleId uint64) error {
-	sql := "update t_blog_article set delete_at = $1 where article_id = $2"
-	result, err := self.db.Exec(context.Background(), sql, time.Now().UnixMilli(), articleId)
+	builder := sqlbuild.NewUpdateBuilder("t_blog_article").
+		Set("delete_at", time.Now().UnixMilli()).
+		Where("article_id").Eq(articleId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("删除博客文章完成", "row", result.RowsAffected(), "articleId", articleId)
 	}

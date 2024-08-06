@@ -6,6 +6,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go-fiber-ent-web-layout/internal/usercase"
+	sqlbuild "go-fiber-ent-web-layout/pkg/sql-build"
 	"log/slog"
 	"strconv"
 	"strings"
@@ -23,10 +24,13 @@ func NewSysMenuRepo(data *Data) usercase.ISysMenuRepo {
 }
 
 func (m *SysMenuRepo) Save(menu *usercase.SysMenu) error {
-	sql := `insert into t_system_menu (menu_name, menu_type, parent_id, path, component, icon, is_frame, frame_url, is_cache, 
-                    is_visible, is_disable, sort) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) returning menu_id`
-	row := m.db.QueryRow(context.Background(), sql, menu.MenuName, menu.MenuType, menu.ParentId, menu.Path, menu.Component,
-		menu.Icon, menu.IsFrame, menu.FrameUrl, menu.IsCache, menu.IsVisible, menu.IsDisable, menu.Sort)
+	builder := sqlbuild.NewInsertBuilder("t_system_menu").
+		Fields("menu_name", "menu_type", "parent_id", "path", "component", "icon", "is_frame", "frame_url",
+			"is_cache", "is_visible", "is_disable", "sort").
+		Values(menu.MenuName, menu.MenuType, menu.ParentId, menu.Path, menu.Component, menu.Icon, menu.IsFrame,
+			menu.FrameUrl, menu.IsCache, menu.IsVisible, menu.IsDisable, menu.Sort).
+		Returning("menu_id")
+	row := m.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var menuId uint
 	err := row.Scan(&menuId)
 	if err == nil {
@@ -37,12 +41,23 @@ func (m *SysMenuRepo) Save(menu *usercase.SysMenu) error {
 }
 
 func (m *SysMenuRepo) Update(menu *usercase.SysMenu) error {
-	sql := `
-		update t_system_menu set update_time = now(), menu_name = $1, menu_type = $2, parent_id = $3, path = $4, component = $5, 
-		                  icon = $6, is_frame = $7, frame_url = $8, is_cache = $9, is_visible = $10, is_disable = $11, sort = $12
-		where menu_id = $13`
-	result, err := m.db.Exec(context.Background(), sql, menu.MenuName, menu.MenuType, menu.ParentId, menu.Path, menu.Component, menu.Icon,
-		menu.IsFrame, menu.FrameUrl, menu.IsCache, menu.IsVisible, menu.IsDisable, menu.Sort, menu.MenuId)
+	builder := sqlbuild.NewUpdateBuilder("t_system_menu").
+		SetRaw("update_time", "now()").
+		SetByMap(map[string]any{
+			"menu_name":  menu.MenuName,
+			"menu_type":  menu.MenuType,
+			"parent_id":  menu.ParentId,
+			"path":       menu.Path,
+			"component":  menu.Component,
+			"icon":       menu.Icon,
+			"is_frame":   menu.IsFrame,
+			"frame_url":  menu.FrameUrl,
+			"is_cache":   menu.IsCache,
+			"is_visible": menu.IsVisible,
+			"is_disable": menu.IsDisable,
+			"sort":       menu.Sort,
+		}).Where("menu_id").Eq(menu.MenuId).BuildAsUpdate()
+	result, err := m.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info(fmt.Sprintf("菜单更新完成，row:%d,id:%d", result.RowsAffected(), menu.MenuId))
 	}
@@ -50,8 +65,12 @@ func (m *SysMenuRepo) Update(menu *usercase.SysMenu) error {
 }
 
 func (m *SysMenuRepo) ListAll() ([]*usercase.SysMenu, error) {
-	rows, err := m.db.Query(context.Background(), `select menu_id, menu_name, menu_type, parent_id, path, component, 
-       icon, is_frame, frame_url, is_cache, is_visible, is_disable, sort from t_system_menu where delete_at = 0 order by sort`)
+	builder := sqlbuild.NewSelectBuilder("t_system_menu").
+		Select("menu_id", "menu_name", "menu_type", "parent_id", "path", "component", "icon", "is_frame", "frame_url",
+			"is_cache", "is_visible", "is_disable", "sort").
+		Where("delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("sort")
+	rows, err := m.db.Query(context.Background(), builder.Sql())
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +114,10 @@ func (self *SysMenuRepo) RecursiveByRoleKeys(roleKeys []string) ([]*usercase.Sys
 }
 
 func (m *SysMenuRepo) ManageListAll() ([]*usercase.SysMenu, error) {
-	rows, err := m.db.Query(context.Background(), "select * from t_system_menu where delete_at = 0 order by sort")
+	builder := sqlbuild.NewSelectBuilder("t_system_menu").
+		Where("delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("sort")
+	rows, err := m.db.Query(context.Background(), builder.Sql())
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +128,10 @@ func (m *SysMenuRepo) ManageListAll() ([]*usercase.SysMenu, error) {
 }
 
 func (m *SysMenuRepo) DeleteById(menuId int) error {
-	result, err := m.db.Exec(context.Background(), "update t_system_menu set delete_at = $1 where menu_id = $2", time.Now().UnixMilli(), menuId)
+	builder := sqlbuild.NewUpdateBuilder("t_system_menu").
+		Set("delete_at", time.Now().UnixMilli()).
+		Where("menu_id").Eq(menuId).BuildAsUpdate()
+	result, err := m.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info(fmt.Sprintf("菜单删除完成，row:%d,id:%d", result.RowsAffected(), menuId))
 	}

@@ -47,7 +47,7 @@ type ICategoryRepo interface {
 	// UpdateSelective 更新分类状态
 	UpdateSelective(from *CategoryUpdateForm) error
 	// UpdateViewNum 更新分类的查看数量
-	UpdateViewNum(catId uint, addNum uint) error
+	UpdateViewNum(catId uint, addNum int) error
 	// SelectById 通过Id查询分类
 	SelectById(catId int) (*Category, error)
 	// List 查询分类列表

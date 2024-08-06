@@ -2,13 +2,12 @@ package data
 
 import (
 	"context"
-	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
+	sqlbuild "go-fiber-ent-web-layout/pkg/sql-build"
 	"log/slog"
-	"strings"
 	"time"
 )
 
@@ -29,8 +28,11 @@ func (self *SysDictRepo) Transaction(ctx context.Context, fn func(tx pgx.Tx) err
 }
 
 func (self *SysDictRepo) SaveDict(dict *usercase.SysDict) error {
-	sql := "insert into t_system_dict (dict_name, dict_key, sort, status, remark) values ($1, $2, $3, $4, $5) returning dict_id"
-	row := self.db.QueryRow(context.Background(), sql, dict.DictName, dict.DictKey, dict.Sort, dict.Status, dict.Remark)
+	builder := sqlbuild.NewInsertBuilder("t_system_dict").
+		Fields("dict_name", "dict_key", "sort", "status", "remark").
+		Values(dict.DictName, dict.DictKey, dict.Sort, dict.Status, dict.Remark).
+		Returning("dict_id")
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var dictId uint64
 	err := row.Scan(&dictId)
 	if err == nil {
@@ -41,8 +43,16 @@ func (self *SysDictRepo) SaveDict(dict *usercase.SysDict) error {
 }
 
 func (self *SysDictRepo) UpdateDict(dict *usercase.SysDict, tx pgx.Tx) error {
-	sql := "update t_system_dict set update_time = now(), dict_name = $1, dict_key = $2, sort = $3, status = $4, remark = $5 where dict_id = $6"
-	result, err := smartExec(self.db, tx, context.Background(), sql, dict.DictName, dict.DictKey, dict.Sort, dict.Status, dict.Remark, dict.DictId)
+	builder := sqlbuild.NewUpdateBuilder("t_system_dict").
+		SetRaw("update_time", "now()").
+		SetByMap(map[string]any{
+			"dict_name": dict.DictName,
+			"dict_key":  dict.DictKey,
+			"sort":      dict.Sort,
+			"status":    dict.Status,
+			"remark":    dict.Remark,
+		}).Where("dict_id").Eq(dict.DictId).BuildAsUpdate()
+	result, err := smartExec(self.db, tx, context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("更新系统字典完成", "row", result.RowsAffected(), "dictId", dict.DictId)
 	}
@@ -50,25 +60,15 @@ func (self *SysDictRepo) UpdateDict(dict *usercase.SysDict, tx pgx.Tx) error {
 }
 
 func (self *SysDictRepo) UpdateSelectiveDict(dict *usercase.SysDict, tx pgx.Tx) error {
-	var sql strings.Builder
-	args := make([]any, 0)
-	sql.WriteString("update t_system_dict set update_time = now()")
-	if dict.DictName != "" {
-		args = append(args, dict.DictName)
-		sql.WriteString(fmt.Sprintf(", dict_name = $%d", len(args)))
-	}
-	if dict.DictKey != "" {
-		args = append(args, dict.DictKey)
-		sql.WriteString(fmt.Sprintf(", dict_key = $%d", len(args)))
-	}
-	if dict.Remark != "" {
-		args = append(args, dict.Remark)
-		sql.WriteString(fmt.Sprintf(", remark = $%d", len(args)))
-	}
-	commonFieldUpdateBuilder(dict.Sort, dict.Status, &sql, &args)
-	args = append(args, dict.DictId)
-	sql.WriteString(fmt.Sprintf(" where dict_id = $%d", len(args)))
-	result, err := smartExec(self.db, tx, context.Background(), sql.String(), args...)
+	builder := sqlbuild.NewUpdateBuilder("t_system_dict").
+		SetRaw("update_time", "now()").
+		SetByCondition(dict.DictName != "", "dict_name", dict.DictName).
+		SetByCondition(dict.DictKey != "", "dict_key", dict.DictKey).
+		SetByCondition(dict.Remark != "", "remark", dict.Remark).
+		SetByCondition(dict.Sort != nil, "sort", dict.Sort).
+		SetByCondition(dict.Status != nil, "status", dict.Status).
+		Where("dict_id").Eq(dict.DictId).BuildAsUpdate()
+	result, err := smartExec(self.db, tx, context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("更新系统字典完成", "row", result.RowsAffected(), "dictId", dict.DictId)
 	}
@@ -76,27 +76,25 @@ func (self *SysDictRepo) UpdateSelectiveDict(dict *usercase.SysDict, tx pgx.Tx) 
 }
 
 func (self *SysDictRepo) CountByKey(key string, dictId uint64) (uint8, error) {
-	sql := "select count(*) from t_system_dict where dict_key = $1 and dict_id != $2 and delete_at = 0"
-	row := self.db.QueryRow(context.Background(), sql, key, dictId)
+	builder := sqlbuild.NewSelectBuilder("t_system_dict").
+		Where("dict_id").Ne(dictId).
+		And("dict_key").Eq(key).
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var total uint8
 	err := row.Scan(&total)
 	return total, err
 }
 
 func (self *SysDictRepo) PageDict(query *usercase.SysDictQueryForm) ([]*usercase.SysDict, int64, error) {
-	var condition strings.Builder
-	args := make([]any, 0)
-	condition.WriteString(" where delete_at = 0 ")
-	if query.DictName != "" {
-		args = append(args, "%"+query.DictName+"%")
-		condition.WriteString(fmt.Sprintf("and dict_name like $%d ", len(args)))
-	}
-	if query.DictKey != "" {
-		args = append(args, "%"+query.DictKey+"%")
-		condition.WriteString(fmt.Sprintf("and dict_key like $%d ", len(args)))
-	}
-	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_system_dict "+condition.String(), args...)
+	builder := sqlbuild.NewSelectBuilder("t_system_dict").
+		WhereByCondition(query.DictName != "", "dict_name").Like("%"+query.DictName+"%").
+		AndByCondition(query.DictKey != "", "dict_key").Like("%"+query.DictKey+"%").
+		AndByCondition(query.CreateTimeBegin != "", "create_time").Ge(query.CreateTimeBegin).
+		AndByCondition(query.CreateTimeEnd != "", "create_time").Le(query.CreateTimeEnd).
+		And("delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("sort", "create_time desc")
+	row := self.db.QueryRow(context.Background(), builder.CountSql(), builder.Args()...)
 	var total int64
 	if err := row.Scan(&total); err != nil {
 		return nil, 0, err
@@ -106,9 +104,8 @@ func (self *SysDictRepo) PageDict(query *usercase.SysDictQueryForm) ([]*usercase
 		return dicts, 0, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString(fmt.Sprintf(" order by sort, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
-	args = append(args, query.Size, offset)
-	rows, err := self.db.Query(context.Background(), "select * from t_system_dict "+condition.String(), args...)
+	builder.Limit(int64(query.Size)).Offset(offset)
+	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -120,7 +117,10 @@ func (self *SysDictRepo) PageDict(query *usercase.SysDictQueryForm) ([]*usercase
 }
 
 func (self *SysDictRepo) SelectDictById(dictId uint64) (*usercase.SysDict, error) {
-	rows, err := self.db.Query(context.Background(), "select * from t_system_dict where dict_id = $1 and delete_at = 0", dictId)
+	builder := sqlbuild.NewSelectBuilder("t_system_dict").
+		Where("dict_id").Eq(dictId).
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	rows, err := self.db.Query(context.Background(), builder.Sql(), dictId)
 	if err == nil && rows.Next() {
 		return pgx.RowToAddrOfStructByNameLax[usercase.SysDict](rows)
 	}
@@ -128,8 +128,10 @@ func (self *SysDictRepo) SelectDictById(dictId uint64) (*usercase.SysDict, error
 }
 
 func (self *SysDictRepo) DeleteDict(dictId int64, tx pgx.Tx) error {
-	sql := "update t_system_dict set delete_at = $1 where dict_id = $2"
-	result, err := smartExec(self.db, tx, context.Background(), sql, time.Now().UnixMilli(), dictId)
+	builder := sqlbuild.NewUpdateBuilder("t_system_dict").
+		Set("delete_at", time.Now().UnixMilli()).
+		Where("dict_id").Eq(dictId).BuildAsUpdate()
+	result, err := smartExec(self.db, tx, context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("删除系统字典完成", "row", result.RowsAffected(), "dictId", dictId)
 	}
@@ -137,8 +139,11 @@ func (self *SysDictRepo) DeleteDict(dictId int64, tx pgx.Tx) error {
 }
 
 func (self *SysDictRepo) SaveDictValue(value *usercase.SysDictValue) error {
-	sql := "insert into t_system_dict_value (dict_id, dict_key, label, value, sort, status, remark) values ($1, $2, $3, $4, $5, $6, $7) returning id"
-	row := self.db.QueryRow(context.Background(), sql, value.DictId, value.DictKey, value.Label, value.Value, value.Sort, value.Status, value.Remark)
+	builder := sqlbuild.NewInsertBuilder("t_system_dict_value").
+		Fields("dict_id", "dict_key", "label", "value", "sort", "status", "remark").
+		Values(value.DictId, value.DictKey, value.Label, value.Value, value.Sort, value.Status, value.Remark).
+		Returning("id")
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var valueId uint64
 	err := row.Scan(&valueId)
 	if err == nil {
@@ -149,8 +154,16 @@ func (self *SysDictRepo) SaveDictValue(value *usercase.SysDictValue) error {
 }
 
 func (self *SysDictRepo) UpdateDictValue(value *usercase.SysDictValue) error {
-	sql := "update t_system_dict_value set update_time = now(), label = $1, value = $2, sort = $3, status = $4, remark = $5 where id = $6"
-	result, err := self.db.Exec(context.Background(), sql, value.Label, value.Value, value.Sort, value.Status, value.Remark, value.ID)
+	builder := sqlbuild.NewUpdateBuilder("t_system_dict_value").
+		SetRaw("update_time", "now()").
+		SetByMap(map[string]any{
+			"label":  value.Label,
+			"value":  value.Value,
+			"sort":   value.Sort,
+			"status": value.Status,
+			"remark": value.Remark,
+		}).Where("id").Eq(value.ID).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("更新系统字典数据完成", "row", result.RowsAffected(), "valueId", value.ID)
 	}
@@ -158,25 +171,15 @@ func (self *SysDictRepo) UpdateDictValue(value *usercase.SysDictValue) error {
 }
 
 func (self *SysDictRepo) UpdateSelectiveDictValue(value *usercase.SysDictValue, tx pgx.Tx) error {
-	var sql strings.Builder
-	args := make([]any, 0)
-	sql.WriteString("update t_system_dict_value set update_time = now()")
-	if value.Label != "" {
-		args = append(args, value.Label)
-		sql.WriteString(fmt.Sprintf(", label = $%d", len(args)))
-	}
-	if value.Value != "" {
-		args = append(args, value.Value)
-		sql.WriteString(fmt.Sprintf(", value = $%d", len(args)))
-	}
-	if value.Remark != "" {
-		args = append(args, value.Remark)
-		sql.WriteString(fmt.Sprintf(", remakr = $%d", len(args)))
-	}
-	commonFieldUpdateBuilder(value.Sort, value.Status, &sql, &args)
-	args = append(args, value.ID)
-	sql.WriteString(fmt.Sprintf(" where id = $%d", len(args)))
-	result, err := smartExec(self.db, tx, context.Background(), sql.String(), args...)
+	builder := sqlbuild.NewUpdateBuilder("t_system_dict_value").
+		SetRaw("update_time", "now()").
+		SetByCondition(value.Label != "", "label", value.Label).
+		SetByCondition(value.Value != "", "value", value.Value).
+		SetByCondition(value.Remark != "", "remark", value.Remark).
+		SetByCondition(value.Sort != nil, "sort", value.Sort).
+		SetByCondition(value.Status != nil, "status", value.Status).
+		Where("id").Eq(value.ID).BuildAsUpdate()
+	result, err := smartExec(self.db, tx, context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("系统字典数据更新完成", "row", result.RowsAffected(), "valueId", value.ID)
 	}
@@ -184,45 +187,46 @@ func (self *SysDictRepo) UpdateSelectiveDictValue(value *usercase.SysDictValue, 
 }
 
 func (self *SysDictRepo) CountValueById(value string, dictId uint64, valueId uint64) (uint8, error) {
-	sql := "select count(*) from t_system_dict_value where value = $1 and dict_id = $2 and id != $3 and delete_at = 0"
-	row := self.db.QueryRow(context.Background(), sql, value, dictId, valueId)
+	builder := sqlbuild.NewSelectBuilder("t_system_dict_value").
+		Select("count(*)").
+		Where("id").Ne(valueId).And("dict_id").Ne(dictId).
+		And("value").Eq(value).And("delete_at").EqRaw("0").BuildAsSelect()
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var total uint8
 	err := row.Scan(&total)
 	return total, err
 }
 
 func (self *SysDictRepo) SelectDictKeyById(dictId int64) string {
-	row := self.db.QueryRow(context.Background(), "select dict_key from t_system_dict where dict_id = $1", dictId)
+	builder := sqlbuild.NewSelectBuilder("t_system_dict").
+		Select("dict_key").
+		Where("dict_id").Eq(dictId).BuildAsSelect()
+	row := self.db.QueryRow(context.Background(), builder.Sql(), dictId)
 	var dictKey string
 	_ = row.Scan(&dictKey)
 	return dictKey
 }
 
 func (self *SysDictRepo) SelectDictKeyByValueId(valueId int64) string {
-	row := self.db.QueryRow(context.Background(), "select dict_key from t_system_dict_value where id = $1", valueId)
+	builder := sqlbuild.NewSelectBuilder("t_system_dict_value").
+		Select("dict_key").
+		Where("id").Eq(valueId).BuildAsSelect()
+	row := self.db.QueryRow(context.Background(), builder.Sql(), valueId)
 	var dictKey string
 	_ = row.Scan(&dictKey)
 	return dictKey
 }
 
 func (self *SysDictRepo) PageDictValue(query *usercase.SysDictValueQueryForm) ([]*usercase.SysDictValue, int64, error) {
-	var condition strings.Builder
-	args := make([]any, 0)
-	condition.WriteString(" where delete_at = 0")
-	if query.DictId != 0 {
-		args = append(args, query.DictId)
-		condition.WriteString(fmt.Sprintf(" and dict_id = $%d", len(args)))
-	}
-	if query.DictKey != "" {
-		args = append(args, query.DictKey)
-		condition.WriteString(fmt.Sprintf(" and dict_key = $%d", len(args)))
-	}
-	if query.Label != "" {
-		args = append(args, "%"+query.Label+"%")
-		condition.WriteString(fmt.Sprintf(" and label like $%d", len(args)))
-	}
-	timeQueryConditionBuilder(query.CreateTimeBegin, query.CreateTimeEnd, &condition, &args)
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_system_dict_value "+condition.String(), args...)
+	builder := sqlbuild.NewSelectBuilder("t_system_dict_value").
+		WhereByCondition(query.DictId != 0, "dict_id").Eq(query.DictId).
+		AndByCondition(query.DictKey != "", "dict_key").Eq(query.DictKey).
+		AndByCondition(query.Label != "", "label").Like("%"+query.Label+"%").
+		AndByCondition(query.CreateTimeBegin != "", "create_time").Ge(query.CreateTimeBegin).
+		AndByCondition(query.CreateTimeEnd != "", "create_time").Le(query.CreateTimeEnd).
+		And("delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("sort", "create_time desc")
+	row := self.db.QueryRow(context.Background(), builder.CountSql(), builder.Args()...)
 	var total int64
 	if err := row.Scan(&total); err != nil {
 		return nil, 0, err
@@ -232,9 +236,8 @@ func (self *SysDictRepo) PageDictValue(query *usercase.SysDictValueQueryForm) ([
 		return values, 0, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	condition.WriteString(fmt.Sprintf(" order by sort, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
-	args = append(args, query.Size, offset)
-	rows, err := self.db.Query(context.Background(), "select * from t_system_dict_value "+condition.String(), args...)
+	builder.Limit(int64(query.Size)).Offset(offset)
+	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -246,8 +249,12 @@ func (self *SysDictRepo) PageDictValue(query *usercase.SysDictValueQueryForm) ([
 }
 
 func (self *SysDictRepo) ListDictValueByDictKey(dictKey string) ([]usercase.SysDictValue, error) {
-	sql := "select dv.id, dv.dict_key, dv.label, dv.value from t_system_dict_value as dv where dict_key = $1 and delete_at = 0 order by sort"
-	rows, err := self.db.Query(context.Background(), sql, dictKey)
+	builder := sqlbuild.NewSelectBuilder("t_system_dict_value").
+		Select("id", "dict_key", "label", "value").
+		Where("dict_key").Eq(dictKey).
+		And("delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("sort")
+	rows, err := self.db.Query(context.Background(), builder.Sql(), dictKey)
 	if err != nil {
 		return nil, err
 	}
@@ -258,8 +265,10 @@ func (self *SysDictRepo) ListDictValueByDictKey(dictKey string) ([]usercase.SysD
 }
 
 func (self *SysDictRepo) DeleteDictValue(valueId int64) error {
-	sql := "update t_system_dict_value set delete_at = $1 where id = $2"
-	result, err := self.db.Exec(context.Background(), sql, time.Now().UnixMilli(), valueId)
+	builder := sqlbuild.NewUpdateBuilder("t_system_dict_value").
+		Set("delete_at", time.Now().UnixMilli()).
+		Where("id").Eq(valueId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("删除系统字典数据完成", "row", result.RowsAffected(), "valueId", valueId)
 	}
@@ -267,25 +276,18 @@ func (self *SysDictRepo) DeleteDictValue(valueId int64) error {
 }
 
 func (self *SysDictRepo) UpdateDictValueByDickId(value *usercase.SysDictValue, tx pgx.Tx) error {
-	var sql strings.Builder
-	args := make([]any, 0)
-	sql.WriteString("update t_system_dict_value set update_time = now() ")
-	if value.DictKey != "" {
-		args = append(args, value.DictKey)
-		sql.WriteString(fmt.Sprintf(", dict_key = $%d", len(args)))
-	}
-	if value.Status != nil {
-		args = append(args, *value.Status)
-		sql.WriteString(fmt.Sprintf(", status = $%d", len(args)))
-	}
-	args = append(args, value.DictId)
-	sql.WriteString(fmt.Sprintf(" where dict_id = $%d and delete_at = 0", len(args)))
+	var newStatus int
 	if value.Status != nil && *value.Status == 0 {
-		sql.WriteString(" and status = 2")
-	} else if value.Status != nil && *value.Status == 2 {
-		sql.WriteString(" and status = 0")
+		newStatus = 2
 	}
-	result, err := smartExec(self.db, tx, context.Background(), sql.String(), args...)
+	builder := sqlbuild.NewUpdateBuilder("t_system_dict_value").
+		Set("update_time", "now()").
+		SetByCondition(value.DictKey != "", "dict_key", value.DictKey).
+		SetByCondition(value.Status != nil, "status", value.Status).
+		Where("dict_id").Eq(value.DictId).
+		And("delete_at").EqRaw("0").
+		And("status").Eq(newStatus).BuildAsUpdate()
+	result, err := smartExec(self.db, tx, context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("通过字典Id更新字典数据完成", "row", result.RowsAffected(), "dictId", value.DictId)
 	}
@@ -293,8 +295,11 @@ func (self *SysDictRepo) UpdateDictValueByDickId(value *usercase.SysDictValue, t
 }
 
 func (self *SysDictRepo) DeleteDictValueByDictId(dictId int64, tx pgx.Tx) error {
-	sql := "update t_system_dict_value set delete_at = $1 where dict_id = $2 and delete_at = 0"
-	result, err := smartExec(self.db, tx, context.Background(), sql, time.Now().UnixMilli(), dictId)
+	builder := sqlbuild.NewUpdateBuilder("t_system_dict_value").
+		Set("delete_at", time.Now().UnixMilli()).
+		Where("dict_id").Eq(dictId).
+		And("delete_at").EqRaw("0").BuildAsUpdate()
+	result, err := smartExec(self.db, tx, context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("通过字典Id删除字典数据完成", "row", result.RowsAffected(), "dictId", dictId)
 	}

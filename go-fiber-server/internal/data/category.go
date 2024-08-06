@@ -6,9 +6,9 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go-fiber-ent-web-layout/internal/usercase"
+	sqlbuild "go-fiber-ent-web-layout/pkg/sql-build"
 	"log/slog"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -23,8 +23,11 @@ func NewCategoryRepo(data *Data) usercase.ICategoryRepo {
 }
 
 func (c *CategoryRepo) Save(cat *usercase.Category) error {
-	row := c.db.QueryRow(context.Background(), "insert into t_blog_category (category_name, description, cover_url, parent_id, is_top, is_hot, sort, status) values ($1, $2, $3, $4, $5, $6, $7, $8) returning category_id",
-		cat.CategoryName, cat.Description, cat.CoverUrl, cat.ParentId, cat.IsTop, cat.IsHot, cat.Sort, cat.Status)
+	builder := sqlbuild.NewInsertBuilder("t_blog_category").
+		Fields("category_name", "description", "cover_url", "parent_id", "is_top", "is_hot", "sort", "status").
+		Values(cat.CategoryName, cat.Description, cat.CoverUrl, cat.ParentId, cat.IsTop, cat.IsHot, cat.Sort, cat.Status).
+		Returning("category_id")
+	row := c.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var categoryId uint
 	err := row.Scan(&categoryId)
 	if err == nil {
@@ -35,12 +38,19 @@ func (c *CategoryRepo) Save(cat *usercase.Category) error {
 }
 
 func (c *CategoryRepo) Update(cat *usercase.Category) error {
-	result, err := c.db.Exec(context.Background(), `update t_blog_category
-					set update_time = now(),
-						category_name = $1,description = $2,cover_url = $3,parent_id = $4,
-						is_hot = $5,is_top  = $6,sort  = $7,status  = $8
-					where category_id = $9`, cat.CategoryName, cat.Description, cat.CoverUrl, cat.ParentId,
-		cat.IsHot, cat.IsTop, cat.Sort, cat.Status, cat.CategoryId)
+	builder := sqlbuild.NewUpdateBuilder("t_blog_category").
+		SetRaw("update_time", "now()").
+		SetByMap(map[string]any{
+			"category_name": cat.CategoryName,
+			"description":   cat.Description,
+			"cover_url":     cat.CoverUrl,
+			"parent_id":     cat.ParentId,
+			"is_hot":        cat.IsHot,
+			"is_top":        cat.IsTop,
+			"sort":          cat.Sort,
+			"status":        cat.Status,
+		}).Where("category_id").Eq(cat.CategoryId).BuildAsUpdate()
+	result, err := c.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info(fmt.Sprintf("分类更新完成，row:%d,id:%d", result.RowsAffected(), cat.CategoryId))
 	}
@@ -48,32 +58,25 @@ func (c *CategoryRepo) Update(cat *usercase.Category) error {
 }
 
 func (c *CategoryRepo) UpdateSelective(form *usercase.CategoryUpdateForm) error {
-	var builder strings.Builder
-	builder.WriteString("update t_blog_category set update_time = now() ")
-	args := make([]any, 0)
-	if form.Status != nil {
-		args = append(args, *form.Status)
-		builder.WriteString(fmt.Sprintf(", status = $%d", len(args)))
-	}
-	if form.IsHot != nil {
-		args = append(args, *form.IsHot)
-		builder.WriteString(fmt.Sprintf(", is_hot = $%d", len(args)))
-	}
-	if form.IsTop != nil {
-		args = append(args, *form.IsTop)
-		builder.WriteString(fmt.Sprintf(", is_top = $%d", len(args)))
-	}
-	builder.WriteString(fmt.Sprintf(" where category_id = $%d", len(args)+1))
-	args = append(args, form.CategoryId)
-	result, err := c.db.Exec(context.Background(), builder.String(), args...)
+	builder := sqlbuild.NewUpdateBuilder("t_blog_category").
+		SetRaw("update_time", "now()").
+		SetByCondition(form.Status != nil, "status", form.Status).
+		SetByCondition(form.IsHot != nil, "is_hot", form.IsHot).
+		SetByCondition(form.IsTop != nil, "is_top", form.IsTop).
+		Where("category_id").Eq(form.CategoryId).BuildAsUpdate()
+	result, err := c.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("分类快捷更新完成", "row", result.RowsAffected(), "categoryId", form.CategoryId)
 	}
 	return err
 }
 
-func (c *CategoryRepo) UpdateViewNum(catId uint, addNum uint) error {
-	result, err := c.db.Exec(context.Background(), "update t_blog_category set view_num = view_num + $1 where category_id = $2", addNum, catId)
+func (c *CategoryRepo) UpdateViewNum(catId uint, addNum int) error {
+	builder := sqlbuild.NewUpdateBuilder("t_blog_category").
+		SetRaw("update_time", "now()").
+		SetRaw("view_num", "view_num + "+strconv.Itoa(addNum)).
+		Where("category_id").Eq(catId).BuildAsUpdate()
+	result, err := c.db.Exec(context.Background(), builder.Sql(), catId)
 	if err == nil {
 		slog.Info(fmt.Sprintf("更新分类查看次数完成，tagId:%d,addNum:%d,row:%d", catId, addNum, result.RowsAffected()))
 	}
@@ -81,7 +84,11 @@ func (c *CategoryRepo) UpdateViewNum(catId uint, addNum uint) error {
 }
 
 func (c *CategoryRepo) SelectById(catId int) (*usercase.Category, error) {
-	rows, err := c.db.Query(context.Background(), "select * from t_blog_category where category_id = $1 and delete_at = '0' and status = 0", catId)
+	builder := sqlbuild.NewSelectBuilder("t_blog_category").
+		Where("category_id").Eq(catId).
+		And("status").EqRaw("0").
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	rows, err := c.db.Query(context.Background(), builder.Sql(), catId)
 	if err == nil && rows.Next() {
 		defer rows.Close()
 		return pgx.RowToAddrOfStructByName[usercase.Category](rows)
@@ -90,11 +97,11 @@ func (c *CategoryRepo) SelectById(catId int) (*usercase.Category, error) {
 }
 
 func (c *CategoryRepo) List() ([]*usercase.Category, error) {
-	rows, err := c.db.Query(context.Background(), `select category_id, category_name, parent_id, cover_url, is_top, is_hot, view_num
-									from t_blog_category
-									where delete_at = '0'
-									  and status = 0
-									order by is_top desc, sort`)
+	builder := sqlbuild.NewSelectBuilder("t_blog_category").
+		Select("category_id", "category_name", "parent_id", "cover_url", "is_top", "is_hot", "view_num").
+		Where("status").EqRaw("0").And("delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("is_top desc", "sort")
+	rows, err := c.db.Query(context.Background(), builder.Sql())
 	if err != nil {
 		return nil, err
 	}
@@ -105,10 +112,10 @@ func (c *CategoryRepo) List() ([]*usercase.Category, error) {
 }
 
 func (c *CategoryRepo) ManageList() ([]*usercase.Category, error) {
-	rows, err := c.db.Query(context.Background(), `select *
-									from t_blog_category
-									where delete_at = '0'
-									order by is_top desc, sort`)
+	builder := sqlbuild.NewSelectBuilder("t_blog_category").
+		Where("delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("is_top desc", "sort")
+	rows, err := c.db.Query(context.Background(), builder.Sql())
 	if err != nil {
 		return nil, err
 	}
@@ -122,16 +129,12 @@ func (c *CategoryRepo) ListByIds(ids []uint) ([]usercase.Category, error) {
 	if len(ids) == 0 {
 		return make([]usercase.Category, 0), nil
 	}
-	var builder strings.Builder
-	builder.WriteString("select category_id, category_name from t_blog_category where delete_at = '0' and status = 0 and category_id in (")
-	for i, id := range ids {
-		if i > 0 {
-			builder.WriteByte(',')
-		}
-		builder.WriteRune(rune(id))
-	}
-	builder.WriteByte(')')
-	rows, err := c.db.Query(context.Background(), builder.String())
+	builder := sqlbuild.NewSelectBuilder("t_blog_category").
+		Select("category_id", "category_name").
+		Where("category_id").In(sqlbuild.SliceToAnySlice[uint](ids)...).
+		And("status").EqRaw("0").
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	rows, err := c.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		return nil, err
 	}
@@ -142,15 +145,22 @@ func (c *CategoryRepo) ListByIds(ids []uint) ([]usercase.Category, error) {
 }
 
 func (c *CategoryRepo) CountByName(name string, catId uint) (uint8, error) {
-	row := c.db.QueryRow(context.Background(), "select count(category_id) from t_blog_category where delete_at = '0' and category_name = $1 and category_id != $2", name, catId)
+	builder := sqlbuild.NewSelectBuilder("t_blog_category").
+		Select("count(*)").
+		Where("category_id").Ne(catId).
+		And("category_name").Eq(name).
+		And("delete_at").EqRaw("0").BuildAsSelect()
+	row := c.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var total uint8
 	err := row.Scan(&total)
 	return total, err
 }
 
 func (c *CategoryRepo) DeleteById(catId int) error {
-	result, err := c.db.Exec(context.Background(), "update t_blog_category set delete_at = $1 where category_id = $2",
-		time.Now().UnixMilli(), catId)
+	builder := sqlbuild.NewUpdateBuilder("t_blog_category").
+		Set("delete_at", time.Now().UnixMilli()).
+		Where("category_id").Eq(catId).BuildAsUpdate()
+	result, err := c.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info(fmt.Sprintf("分类删除完成，row:%d,id:%d", result.RowsAffected(), catId))
 	}
@@ -161,16 +171,10 @@ func (c *CategoryRepo) BatchDelete(ids []int) (int64, error) {
 	if len(ids) == 0 {
 		return 0, nil
 	}
-	var builder strings.Builder
-	builder.WriteString("update t_blog_category set delete_at = $1 where category_id in (")
-	for i, id := range ids {
-		if i > 0 {
-			builder.WriteByte(',')
-		}
-		builder.WriteRune(rune(id))
-	}
-	builder.WriteByte(')')
-	result, err := c.db.Exec(context.Background(), builder.String(), time.Now().UnixMilli())
+	builder := sqlbuild.NewUpdateBuilder("t_blog_category").
+		Set("delete_at", time.Now().UnixMilli()).
+		Where("category_id").In(sqlbuild.SliceToAnySlice[int](ids)...).BuildAsUpdate()
+	result, err := c.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		return 0, err
 	}

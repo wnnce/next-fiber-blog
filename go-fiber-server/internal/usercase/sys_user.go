@@ -69,7 +69,7 @@ type SysUserQueryForm struct {
 	Nickname        string `json:"nickname"`
 	Email           string `json:"email"`
 	Phone           string `json:"phone"`
-	RoleId          uint   `json:"roleId"`
+	RoleId          *uint  `json:"roleId"`
 	CreateTimeBegin string `json:"createTimeBegin"`
 	CreateTimeEnd   string `json:"createTimeEnd"`
 	PageQueryForm

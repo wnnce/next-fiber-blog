@@ -2,13 +2,12 @@ package data
 
 import (
 	"context"
-	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
+	sqlbuild "go-fiber-ent-web-layout/pkg/sql-build"
 	"log/slog"
-	"strings"
 	"time"
 )
 
@@ -23,8 +22,11 @@ func NewNoticeRepo(data *Data) usercase.INoticeRepo {
 }
 
 func (self *NoticeRepo) Save(notice *usercase.Notice) error {
-	sql := "insert into t_blog_notice (title, message, level, notice_type, sort, status) values ($1, $2, $3, $4, $5, $6) returning notice_id"
-	row := self.db.QueryRow(context.Background(), sql, notice.Title, notice.Message, notice.Level, notice.NoticeType, notice.Sort, notice.Status)
+	builder := sqlbuild.NewInsertBuilder("t_blog_notice").
+		Fields("title", "message", "level", "notice_type", "sort", "status").
+		Values(notice.Title, notice.Message, notice.Level, notice.NoticeType, notice.Sort, notice.Status).
+		Returning("notice_id")
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var noticeId uint64
 	err := row.Scan(&noticeId)
 	if err == nil {
@@ -35,8 +37,17 @@ func (self *NoticeRepo) Save(notice *usercase.Notice) error {
 }
 
 func (self *NoticeRepo) Update(notice *usercase.Notice) error {
-	sql := "update t_blog_notice set title = $1, message = $2, level = $3, notice_type = $4, sort = $5, status = $6 where notice_id = $7"
-	result, err := self.db.Exec(context.Background(), sql, notice.Title, notice.Message, notice.Level, notice.NoticeType, notice.Sort, notice.Status, notice.NoticeId)
+	builder := sqlbuild.NewUpdateBuilder("t_blog_notice").
+		SetRaw("update_time", "now()").
+		SetByMap(map[string]any{
+			"title":       notice.Title,
+			"message":     notice.Message,
+			"level":       notice.Level,
+			"notice_type": notice.NoticeType,
+			"sort":        notice.Sort,
+			"status":      notice.Status,
+		}).Where("notice_id").Eq(notice.NoticeId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("更新系统通知完成", "row", result.RowsAffected(), "noticeId", notice.NoticeId)
 	}
@@ -44,8 +55,13 @@ func (self *NoticeRepo) Update(notice *usercase.Notice) error {
 }
 
 func (self *NoticeRepo) ListByType(noticeType int) ([]usercase.Notice, error) {
-	sql := "select title, message, level, notice_type from t_blog_notice where notice_type = $1 and status = 0 and delete_at = 0 order by sort"
-	rows, err := self.db.Query(context.Background(), sql, noticeType)
+	builder := sqlbuild.NewSelectBuilder("t_blog_notice").
+		Select("title", "message", "level", "notice_type").
+		Where("notice_type").Eq(noticeType).
+		And("status").EqRaw("0").
+		And("delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("sort")
+	rows, err := self.db.Query(context.Background(), builder.Sql(), noticeType)
 	if err != nil {
 		return nil, err
 	}
@@ -56,22 +72,15 @@ func (self *NoticeRepo) ListByType(noticeType int) ([]usercase.Notice, error) {
 }
 
 func (self *NoticeRepo) ManagePage(query *usercase.NoticeQueryForm) ([]*usercase.Notice, int64, error) {
-	var builder strings.Builder
-	builder.WriteString(" where delete_at = 0")
-	args := make([]any, 0)
-	if query.Title != "" {
-		args = append(args, "%"+query.Title+"%")
-		builder.WriteString(fmt.Sprintf(" and title like $%d", len(args)))
-	}
-	if query.Level != nil {
-		args = append(args, *query.Level)
-		builder.WriteString(fmt.Sprintf(" and level = $%d", len(args)))
-	}
-	if query.NoticeType != nil {
-		args = append(args, *query.NoticeType)
-		builder.WriteString(fmt.Sprintf(" and notice_type = $%d", len(args)))
-	}
-	row := self.db.QueryRow(context.Background(), "select count(*) from t_blog_notice "+builder.String(), args...)
+	builder := sqlbuild.NewSelectBuilder("t_blog_notice").
+		WhereByCondition(query.Title != "", "title").Like("%"+query.Title+"%").
+		AndByCondition(query.Level != nil, "level").Eq(query.Level).
+		AndByCondition(query.NoticeType != nil, "notice_type").Eq(query.NoticeType).
+		AndByCondition(query.CreateTimeBegin != "", "create_time").Ge(query.CreateTimeBegin).
+		AndByCondition(query.CreateTimeEnd != "", "create_time").Le(query.CreateTimeEnd).
+		And("delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("sort", "create_time desc")
+	row := self.db.QueryRow(context.Background(), builder.CountSql(), builder.Args()...)
 	var total int64
 	if err := row.Scan(&total); err != nil {
 		return nil, 0, err
@@ -82,9 +91,8 @@ func (self *NoticeRepo) ManagePage(query *usercase.NoticeQueryForm) ([]*usercase
 
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	builder.WriteString(fmt.Sprintf(" order by sort, create_time desc limit $%d offset $%d", len(args)+1, len(args)+2))
-	args = append(args, query.Size, offset)
-	rows, err := self.db.Query(context.Background(), "select * from t_blog_notice "+builder.String(), args...)
+	builder.Limit(int64(query.Size)).Offset(offset)
+	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -96,16 +104,20 @@ func (self *NoticeRepo) ManagePage(query *usercase.NoticeQueryForm) ([]*usercase
 }
 
 func (self *NoticeRepo) QueryNoticeTypeById(noticeId int64) int {
-	sql := "select notice_type from t_blog_notice where notice_id = $1"
-	row := self.db.QueryRow(context.Background(), sql, noticeId)
+	builder := sqlbuild.NewSelectBuilder("t_blog_notice").
+		Select("notice_type").
+		Where("notice_id").Eq(noticeId).BuildAsSelect()
+	row := self.db.QueryRow(context.Background(), builder.Sql(), noticeId)
 	noticeType := -1
 	_ = row.Scan(&noticeType)
 	return noticeType
 }
 
 func (self *NoticeRepo) DeleteById(id int64) error {
-	sql := "update t_blog_notice set delete_at = $1 where notice_id = $2"
-	result, err := self.db.Exec(context.Background(), sql, time.Now().UnixMilli(), id)
+	builder := sqlbuild.NewUpdateBuilder("t_blog_notice").
+		Set("delete_at", time.Now().UnixMilli()).
+		Where("notice_id").Eq(id).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("删除系统通知完成", "row", result.RowsAffected(), "noticeId", id)
 	}
