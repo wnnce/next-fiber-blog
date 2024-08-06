@@ -12,6 +12,12 @@ export interface Tag {
   createTime: string;
 }
 
+export interface ArticleTag {
+  tagId: number;
+  tagName: string;
+  color: string;
+}
+
 // 博客标签表单
 export interface TagForm {
   tagId?: number;

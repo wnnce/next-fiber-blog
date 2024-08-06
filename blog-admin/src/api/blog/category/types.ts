@@ -26,6 +26,11 @@ export interface Category {
   children: Category[]
 }
 
+export interface ArticleCategory {
+  categoryId: number;
+  categoryName: string;
+}
+
 // 分类表单
 export interface CategoryForm {
   categoryId?: number;

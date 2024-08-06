@@ -219,7 +219,7 @@ onMounted(() => {
                 <li><icon-eye/><span>{{ item.viewNum }}</span></li>
                 <li><icon-share-alt/><span>{{ item.shareNum }}</span></li>
                 <li><icon-thumb-up/><span>{{ item.voteUp }}</span></li>
-                <li><icon-message/><span>0</span></li>
+                <li><icon-message/><span>{{ item.commentNum }}</span></li>
                 <li><icon-clock-circle/><span>{{ item.createTime }}</span></li>
               </ul>
             </div>

@@ -1,6 +1,7 @@
-
 // 博客文章
 import type { PageQuery } from '@/assets/script/types'
+import type { ArticleCategory } from '@/api/blog/category/types'
+import type { ArticleTag } from '@/api/blog/tags/types'
 
 export interface Article {
   articleId: number;
@@ -23,6 +24,12 @@ export interface Article {
   createTime: string;
   sort: number;
   status: number;
+  // 评论数量
+  commentNum: number;
+  // 分类列表
+  categories: ArticleCategory[];
+  // 标签列表
+  tags: ArticleTag[];
 }
 
 // 博客表单
