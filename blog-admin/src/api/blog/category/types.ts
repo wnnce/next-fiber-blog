@@ -22,8 +22,10 @@ export interface Category {
   status: number;
   // 创建时间
   createTime: string;
+  // 文章数量
+  articleNum: number;
   // 子分类
-  children: Category[]
+  children: Category[];
 }
 
 export interface ArticleCategory {

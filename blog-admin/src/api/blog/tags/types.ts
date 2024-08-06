@@ -10,6 +10,7 @@ export interface Tag {
   sort: number;
   status: number;
   createTime: string;
+  articleNum: number;
 }
 
 export interface ArticleTag {

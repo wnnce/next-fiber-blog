@@ -55,6 +55,7 @@ onMounted(() => {
             @menu-item-click="handleItemClick"
             v-model:selected-keys="selectedKeys"
             v-model:open-keys="openedKeys"
+            accordion
     >
       <a-menu-item :key="'-1'">
         <template #icon><icon-home /></template>

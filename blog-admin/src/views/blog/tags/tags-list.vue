@@ -151,6 +151,7 @@ onMounted(() => {
           </template>
         </a-table-column>
         <a-table-column title="查看次数" data-index="viewNum" align="center" />
+        <a-table-column title="文章数量" data-index="articleNum" align="center" />
         <a-table-column title="排序" data-index="sort" />
         <a-table-column title="创建时间" data-index="createTime" align="center" :width="280" />
         <a-table-column title="状态" :width="60">
@@ -170,7 +171,7 @@ onMounted(() => {
                           :ok-button-props="{ status: 'danger' }"
                           @ok="handleDelete(record)"
             >
-              <a-button type="text" shape="circle" status="danger">
+              <a-button type="text" shape="circle" status="danger" :disabled="record.articleNum > 0">
                 <template #icon><icon-delete /></template>
               </a-button>
             </a-popconfirm>
