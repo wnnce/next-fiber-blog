@@ -92,11 +92,15 @@ func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Art
 		Select("ba.article_id", "ba.title", "ba.summary", "ba.cover_url", "ba.category_ids", "ba.tag_ids",
 			"ba.view_num", "ba.share_num", "ba.vote_up", "ba.protocol", "ba.tips", "ba.password", "ba.is_hot", "ba.is_top",
 			"ba.is_comment", "ba.is_private", "ba.create_time", "ba.sort", "ba.status").
-		LeftJoin("t_blog_comment as bc").
-		On("bc.article_id").EqRaw("ba.article_id").
-		And("bc.status").EqRaw("0").
-		And("bc.delete_at").EqRaw("0").BuildAsSelect().
-		Select("count(bc.*) as comment_num").
+		LeftJoin("t_blog_comment as bc").On("bc.article_id").EqRaw("ba.article_id").And("bc.status").EqRaw("0").And("bc.delete_at").EqRaw("0").BuildAsSelect().
+		Select("count(DISTINCT bc.comment_id) as comment_num").
+		LeftJoin("t_blog_category as ct").On("ct.category_id").EqRaw("ANY(ba.category_ids)").And("ct.status").EqRaw("0").And("ct.delete_at").EqRaw("0").BuildAsSelect().
+		// 直接使用 jsonb_agg 将分类字段聚合为分类列表
+		// json字段需要使用驼峰命名 因为pgx在处理jsonb类型字段时 会调用json库直接反序列化
+		Select("jsonb_agg(DISTINCT jsonb_build_object('categoryId', ct.category_id, 'categoryName', ct.category_name)) AS categories").
+		LeftJoin("t_blog_tag as bt").On("bt.tag_id").EqRaw("ANY(ba.tag_ids)").And("bt.status").EqRaw("0").And("bt.delete_at").EqRaw("0").BuildAsSelect().
+		// 聚合为标签列表
+		Select("jsonb_agg(DISTINCT jsonb_build_object('tagId', bt.tag_id, 'tagName', bt.tag_name, 'color', bt.color)) AS tags").
 		WhereByCondition(query.Title != "", "ba.title").Like("%"+query.Title+"%").
 		AndByCondition(query.TagId != nil, fmt.Sprintf("%d", query.TagId)).EqRaw("ANY(ba.tag_ids)").
 		AndByCondition(query.CategoryId != nil, fmt.Sprintf("%d", query.CategoryId)).EqRaw("ANY(ba.category_ids)").
@@ -104,8 +108,7 @@ func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Art
 		AndByCondition(query.CreateTimeBegin != "", "ba.create_time").Ge(query.CreateTimeBegin).
 		AndByCondition(query.CreateTimeEnd != "", "ba.create_time").Le(query.CreateTimeEnd).
 		And("ba.delete_at").EqRaw("0").BuildAsSelect().
-		GroupBy("ba.article_id").
-		OrderBy("ba.is_top desc", "ba.sort", "ba.create_time desc")
+		GroupBy("ba.article_id")
 	row := self.db.QueryRow(context.Background(), builder.CountSql(), builder.Args()...)
 	var total int64
 	if err := row.Scan(&total); err != nil {
@@ -131,11 +134,12 @@ func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Art
 func (self *ArticleRepo) SelectById(articleId uint64, checkStatus bool) (*usercase.ArticleVo, error) {
 	builder := sqlbuild.NewSelectBuilder("t_blog_article as ba").
 		Select("ba.*").
-		LeftJoin("t_blog_comment as bc").
-		On("bc.article_id").EqRaw("ba.article_id").
-		And("bc.status").EqRaw("0").
-		And("bc.delete_at").EqRaw("0").BuildAsSelect().
-		Select("count(bc.*) as comment_num").
+		LeftJoin("t_blog_comment as bc").On("bc.article_id").EqRaw("ba.article_id").And("bc.status").EqRaw("0").And("bc.delete_at").EqRaw("0").BuildAsSelect().
+		Select("count(DISTINCT bc.comment_id) as comment_num").
+		LeftJoin("t_blog_category as ct").On("ct.category_id").EqRaw("ANY(ba.category_ids)").And("ct.status").EqRaw("0").And("ct.delete_at").EqRaw("0").BuildAsSelect().
+		Select("jsonb_agg(DISTINCT jsonb_build_object('categoryId', ct.category_id, 'categoryName', ct.category_name)) AS categories").
+		LeftJoin("t_blog_tag as bt").On("bt.tag_id").EqRaw("ANY(ba.tag_ids)").And("bt.status").EqRaw("0").And("bt.delete_at").EqRaw("0").BuildAsSelect().
+		Select("jsonb_agg(DISTINCT jsonb_build_object('tagId', bt.tag_id, 'tagName', bt.tag_name, 'color', bt.color)) AS tags").
 		Where("ba.article_id").Eq(articleId).
 		AndByCondition(checkStatus, "ba.status").EqRaw("0").
 		And("ba.delete_at").EqRaw("0").BuildAsSelect().

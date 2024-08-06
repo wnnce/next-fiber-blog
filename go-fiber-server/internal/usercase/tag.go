@@ -10,6 +10,13 @@ type Tag struct {
 	BaseEntity
 }
 
+// ArticleTagVo 博客文章标签Vo类 用户查询文章时一起返回
+type ArticleTagVo struct {
+	TagId   uint   `json:"TagId,omitempty" db:"tag_id"`
+	TagName string `json:"TagName,omitempty" db:"tag_name"`
+	Color   string `json:"color,omitempty" db:"color"`
+}
+
 // TagForm 标签的新增、修改表单
 type TagForm struct {
 	TagId    uint   `json:"tagId,omitempty"`

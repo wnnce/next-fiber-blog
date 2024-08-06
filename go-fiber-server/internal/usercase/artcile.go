@@ -25,7 +25,9 @@ type Article struct {
 // ArticleVo 博客文章Vo类
 type ArticleVo struct {
 	Article
-	CommentNum int64 `json:"commentNum" db:"comment_num"`
+	CommentNum int64                `json:"commentNum" db:"comment_num"` // 评论数量
+	Categories []*ArticleCategoryVo `json:"categories" db:"categories"`  // 分类列表
+	Tags       []*ArticleTagVo      `json:"tags" db:"tags"`              // 标签列表
 }
 
 // ArticleUpdateForm 文章更新表单

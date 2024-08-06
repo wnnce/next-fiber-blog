@@ -14,6 +14,12 @@ type Category struct {
 	Children []*Category `json:"children,omitempty"` // 子分类
 }
 
+// ArticleCategoryVo 博客文章分类Vo类 用于查询文章时一起返回
+type ArticleCategoryVo struct {
+	CategoryId   uint   `json:"categoryId,omitempty" db:"category_id"`
+	CategoryName string `json:"categoryName,omitempty" db:"category_name"`
+}
+
 // CategoryUpdateForm 分类快捷更新表单
 type CategoryUpdateForm struct {
 	CategoryId uint  `json:"categoryId" validate:"required"`
