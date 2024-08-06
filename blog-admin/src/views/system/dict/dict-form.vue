@@ -84,7 +84,7 @@ defineExpose({
       </a-form-item>
       <a-form-item label="状态" field="status" required>
 <!--        <a-switch :checked-value="0" :unchecked-value="1" v-model="formData.status" />-->
-        <dict-select dict-key="dict_status" v-model="formData.status" />
+        <dict-select dict-key="dict_status" v-model="formData.status" type="number" />
       </a-form-item>
       <a-form-item>
         <div class="flex justify-between" style="width: 100%; column-gap: 24px">
