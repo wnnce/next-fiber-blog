@@ -61,7 +61,7 @@ defineExpose({
 
 <template>
   <a-modal :title="configForm.configId ? '修改参数配置' : '添加参数配置'" v-model:visible="modalShow" @close="onClose" :footer="false">
-    <a-form :model="configForm" layout="vertical" @submit="formSubmit">
+    <a-form :model="configForm" layout="vertical" @submit-success="formSubmit">
       <a-form-item label="参数名称" field="configName" :rules="[ {required: true, message: '参数名称不能为空'} ]">
         <a-input v-model="configForm.configName" placeholder="请输入参数名称" />
       </a-form-item>

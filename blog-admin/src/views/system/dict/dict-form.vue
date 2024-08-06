@@ -69,7 +69,7 @@ defineExpose({
 
 <template>
   <a-modal :title="formData.dictId ? '修改字典' : '添加字典'" v-model:visible="modalShow" @close="onClose" :footer="false">
-    <a-form :model="formData" layout="vertical" @submit="formSubmit" :rules="formRules">
+    <a-form :model="formData" layout="vertical" @submit-success="formSubmit" :rules="formRules">
       <a-form-item label="字典名称" field="dictName">
         <a-input v-model="formData.dictName" placeholder="请输入字典名称" />
       </a-form-item>

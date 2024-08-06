@@ -147,7 +147,7 @@ defineExpose({
 
 <template>
   <a-modal :title="formData.articleId ? '修改文章' : '添加文章'" v-model:visible="modalShow" @close="onClose" :footer="false">
-    <a-form :model="formData" auto-label-width @submit="formSubmit" :rules="formRules">
+    <a-form :model="formData" auto-label-width @submit-success="formSubmit" :rules="formRules">
       <a-form-item label="标题" field="title">
         <a-input v-model="formData.title" placeholder="请输入文章标题" />
       </a-form-item>

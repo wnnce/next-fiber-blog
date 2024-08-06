@@ -88,7 +88,7 @@ defineExpose({
 
 <template>
   <a-modal :title="formData.linkId ? '修改友情链接' : '添加友情链接'" v-model:visible="modalShow" @close="onClose" :footer="false">
-    <a-form :model="formData" auto-label-width @submit="formSubmit" :rules="formRules">
+    <a-form :model="formData" auto-label-width @submit-success="formSubmit" :rules="formRules">
       <a-form-item label="友情链接名称" field="name">
         <a-input v-model="formData.name" placeholder="请输入友情链接名称" />
       </a-form-item>

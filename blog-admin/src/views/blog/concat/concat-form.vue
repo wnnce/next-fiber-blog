@@ -89,7 +89,7 @@ defineExpose({
 
 <template>
   <a-modal :title="formData.concatId ? '修改联系方式' : '添加联系方式'" v-model:visible="modalShow" @close="onClose" :footer="false">
-    <a-form :model="formData" auto-label-width @submit="formSubmit" :rules="formRules">
+    <a-form :model="formData" auto-label-width @submit-success="formSubmit" :rules="formRules">
       <a-form-item label="名称" field="name">
         <a-input v-model="formData.name" placeholder="请输入联系方式名称" />
       </a-form-item>

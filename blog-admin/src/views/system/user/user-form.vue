@@ -121,7 +121,7 @@ defineExpose({
 
 <template>
   <a-modal :title="formData.userId ? '修改用户' : '添加用户'" v-model:visible="modalShow" @close="onClose" :footer="false">
-    <a-form :model="formData" auto-label-width @submit="formSubmit" :rules="formRules">
+    <a-form :model="formData" auto-label-width @submit-success="formSubmit" :rules="formRules">
       <a-form-item label="用户名" field="username">
         <a-input v-model="formData.username" placeholder="请输入用户名" />
       </a-form-item>

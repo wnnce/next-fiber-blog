@@ -75,7 +75,7 @@ defineExpose({
 
 <template>
   <a-modal :title="formData.id ? '修改字典数据' : '添加字典数据'" v-model:visible="modalShow" @close="onClose" :footer="false">
-    <a-form :model="formData" auto-label-width @submit="formSubmit" :rules="formRules">
+    <a-form :model="formData" auto-label-width @submit-success="formSubmit" :rules="formRules">
       <a-form-item label="字典KEY" field="dictKey">
         <a-input :model-value="formData.dictKey" disabled />
       </a-form-item>

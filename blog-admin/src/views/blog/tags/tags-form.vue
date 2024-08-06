@@ -88,7 +88,7 @@ defineExpose({
 
 <template>
   <a-modal :title="formData.tagId ? '修改标签' : '添加标签'" v-model:visible="modalShow" @close="onClose" :footer="false">
-    <a-form :model="formData" auto-label-width @submit="formSubmit" :rules="formRules">
+    <a-form :model="formData" auto-label-width @submit-success="formSubmit" :rules="formRules">
       <a-form-item label="标签名称" field="tagName">
         <a-input v-model="formData.tagName" placeholder="请输入标签名称" />
       </a-form-item>

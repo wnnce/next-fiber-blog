@@ -121,7 +121,7 @@ defineExpose({
 
 <template>
   <a-modal :title="formData.categoryId ? '修改分类' : '新增分类'" v-model:visible="modalShow" @close="onClose" :footer="false">
-    <a-form :model="formData" @submit="formSubmit" auto-label-width :rules="formRules">
+    <a-form :model="formData" @submit-success="formSubmit" auto-label-width :rules="formRules">
       <a-form-item label="上级分类" field="parentId">
         <a-tree-select v-model="formData.parentId" :data="treeSelectData" :tree-props="{ defaultExpandAll: false }"
                        placeholder="请选择上级菜单"

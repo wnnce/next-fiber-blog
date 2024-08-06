@@ -117,7 +117,7 @@ onMounted(() => {
       <div ref="loginCardRef" class="login-card radius-xl" @mousemove="event => handleCardMouseMove(event)" @mouseleave="handleCardMouseLeave">
         <div class="light" :style="cardLightStyle"/>
         <h1 class="title">欢迎访问博客后台管理系统</h1>
-        <a-form :model="formData" layout="vertical" @submit="handleSubmit">
+        <a-form :model="formData" layout="vertical" @submit-success="handleSubmit">
           <a-form-item field="username" label="用户名" hide-label :rules="[{required: true, message: '用户名不能为空'}]">
             <a-input v-model="formData.username" size="large" placeholder="请输入用户名">
               <template #prefix>

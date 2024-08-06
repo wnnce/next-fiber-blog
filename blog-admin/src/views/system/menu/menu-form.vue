@@ -99,7 +99,7 @@ defineExpose({
 
 <template>
   <a-modal :title="formData.menuName ? '修改参数配置' : '添加参数配置'" v-model:visible="modalShow" @close="onClose" :footer="false">
-    <a-form :model="formData" @submit="formSubmit" auto-label-width>
+    <a-form :model="formData" @submit-success="formSubmit" auto-label-width>
       <a-form-item label="上级菜单" field="parentId" :rules="[ {required: true, message: '上级菜单不能为空'} ]">
         <a-tree-select v-model="formData.parentId" :data="treeSelectData" placeholder="请选择上级菜单"
                        :tree-props="{ defaultExpandAll: false }"

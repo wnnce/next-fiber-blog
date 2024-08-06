@@ -91,7 +91,7 @@ defineExpose({
 
 <template>
   <a-modal :title="formData.roleId ? '修改角色' : '添加角色'" v-model:visible="modalShow" @close="onClose" :footer="false">
-    <a-form :model="formData" auto-label-width @submit="formSubmit">
+    <a-form :model="formData" auto-label-width @submit-success="formSubmit">
       <a-form-item label="角色名称" field="roleName" :rules="[ {required: true, message: '角色名称不能为空'} ]">
         <a-input v-model="formData.roleName" placeholder="请输入角色名称" />
       </a-form-item>
