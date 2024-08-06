@@ -30,11 +30,12 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 		return nil, nil, err
 	}
 	iTagRepo := data.NewTagRepo(dataData)
+	iArticleRepo := data.NewArticleRepo(dataData)
 	redisTemplate := data.NewRedisTemplate(dataData)
-	iTagService := service.NewTagService(iTagRepo, redisTemplate)
+	iTagService := service.NewTagService(iTagRepo, iArticleRepo, redisTemplate)
 	httpApi := tag.NewHttpApi(iTagService)
 	iCategoryRepo := data.NewCategoryRepo(dataData)
-	iCategoryService := service.NewCategoryService(iCategoryRepo, redisTemplate)
+	iCategoryService := service.NewCategoryService(iCategoryRepo, iArticleRepo, redisTemplate)
 	categoryHttpApi := category.NewHttpApi(iCategoryService)
 	iConcatRepo := data.NewConcatRepo(dataData)
 	iConcatService := service.NewConcatService(iConcatRepo, redisTemplate)
@@ -63,7 +64,6 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 	iNoticeRepo := data.NewNoticeRepo(dataData)
 	iNoticeService := service.NewNoticeService(iNoticeRepo, redisTemplate)
 	noticeApi := manage.NewNoticeApi(iNoticeService)
-	iArticleRepo := data.NewArticleRepo(dataData)
 	iArticleService := service.NewArticleService(iArticleRepo, redisTemplate)
 	articleHttpApi := article.NewHttpApi(iArticleService)
 	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi, roleApi, userApi, dictApi, noticeApi, articleHttpApi)

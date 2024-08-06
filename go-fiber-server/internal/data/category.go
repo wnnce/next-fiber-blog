@@ -96,32 +96,40 @@ func (c *CategoryRepo) SelectById(catId int) (*usercase.Category, error) {
 	return nil, err
 }
 
-func (c *CategoryRepo) List() ([]*usercase.Category, error) {
-	builder := sqlbuild.NewSelectBuilder("t_blog_category").
-		Select("category_id", "category_name", "parent_id", "cover_url", "is_top", "is_hot", "view_num").
-		Where("status").EqRaw("0").And("delete_at").EqRaw("0").BuildAsSelect().
-		OrderBy("is_top desc", "sort")
+func (c *CategoryRepo) List() ([]*usercase.CategoryVo, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_category as bc").
+		Select("bc.category_id", "bc.category_name", "bc.parent_id", "bc.cover_url", "bc.is_top", "bc.is_hot", "bc.view_num").
+		LeftJoin("t_blog_article as ba").On("bc.category_id").EqRaw("ANY(ba.category_ids)").And("ba.status").EqRaw("0").And("ba.delete_at").EqRaw("0").BuildAsSelect().
+		Select("count(ba.*) as article_num").
+		Where("bc.status").EqRaw("0").And("bc.delete_at").EqRaw("0").BuildAsSelect().
+		GroupBy("bc.category_id").
+		OrderBy("bc.is_top desc", "bc.sort")
 	rows, err := c.db.Query(context.Background(), builder.Sql())
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Category, error) {
-		return pgx.RowToAddrOfStructByNameLax[usercase.Category](row)
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.CategoryVo, error) {
+		return pgx.RowToAddrOfStructByNameLax[usercase.CategoryVo](row)
 	})
 }
 
-func (c *CategoryRepo) ManageList() ([]*usercase.Category, error) {
-	builder := sqlbuild.NewSelectBuilder("t_blog_category").
-		Where("delete_at").EqRaw("0").BuildAsSelect().
-		OrderBy("is_top desc", "sort")
+func (c *CategoryRepo) ManageList() ([]*usercase.CategoryVo, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_category as bc").
+		Select("bc.*").
+		// 后台查看文章数量忽略status字段
+		LeftJoin("t_blog_article as ba").On("bc.category_id").EqRaw("ANY(ba.category_ids)").And("ba.delete_at").EqRaw("0").BuildAsSelect().
+		Select("count(ba.*) as article_num").
+		Where("bc.delete_at").EqRaw("0").BuildAsSelect().
+		GroupBy("bc.category_id").
+		OrderBy("bc.is_top desc", "bc.sort")
 	rows, err := c.db.Query(context.Background(), builder.Sql())
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Category, error) {
-		return pgx.RowToAddrOfStructByNameLax[usercase.Category](row)
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.CategoryVo, error) {
+		return pgx.RowToAddrOfStructByNameLax[usercase.CategoryVo](row)
 	})
 }
 

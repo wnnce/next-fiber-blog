@@ -16,12 +16,15 @@ const categoryTreeListCacheKey = "BLOG:category:list:tree"
 
 type CategoryService struct {
 	repo          usercase.ICategoryRepo
+	articleRepo   usercase.IArticleRepo
 	redisTemplate *data.RedisTemplate
 }
 
-func NewCategoryService(repo usercase.ICategoryRepo, redisTemplate *data.RedisTemplate) usercase.ICategoryService {
+func NewCategoryService(repo usercase.ICategoryRepo, articleRepo usercase.IArticleRepo,
+	redisTemplate *data.RedisTemplate) usercase.ICategoryService {
 	return &CategoryService{
 		repo:          repo,
+		articleRepo:   articleRepo,
 		redisTemplate: redisTemplate,
 	}
 }
@@ -62,8 +65,8 @@ func (self *CategoryService) UpdateSelectiveCategory(form *usercase.CategoryUpda
 	return nil
 }
 
-func (self *CategoryService) TreeCategory() ([]*usercase.Category, error) {
-	categoryTree, err := data.RedisGetSlice[*usercase.Category](context.Background(), categoryTreeListCacheKey, self.redisTemplate.Client())
+func (self *CategoryService) TreeCategory() ([]*usercase.CategoryVo, error) {
+	categoryTree, err := data.RedisGetSlice[*usercase.CategoryVo](context.Background(), categoryTreeListCacheKey, self.redisTemplate.Client())
 	if err == nil && len(categoryTree) > 0 {
 		return categoryTree, nil
 	}
@@ -81,14 +84,11 @@ func (self *CategoryService) TreeCategory() ([]*usercase.Category, error) {
 	return categoryTree, err
 }
 
-func (self *CategoryService) ManageTreeCategory() ([]*usercase.Category, error) {
+func (self *CategoryService) ManageTreeCategory() ([]*usercase.CategoryVo, error) {
 	categorys, err := self.repo.ManageList()
 	if err != nil {
 		slog.Error(fmt.Sprintf("获取分类列表失败，错误信息：%s", err))
 		return nil, tools.FiberServerError("分类查询失败")
-	}
-	if len(categorys) <= 1 {
-		return categorys, nil
 	}
 	return tools.BuilderTree[uint](categorys), nil
 }
@@ -106,7 +106,15 @@ func (self *CategoryService) QueryCategoryInfo(catId int) (*usercase.Category, e
 }
 
 func (self *CategoryService) Delete(catId int) error {
-	if err := self.repo.DeleteById(catId); err != nil {
+	total, err := self.articleRepo.CountByCategoryId(catId)
+	if err != nil {
+		slog.Error("获取分类关联文章数据失败", "error", err.Error())
+		return tools.FiberServerError("分类删除失败")
+	}
+	if total > 0 {
+		return tools.FiberRequestError("当前分类还有文章未删除")
+	}
+	if err = self.repo.DeleteById(catId); err != nil {
 		slog.Error(fmt.Sprintf("分类删除失败，错误信息：%s", err))
 		return tools.FiberServerError("分类删除失败")
 	}

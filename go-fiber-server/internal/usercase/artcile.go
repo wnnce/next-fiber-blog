@@ -61,8 +61,10 @@ type IArticleRepo interface {
 
 	SelectById(articleId uint64, checkStatus bool) (*ArticleVo, error)
 
+	// CountByTagId 统计该标签id下的文章数量 忽略status
 	CountByTagId(tagId int) (int64, error)
 
+	// CountByCategoryId 统计该分类id下的文章数量 忽略status
 	CountByCategoryId(categoryId int) (int64, error)
 
 	CountByTitle(title string, articleId uint64) (uint8, error)

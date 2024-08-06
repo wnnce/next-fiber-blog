@@ -92,19 +92,23 @@ func (self *TagRepo) SelectById(id int) (*usercase.Tag, error) {
 	return nil, err
 }
 
-func (self *TagRepo) Page(query *usercase.TagQueryForm) ([]*usercase.Tag, int64, error) {
-	builder := sqlbuild.NewSelectBuilder("t_blog_tag").
-		WhereByCondition(query.TagName != "", "tag_name").Like("%"+query.TagName+"%").
-		AndByCondition(query.CreateTimeBegin != "", "create_time").Ge(query.CreateTimeBegin).
-		AndByCondition(query.CreateTimeEnd != "", "create_time").Le(query.CreateTimeEnd).
-		And("delete_at").EqRaw("0").BuildAsSelect().
-		OrderBy("sort", "create_time desc")
+func (self *TagRepo) Page(query *usercase.TagQueryForm) ([]*usercase.TagVo, int64, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_tag as bt").
+		Select("bt.*").
+		LeftJoin("t_blog_article as ba").On("bt.tag_id").EqRaw("ANY(ba.tag_ids)").And("ba.delete_at").EqRaw("0").BuildAsSelect().
+		Select("count(ba.*) as article_num").
+		WhereByCondition(query.TagName != "", "bt.tag_name").Like("%"+query.TagName+"%").
+		AndByCondition(query.CreateTimeBegin != "", "bt.create_time").Ge(query.CreateTimeBegin).
+		AndByCondition(query.CreateTimeEnd != "", "bt.create_time").Le(query.CreateTimeEnd).
+		And("bt.delete_at").EqRaw("0").BuildAsSelect().
+		GroupBy("bt.tag_id").
+		OrderBy("bt.sort", "bt.create_time desc")
 	var total int64
 	row := self.db.QueryRow(context.Background(), builder.CountSql(), builder.Args()...)
 	if err := row.Scan(&total); err != nil {
 		return nil, 0, err
 	}
-	tags := make([]*usercase.Tag, 0)
+	tags := make([]*usercase.TagVo, 0)
 	if total == 0 {
 		return tags, total, nil
 	}
@@ -115,25 +119,28 @@ func (self *TagRepo) Page(query *usercase.TagQueryForm) ([]*usercase.Tag, int64,
 		return nil, 0, err
 	}
 	defer rows.Close()
-	tags, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Tag, error) {
-		return pgx.RowToAddrOfStructByName[usercase.Tag](row)
+	tags, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.TagVo, error) {
+		return pgx.RowToAddrOfStructByName[usercase.TagVo](row)
 	})
 	return tags, total, err
 }
 
-func (self *TagRepo) List() ([]*usercase.Tag, error) {
-	builder := sqlbuild.NewSelectBuilder("t_blog_tag").
-		Select("tag_id", "tag_name", "cover_url", "view_num", "color").
-		Where("status").EqRaw("0").
-		And("delete_at").EqRaw("0").BuildAsSelect().
-		OrderBy("sort", "create_time desc")
+func (self *TagRepo) List() ([]*usercase.TagVo, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_tag as bt").
+		Select("bt.tag_id", "bt.tag_name", "bt.cover_url", "bt.view_num", "bt.color").
+		LeftJoin("t_blog_article as ba").On("bt.tag_id").EqRaw("ANY(ba.tag_ids)").And("ba.status").EqRaw("0").And("ba.delete_at").EqRaw("0").BuildAsSelect().
+		Select("count(ba.*) as article_num").
+		Where("bt.status").EqRaw("0").
+		And("bt.delete_at").EqRaw("0").BuildAsSelect().
+		GroupBy("bt.tag_id").
+		OrderBy("bt.sort", "bt.create_time desc")
 	rows, err := self.db.Query(context.Background(), builder.Sql())
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Tag, error) {
-		return pgx.RowToAddrOfStructByNameLax[usercase.Tag](row)
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.TagVo, error) {
+		return pgx.RowToAddrOfStructByNameLax[usercase.TagVo](row)
 	})
 }
 

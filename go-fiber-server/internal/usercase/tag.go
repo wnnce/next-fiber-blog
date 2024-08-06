@@ -10,6 +10,11 @@ type Tag struct {
 	BaseEntity
 }
 
+type TagVo struct {
+	Tag
+	ArticleNum int `json:"articleNum" db:"article_num"`
+}
+
 // ArticleTagVo 博客文章标签Vo类 用户查询文章时一起返回
 type ArticleTagVo struct {
 	TagId   uint   `json:"TagId,omitempty" db:"tag_id"`
@@ -53,9 +58,9 @@ type ITagRepo interface {
 	// SelectById 通过Id获取标签数据
 	SelectById(id int) (*Tag, error)
 	// Page 后台获取标签列表
-	Page(form *TagQueryForm) ([]*Tag, int64, error)
+	Page(form *TagQueryForm) ([]*TagVo, int64, error)
 	// List 博客页码获取标签列表
-	List() ([]*Tag, error)
+	List() ([]*TagVo, error)
 	// ListByIds 通过标签Id列表获取标签列表
 	ListByIds(ids []uint) ([]*Tag, error)
 	// CountByTagName 通过名称查询标签数量
@@ -77,9 +82,9 @@ type ITagService interface {
 	// QueryTagInfo 查询标签详情
 	QueryTagInfo(id int) (*Tag, error)
 	// PageTag 查询标签列表
-	PageTag(form *TagQueryForm) (*PageData[Tag], error)
+	PageTag(form *TagQueryForm) (*PageData[TagVo], error)
 	// AllTag 博客获取所有标签
-	AllTag() []*Tag
+	AllTag() []*TagVo
 	// Delete 删除单个标签
 	Delete(id int) error
 	// BatchDelete 批量删除标签

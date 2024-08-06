@@ -155,7 +155,6 @@ func (self *ArticleRepo) CountByTagId(tagId int) (int64, error) {
 	builder := sqlbuild.NewSelectBuilder("t_blog_article").
 		Select("count(*)").
 		Where(strconv.Itoa(tagId)).EqRaw("ANY(tag_ids)").
-		And("status").EqRaw("0").
 		And("delete_at").EqRaw("0").BuildAsSelect()
 	row := self.db.QueryRow(context.Background(), builder.Sql())
 	var total int64
@@ -167,7 +166,6 @@ func (self *ArticleRepo) CountByCategoryId(categoryId int) (int64, error) {
 	builder := sqlbuild.NewSelectBuilder("t_blog_article").
 		Select("count(*)").
 		Where(strconv.Itoa(categoryId)).EqRaw("ANY(category_ids)").
-		And("status").EqRaw("0").
 		And("delete_at").EqRaw("0").BuildAsSelect()
 	row := self.db.QueryRow(context.Background(), builder.Sql())
 	var total int64

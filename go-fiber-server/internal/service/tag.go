@@ -19,12 +19,14 @@ const tagListCacheKey = "BLOG:tag:list"
 
 type TagService struct {
 	repo          usercase.ITagRepo
+	articleRepo   usercase.IArticleRepo
 	redisTemplate *data.RedisTemplate
 }
 
-func NewTagService(repo usercase.ITagRepo, redisTemplate *data.RedisTemplate) usercase.ITagService {
+func NewTagService(repo usercase.ITagRepo, articleRepo usercase.IArticleRepo, redisTemplate *data.RedisTemplate) usercase.ITagService {
 	return &TagService{
 		repo:          repo,
+		articleRepo:   articleRepo,
 		redisTemplate: redisTemplate,
 	}
 }
@@ -78,14 +80,14 @@ func (self *TagService) QueryTagInfo(tagId int) (*usercase.Tag, error) {
 	return tag, nil
 }
 
-func (self *TagService) PageTag(form *usercase.TagQueryForm) (*usercase.PageData[usercase.Tag], error) {
+func (self *TagService) PageTag(form *usercase.TagQueryForm) (*usercase.PageData[usercase.TagVo], error) {
 	tags, total, err := self.repo.Page(form)
 	if err != nil {
 		slog.Error(fmt.Sprintf("获取标签列表失败，错误信息：%v", err))
 		return nil, tools.FiberServerError("获取标签列表失败")
 	}
 	pages := int(math.Ceil(float64(total) / float64(form.Size)))
-	return &usercase.PageData[usercase.Tag]{
+	return &usercase.PageData[usercase.TagVo]{
 		Current: form.Page,
 		Size:    form.Size,
 		Pages:   pages,
@@ -94,15 +96,15 @@ func (self *TagService) PageTag(form *usercase.TagQueryForm) (*usercase.PageData
 	}, nil
 }
 
-func (self *TagService) AllTag() []*usercase.Tag {
-	tags, err := data.RedisGetSlice[*usercase.Tag](context.Background(), tagListCacheKey, self.redisTemplate.Client())
+func (self *TagService) AllTag() []*usercase.TagVo {
+	tags, err := data.RedisGetSlice[*usercase.TagVo](context.Background(), tagListCacheKey, self.redisTemplate.Client())
 	if err == nil && len(tags) > 0 {
 		return tags
 	}
 	tags, err = self.repo.List()
 	if err != nil {
 		slog.Error("获取标签列表失败，错误信息：" + err.Error())
-		return make([]*usercase.Tag, 0)
+		return make([]*usercase.TagVo, 0)
 	}
 	pool.Go(func() {
 		if setErr := self.redisTemplate.Set(context.Background(), tagListCacheKey, tags, time.Duration(math.MaxInt64)); err != nil {
@@ -113,8 +115,15 @@ func (self *TagService) AllTag() []*usercase.Tag {
 }
 
 func (self *TagService) Delete(tagId int) error {
-	// TODO 删除前验证是否还存在文章
-	if err := self.repo.DeleteById(tagId); err != nil {
+	total, err := self.articleRepo.CountByTagId(tagId)
+	if err != nil {
+		slog.Error("获取标签关联的文章数量失败", "error", err.Error())
+		return tools.FiberServerError("删除标签失败")
+	}
+	if total > 0 {
+		return tools.FiberRequestError("当前标签还有文章未删除")
+	}
+	if err = self.repo.DeleteById(tagId); err != nil {
 		slog.Error(fmt.Sprintf("删除标签失败，tagId:%d,错误信息：%v", tagId, err))
 		return tools.FiberServerError("删除标签失败")
 	}

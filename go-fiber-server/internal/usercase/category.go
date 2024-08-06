@@ -11,7 +11,12 @@ type Category struct {
 	IsHot        bool   `json:"isHot" db:"is_hot"`                                                    // 是否热门
 	IsTop        bool   `json:"isTop" db:"is_top"`                                                    // 是否置顶
 	BaseEntity
-	Children []*Category `json:"children,omitempty"` // 子分类
+}
+
+type CategoryVo struct {
+	Category
+	ArticleNum int           `json:"articleNum"`         // 分类关联的文章数量
+	Children   []*CategoryVo `json:"children,omitempty"` // 子分类
 }
 
 // ArticleCategoryVo 博客文章分类Vo类 用于查询文章时一起返回
@@ -28,18 +33,18 @@ type CategoryUpdateForm struct {
 	Status     *int  `json:"status"`
 }
 
-func (c *Category) GetId() uint {
+func (c *CategoryVo) GetId() uint {
 	return c.CategoryId
 }
 
-func (c *Category) GetParentId() uint {
+func (c *CategoryVo) GetParentId() uint {
 	return c.ParentId
 }
 
-func (c *Category) AppendChild(t Tree[uint]) {
-	if cat, ok := t.(*Category); ok {
+func (c *CategoryVo) AppendChild(t Tree[uint]) {
+	if cat, ok := t.(*CategoryVo); ok {
 		if c.Children == nil {
-			c.Children = make([]*Category, 0)
+			c.Children = make([]*CategoryVo, 0)
 		}
 		c.Children = append(c.Children, cat)
 	}
@@ -57,9 +62,9 @@ type ICategoryRepo interface {
 	// SelectById 通过Id查询分类
 	SelectById(catId int) (*Category, error)
 	// List 查询分类列表
-	List() ([]*Category, error)
+	List() ([]*CategoryVo, error)
 	// ManageList 管理端查询分类
-	ManageList() ([]*Category, error)
+	ManageList() ([]*CategoryVo, error)
 	// ListByIds 通过分类Id列表查询分类列表
 	ListByIds([]uint) ([]Category, error)
 
@@ -77,9 +82,9 @@ type ICategoryService interface {
 
 	UpdateSelectiveCategory(form *CategoryUpdateForm) error
 
-	TreeCategory() ([]*Category, error)
+	TreeCategory() ([]*CategoryVo, error)
 
-	ManageTreeCategory() ([]*Category, error)
+	ManageTreeCategory() ([]*CategoryVo, error)
 
 	QueryCategoryInfo(catId int) (*Category, error)
 
