@@ -11,12 +11,14 @@ interface Props {
   defaultValue?: string,
   fixedToolbar?: boolean,
   minHeight?: number,
+  hideCodePreview?: boolean,
 }
 
 const props = withDefaults(defineProps<Props>(), {
   placeholder: '请输入内容',
   mode: 'wysiwyg',
   fixedToolbar: true,
+  hideCodePreview: false,
 })
 
 let vditor!: Vditor;
@@ -74,6 +76,17 @@ defineExpose({
 
 onMounted(() => {
   vditor = new Vditor(templateId, {
+    counter: {
+      enable: true,
+    },
+    preview: {
+      hljs: {
+        lineNumber: true,
+      },
+      markdown: {
+        codeBlockPreview: !props.hideCodePreview
+      }
+    },
     theme: useAppConfigStore().state.pageTheme === 'light' ? 'classic' : 'dark',
     toolbarConfig: {
       pin: props.fixedToolbar
@@ -102,4 +115,33 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
+.editor-container {
+  width: 100%;
+}
+:deep(.vditor-reset) {
+  color: var(--text-color) !important;
+}
+.vditor {
+  border: none !important;
+  --border-color: var(--color-border-2);
+  --second-color: rgba(88, 96, 105, 0.36);
+
+  --panel-background-color: #ffffff;
+  --panel-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+
+  --toolbar-background-color: var(--card-color);
+  --toolbar-icon-color: var(--color-text-2);
+  --toolbar-icon-hover-color: #4285f4;
+  --toolbar-height: 35px;
+  --toolbar-divider-margin-top: 8px;
+
+  --textarea-background-color: var(--card-color);
+
+  &--dark {
+    --panel-background-color: var(--card-color);
+    --panel-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+
+    --textarea-background-color: var(--card-color);
+  }
+}
 </style>
