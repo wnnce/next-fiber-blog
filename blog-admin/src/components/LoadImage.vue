@@ -25,6 +25,8 @@ interface Props {
   radius?: number | string;
   // 图片显示模式
   mode?: ImageMode;
+  // 图片是否可以预览
+  preview?: boolean;
 }
 const props = withDefaults(defineProps<Props>(), {
   local: false,
@@ -35,7 +37,8 @@ const props = withDefaults(defineProps<Props>(), {
   lazy: true,
   alt: 'image',
   radius: '0',
-  mode: 'cover'
+  mode: 'cover',
+  preview: false
 })
 const emits = defineEmits<{
   // 图片加载完成事件
@@ -89,15 +92,22 @@ const handleLoadDone = () => {
   }
   emits('done');
 }
+
+const previewShow = ref<boolean>(false);
+const handleImagePreview = () => {
+  if (loadingStatus.value === 'done' && props.preview) {
+    previewShow.value = true;
+  }
+}
 </script>
 
 <template>
-  <div class="load-image">
+  <div class="load-image" :class="preview ? 'cursor-pointer' : ''" @click="handleImagePreview">
     <div class="mask thumb-loading-mask absolute-center" v-if="loadingStatus === 'loading'">
       <icon-loading spin />
     </div>
     <div class="mask thumb-error-mask absolute-center" v-else-if="loadingStatus === 'error'">
-      <icon-close-circle />
+      <icon-image-close />
     </div>
     <!-- 缩略图模式之加载缩略图 -->
     <template v-if="thumbnail">
@@ -127,10 +137,14 @@ const handleLoadDone = () => {
            @error="handleLoadError"
       />
     </template>
+    <a-image-preview :src="src" v-model:visible="previewShow" />
   </div>
 </template>
 
 <style scoped lang="scss">
+.cursor-pointer {
+  cursor: pointer;
+}
 .load-image {
   height: v-bind(_height);
   width: v-bind(_width);
