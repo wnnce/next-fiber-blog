@@ -203,8 +203,8 @@ onMounted(() => {
       </div>
       <right-operate @refresh="handleRefresh"/>
     </div>
-    <div class="article-list flex flex-column">
-      <transition-group name="switch">
+    <a-spin :loading="tableLoading">
+      <div class="article-list flex flex-column" v-if="tableData && tableData.length > 0">
         <div class="article-item flex justify-between" v-for="item in tableData" :key="item.articleId">
           <div class="item-info flex">
             <div class="item-cover flex item-center">
@@ -273,8 +273,9 @@ onMounted(() => {
             </ul>
           </div>
         </div>
-      </transition-group>
-    </div>
+      </div>
+      <a-empty v-else />
+    </a-spin>
     <div class="flex justify-end">
       <a-pagination :total="recordTotal" size="medium"
                     v-model:current="queryForm.page"
