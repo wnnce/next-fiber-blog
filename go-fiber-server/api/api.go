@@ -10,16 +10,18 @@ import (
 	"go-fiber-ent-web-layout/api/manage/v1"
 	"go-fiber-ent-web-layout/api/other/v1"
 	"go-fiber-ent-web-layout/api/tag/v1"
+	"go-fiber-ent-web-layout/api/topic/v1"
 	"go-fiber-ent-web-layout/internal/middleware/auth"
 )
 
 var InjectSet = wire.NewSet(tag.NewHttpApi, category.NewHttpApi, concat.NewHttpApi, link.NewHttpApi, article.NewHttpApi,
-	manage.NewMenuApi, manage.NewConfigApi, other.NewHttpApi, manage.NewRoleApi, manage.NewUserApi, manage.NewDictApi, manage.NewNoticeApi)
+	manage.NewMenuApi, manage.NewConfigApi, other.NewHttpApi, manage.NewRoleApi, manage.NewUserApi, manage.NewDictApi,
+	manage.NewNoticeApi, topic.NewHttpApi)
 
 // RegisterRoutes 全局路由绑定处理函数 在newApp函数中调用 不然wire无法处理依赖注入
 func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpApi, conApi *concat.HttpApi, linkApi *link.HttpApi,
 	menuApi *manage.MenuApi, cfgApi *manage.ConfigApi, oApi *other.HttpApi, roleApi *manage.RoleApi, userApi *manage.UserApi,
-	dictApi *manage.DictApi, noticeApi *manage.NoticeApi, articleApi *article.HttpApi) {
+	dictApi *manage.DictApi, noticeApi *manage.NoticeApi, articleApi *article.HttpApi, topicApi *topic.HttpApi) {
 	// 系统接口路由
 	sysRoute := app.Group("/system", auth.ManageAuth, auth.VerifyRoles("admin"))
 	sysRoute.Post("/record/login", oApi.PageLoginRecord)
@@ -121,6 +123,7 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	linkRoute.Put("/status", linkApi.UpdateSelective)
 	linkRoute.Delete("/:id<int;min<1>>", linkApi.Delete)
 
+	// 文章管理接口
 	articleRoute := app.Group("/article", auth.ManageAuth)
 	articleRoute.Post("/", articleApi.Save)
 	articleRoute.Put("/", articleApi.Update)
@@ -128,6 +131,14 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	articleRoute.Post("/manage/page", articleApi.ManagePage)
 	articleRoute.Delete("/:id", articleApi.Delete)
 	articleRoute.Get("/info/:id", articleApi.ManageQueryInfo)
+
+	// 动态管理接口
+	topicRoute := app.Group("/topic", auth.ManageAuth)
+	topicRoute.Post("/", topicApi.Save)
+	topicRoute.Put("/", topicApi.Update)
+	topicRoute.Put("/status", topicApi.UpdateSelective)
+	topicRoute.Post("/page", topicApi.Page)
+	topicRoute.Delete("/:id", topicApi.Delete)
 
 	// 开放接口
 	openRoute := app.Group("/open")

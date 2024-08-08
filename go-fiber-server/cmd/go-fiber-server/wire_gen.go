@@ -16,6 +16,7 @@ import (
 	"go-fiber-ent-web-layout/api/manage/v1"
 	"go-fiber-ent-web-layout/api/other/v1"
 	"go-fiber-ent-web-layout/api/tag/v1"
+	"go-fiber-ent-web-layout/api/topic/v1"
 	"go-fiber-ent-web-layout/internal/conf"
 	"go-fiber-ent-web-layout/internal/data"
 	"go-fiber-ent-web-layout/internal/service"
@@ -66,7 +67,10 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 	noticeApi := manage.NewNoticeApi(iNoticeService)
 	iArticleService := service.NewArticleService(iArticleRepo, redisTemplate)
 	articleHttpApi := article.NewHttpApi(iArticleService)
-	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi, roleApi, userApi, dictApi, noticeApi, articleHttpApi)
+	iTopicRepo := data.NewTopicRepo(dataData)
+	iTopicService := service.NewTopicService(iTopicRepo)
+	topicHttpApi := topic.NewHttpApi(iTopicService)
+	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi, roleApi, userApi, dictApi, noticeApi, articleHttpApi, topicHttpApi)
 	return app, func() {
 		cleanup()
 	}, nil

@@ -77,6 +77,7 @@ func (self *SysDictRepo) UpdateSelectiveDict(dict *usercase.SysDict, tx pgx.Tx) 
 
 func (self *SysDictRepo) CountByKey(key string, dictId uint64) (uint8, error) {
 	builder := sqlbuild.NewSelectBuilder("t_system_dict").
+		Select("count(*)").
 		Where("dict_id").Ne(dictId).
 		And("dict_key").Eq(key).
 		And("delete_at").EqRaw("0").BuildAsSelect()
@@ -189,7 +190,7 @@ func (self *SysDictRepo) UpdateSelectiveDictValue(value *usercase.SysDictValue, 
 func (self *SysDictRepo) CountValueById(value string, dictId uint64, valueId uint64) (uint8, error) {
 	builder := sqlbuild.NewSelectBuilder("t_system_dict_value").
 		Select("count(*)").
-		Where("id").Ne(valueId).And("dict_id").Ne(dictId).
+		Where("id").Ne(valueId).And("dict_id").Eq(dictId).
 		And("value").Eq(value).And("delete_at").EqRaw("0").BuildAsSelect()
 	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var total uint8

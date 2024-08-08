@@ -15,6 +15,7 @@ import (
 	"go-fiber-ent-web-layout/api/manage/v1"
 	"go-fiber-ent-web-layout/api/other/v1"
 	"go-fiber-ent-web-layout/api/tag/v1"
+	"go-fiber-ent-web-layout/api/topic/v1"
 	"go-fiber-ent-web-layout/internal/conf"
 	"go-fiber-ent-web-layout/internal/middleware/cors"
 	"go-fiber-ent-web-layout/internal/middleware/limiter"
@@ -30,7 +31,8 @@ var confPath string
 // 创建fiber app 包含注入中间件、错误处理、路由绑定等操作
 func newApp(ctx context.Context, cf *conf.Server, tagApi *tag.HttpApi, catApi *category.HttpApi, conApi *concat.HttpApi,
 	linkApi *link.HttpApi, menuApi *manage.MenuApi, cfgApi *manage.ConfigApi, oApi *other.HttpApi, roleApi *manage.RoleApi,
-	userApi *manage.UserApi, dictApi *manage.DictApi, noticeApi *manage.NoticeApi, articleApi *article.HttpApi) *fiber.App {
+	userApi *manage.UserApi, dictApi *manage.DictApi, noticeApi *manage.NoticeApi, articleApi *article.HttpApi,
+	topicApi *topic.HttpApi) *fiber.App {
 	app := fiber.New(fiber.Config{
 		AppName:         cf.Name,                        // 应用名称
 		ErrorHandler:    hand.CustomErrorHandler,        // 自定义错误处理器
@@ -55,7 +57,7 @@ func newApp(ctx context.Context, cf *conf.Server, tagApi *tag.HttpApi, catApi *c
 		TokenBucket:     cf.Limiter.TokenBucket,
 	}, ctx))
 	api.RegisterRoutes(app, tagApi, catApi, conApi, linkApi, menuApi, cfgApi, oApi, roleApi, userApi, dictApi, noticeApi,
-		articleApi)
+		articleApi, topicApi)
 	return app
 }
 
