@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import type { SelectOptionData } from '@arco-design/web-vue'
 import { useDict } from '@/hooks/dict'
 
@@ -18,6 +18,13 @@ const props = withDefaults(defineProps<Props>(), {
   width: '100%',
   placeholder: '请选择数据',
   type: 'string'
+})
+
+const _width = computed(() => {
+  if (typeof props.width === 'number') {
+    return props.width + 'px'
+  }
+  return props.width
 })
 
 const modelValue = defineModel<string | number | boolean | undefined>('modelValue', {
@@ -46,13 +53,19 @@ const queryDictValues = async () => {
   }
 }
 
+const handleClear = () => {
+  modelValue.value = undefined;
+}
+
 onMounted(() => {
   queryDictValues();
 })
 </script>
 
 <template>
-  <a-select allow-clear v-model="modelValue" :placeholder="placeholder">
+  <a-select allow-clear v-model="modelValue" :placeholder="placeholder" :style="{ width: _width }"
+            @clear="handleClear"
+  >
     <a-option v-for="(item, index) in options" :label="item.label" :value="item.value" :key="index" />
   </a-select>
 </template>
