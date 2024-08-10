@@ -62,3 +62,18 @@ func (self *HttpApi) PageAccessRecord(ctx fiber.Ctx) error {
 	}
 	return ctx.JSON(res.OkByData(page))
 }
+
+func (self *HttpApi) QuerySiteConfiguration(ctx fiber.Ctx) error {
+	return ctx.JSON(res.OkByData(self.service.SiteConfiguration()))
+}
+
+func (self *HttpApi) UpdateSiteConfiguration(ctx fiber.Ctx) error {
+	config := make(map[string]usercase.SiteConfigurationItem)
+	if err := ctx.Bind().JSON(&config); err != nil {
+		return err
+	}
+	if err := self.service.UpdateSiteConfiguration(config); err != nil {
+		return err
+	}
+	return ctx.JSON(res.SimpleOK())
+}

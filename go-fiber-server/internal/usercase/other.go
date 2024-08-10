@@ -60,6 +60,28 @@ type AccessLogQueryForm struct {
 	PageQueryForm
 }
 
+type SiteConfigurationItem struct {
+	Name  string `json:"name"`  // 配置项名称
+	Type  string `json:"type"`  // 配置项类型 image:图片 text:普通字符串 number:数字 markdown:markdown格式文本 html:html格式文本 color:颜色
+	Value any    `json:"value"` // 配置项内容
+}
+
+// DefaultSiteConfiguration 默认站点配置
+var DefaultSiteConfiguration = map[string]SiteConfigurationItem{
+	"tabTitle":     {Name: "浏览器标题", Value: "demo", Type: "text"},
+	"logo":         {Name: "Logo", Type: "image", Value: "demo"},
+	"avatar":       {Name: "博客头像", Type: "image", Value: "demo"},
+	"title":        {Name: "博客标题", Type: "text", Value: "demo"},
+	"summary":      {Name: "博客简介", Type: "text", Value: "demo"},
+	"about":        {Name: "关于", Type: "markdown", Value: "demo"},
+	"powered":      {Name: "底部Powered", Type: "html", Value: "demo"},
+	"icp":          {Name: "ICP备案", Type: "html", Value: ""},
+	"articleSize":  {Name: "文章数量", Type: "number", Value: 5},
+	"topicSize":    {Name: "动态数量", Type: "number", Value: 10},
+	"commentSize":  {Name: "评论数量", Type: "number", Value: 5},
+	"primaryColor": {Name: "主要颜色", Type: "color", Value: "#ffffff"},
+}
+
 type IOtherRepo interface {
 	// SaveFileRecord 保存文件上传记录
 	SaveFileRecord(file *UploadFile)
@@ -84,6 +106,13 @@ type IOtherRepo interface {
 }
 
 type IOtherService interface {
+
+	// SiteConfiguration 获取站点配置
+	SiteConfiguration() map[string]SiteConfigurationItem
+
+	// UpdateSiteConfiguration 更新站点配置
+	UpdateSiteConfiguration(config map[string]SiteConfigurationItem) error
+
 	// UploadImage 上传图片
 	UploadImage(fileHeader *multipart.FileHeader) (string, error)
 

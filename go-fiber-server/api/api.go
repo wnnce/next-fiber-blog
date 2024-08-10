@@ -86,6 +86,8 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	baseRoute.Post("/upload/image", oApi.UploadImage)
 	// 获取管理端通知公告
 	baseRoute.Post("/notice/admin", noticeApi.ListAdminNotice)
+	// 更新站点配置
+	baseRoute.Put("/site/configuration", oApi.UpdateSiteConfiguration)
 
 	// 标签管理接口
 	tagRoute := app.Group("/tag", auth.ManageAuth)
@@ -142,10 +144,16 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 
 	// 开放接口
 	openRoute := app.Group("/open")
+	// 日志推送接口
 	openRoute.Get("/logger/stream/:interval<int;min<10>>", manage.LoggerPush)
+	// 管理端登录接口
 	openRoute.Post("/login", userApi.Login)
+	// 博客请求记录接口
 	openRoute.Get("/trace/access", oApi.AccessTrace)
+	// 获取字典数据接口
 	openRoute.Get("/dict/:dictKey", dictApi.ListDictValue)
+	// 获取站点配置接口
+	openRoute.Get("/site/configuration", oApi.QuerySiteConfiguration)
 	// 获取弹窗通知
 	openRoute.Get("/notice/index", noticeApi.ListIndexNotice)
 	// 获取公告通知

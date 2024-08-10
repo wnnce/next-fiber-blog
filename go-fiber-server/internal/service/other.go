@@ -2,6 +2,8 @@ package service
 
 import (
 	"bytes"
+	"context"
+	"go-fiber-ent-web-layout/internal/data"
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/tools/qiniu"
 	"go-fiber-ent-web-layout/internal/tools/region"
@@ -17,14 +19,36 @@ import (
 	"time"
 )
 
+const SITE_CONFIGURATION_CACHE_KEY = "BLOG:site_configuration"
+
 type OtherService struct {
-	repo usercase.IOtherRepo
+	repo          usercase.IOtherRepo
+	redisTemplate *data.RedisTemplate
 }
 
-func NewOtherService(repo usercase.IOtherRepo) usercase.IOtherService {
+func NewOtherService(repo usercase.IOtherRepo, redisTemplate *data.RedisTemplate) usercase.IOtherService {
 	return &OtherService{
-		repo: repo,
+		repo:          repo,
+		redisTemplate: redisTemplate,
 	}
+}
+
+func (self *OtherService) SiteConfiguration() map[string]usercase.SiteConfigurationItem {
+	config, err := data.RedisGetStruct[map[string]usercase.SiteConfigurationItem](context.Background(),
+		SITE_CONFIGURATION_CACHE_KEY, self.redisTemplate.Client())
+	if err == nil && config != nil {
+		return config
+	}
+	return usercase.DefaultSiteConfiguration
+}
+
+func (self *OtherService) UpdateSiteConfiguration(config map[string]usercase.SiteConfigurationItem) error {
+	err := self.redisTemplate.Set(context.Background(), SITE_CONFIGURATION_CACHE_KEY, config, time.Duration(math.MaxInt64))
+	if err != nil {
+		slog.Error("更新站点配置失败", "error", err.Error())
+		return tools.FiberServerError("更新失败")
+	}
+	return nil
 }
 
 func (self *OtherService) UploadImage(fileHeader *multipart.FileHeader) (string, error) {

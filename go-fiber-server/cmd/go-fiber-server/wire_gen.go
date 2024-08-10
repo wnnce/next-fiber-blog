@@ -51,7 +51,7 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 	iSysConfigService := service.NewSysConfigService(iSysConfigRepo)
 	configApi := manage.NewConfigApi(iSysConfigService)
 	iOtherRepo := data.NewOtherRepo(dataData)
-	iOtherService := service.NewOtherService(iOtherRepo)
+	iOtherService := service.NewOtherService(iOtherRepo, redisTemplate)
 	otherHttpApi := other.NewHttpApi(iOtherService)
 	iSysRoleRepo := data.NewSysRoleRepo(dataData)
 	iSysUserRepo := data.NewSysUserRepo(dataData)
