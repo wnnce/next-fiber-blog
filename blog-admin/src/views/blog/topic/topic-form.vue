@@ -7,7 +7,7 @@ import type { FileItem } from '@arco-design/web-vue'
 import type { FieldRule } from '@arco-design/web-vue/es/form/interface'
 import ImageUpload from '@/components/ImageUpload.vue'
 import DictSelect from '@/components/DictSelect.vue'
-import Editor from '@/components/Editor.vue'
+import MarkdownEditor from '@/components/MarkdownEditor.vue'
 import type { Topic, TopicForm } from '@/api/blog/topic/types'
 import { topicApi } from '@/api/blog/topic'
 
@@ -122,7 +122,7 @@ defineExpose({
       <a-form ref="formRef" :model="formData" auto-label-width :rules="formRules" @submit-success="formSubmit">
         <div class="topic-publish-form flex flex-column radius-md">
           <a-form-item field="content" hide-label>
-            <Editor ref="editorRef" :min-height="120" placeholder="说点什么吧..." mode="ir"
+            <MarkdownEditor ref="editorRef" :min-height="120" placeholder="说点什么吧..." mode="ir"
                     hide-code-preview
                     style="flex: 1"
             />

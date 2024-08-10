@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Editor from '@/components/Editor.vue'
+import MarkdownEditor from '@/components/MarkdownEditor.vue'
 import { onActivated, onMounted, ref } from 'vue'
 import { useLocalStorage } from '@/hooks/local-storage'
 import { useArcoMessage } from '@/hooks/message'
@@ -114,7 +114,7 @@ onMounted(() => {
         </a-button>
       </div>
     </div>
-    <Editor ref="editorRef" :min-height="700" />
+    <MarkdownEditor ref="editorRef" :min-height="700" />
     <article-form ref="formRef" @reload="handleClear" />
     <a-modal title="提示" message-type="info" width="300px" v-model:visible="draftModelShow">
       读取到还有未编辑完成的草稿，是否继续编辑？
