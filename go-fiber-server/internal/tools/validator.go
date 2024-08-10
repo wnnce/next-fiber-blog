@@ -6,6 +6,7 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	zh_translations "github.com/go-playground/validator/v10/translations/zh"
+	"reflect"
 )
 
 var defaultStructValidator *StructValidator
@@ -21,6 +22,10 @@ func (s *StructValidator) Engine() any {
 
 // ValidateStruct 验证结构体，将保修信息转化为可读的错误信息返回
 func (s *StructValidator) ValidateStruct(out any) error {
+	// 不为结构体则跳过
+	if reflect.ValueOf(out).Kind() != reflect.Struct {
+		return nil
+	}
 	err := s.validate.Struct(out)
 	if err == nil {
 		return nil
