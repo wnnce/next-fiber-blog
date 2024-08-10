@@ -1,16 +1,20 @@
 <script setup lang="ts">
-import Vditor from 'vditor/dist/method.min'
-import { onMounted } from 'vue'
+import Vditor from 'vditor/dist/method.min';
+import { onMounted, watch } from 'vue'
 
 interface Props {
   markdown: string
 }
-
 const props = defineProps<Props>();
+
+// 及时预览
+watch(props, () => {
+  renderMarkdown();
+})
 
 const templateId: string = (Math.random() * 100).toFixed(0);
 
-onMounted(() => {
+const renderMarkdown = () => {
   Vditor.preview(<HTMLDivElement>document.getElementById(templateId), props.markdown, {
     mode: 'dark',
     hljs: {
@@ -18,6 +22,9 @@ onMounted(() => {
       style: 'native'
     },
   })
+}
+onMounted(() => {
+  renderMarkdown();
 })
 
 </script>
