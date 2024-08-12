@@ -1,0 +1,32 @@
+.header {
+  backdrop-filter: blur(var(--filter-blur-size));
+  background-color: rgba(var(--card-color), 0.7);
+  .header-main {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+  .nav-div {
+    .logo {
+      margin: auto 24px auto 0;
+    }
+    ul {
+      list-style: none;
+      li {
+        margin: 0 4px;
+        &:hover {
+          color: rgb(var(--primary-color));
+        }
+        a {
+          padding: 8px;
+        }
+      }
+    }
+  }
+  .header-search {
+    margin: auto 0;
+    transition: color 300ms ease;
+    &:hover {
+      color: rgb(var(--primary-color));
+    }
+  }
+}

@@ -1,9 +1,8 @@
 
-
-export default function Home() {
+export default function Categories() {
   return (
     <div className="min-h-screen flex justify-center items-center">
-      <span className="font-bold text-24">Hello Next</span>
+      <h1>Categories</h1>
     </div>
   )
 }

@@ -1,0 +1,12 @@
+:root {
+    --max-width: 1200px;
+    --backgroundt-color: 13, 17, 23;
+    --card-color: 22, 27, 34;
+    --border-color: 37, 43, 50;
+    --primary-color: 70, 185, 82;
+    --shadow-color: 238, 238, 238;
+    --text-color-1: 255, 255, 255;
+    --text-color-2: 240, 240, 240;
+    --input-background-color: 42, 52, 68;
+    --filter-blur-size: 0.25rem;
+}

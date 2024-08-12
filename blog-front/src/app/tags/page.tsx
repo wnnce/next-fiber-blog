@@ -1,9 +1,10 @@
 
-
-export default function Home() {
+export default function Tags() {
   return (
     <div className="min-h-screen flex justify-center items-center">
-      <span className="font-bold text-24">Hello Next</span>
+      <h1 className="">
+        Tags
+      </h1>
     </div>
   )
 }
