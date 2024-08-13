@@ -4,6 +4,7 @@ import "@/styles/globals.css";
 import React from 'react'
 import Header from '@/layouts/Header'
 import Footer from '@/layouts/Footer'
+import ScrollVisible from '@/components/ScrollVisible'
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,6 +28,7 @@ const RootLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <html lang="zh-cn">
       <body className={inter.className}>
+        <ScrollVisible />
         <Header navList={navList} />
         <main>
           {children}

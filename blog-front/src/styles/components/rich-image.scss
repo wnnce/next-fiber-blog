@@ -1,0 +1,28 @@
+.rich-image {
+  overflow: hidden;
+  position: relative;
+  img {
+    height: 100%;
+    width: 100%;
+  }
+  .rich-image-mask {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+  .loading-mask {
+    background-color: #f4f4f4;
+    color: #666666;
+  }
+  .blur-mask {
+    transition: all 500ms ease;
+    z-index: 2;
+  }
+  .thumb-image-mask {
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+  }
+}

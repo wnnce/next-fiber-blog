@@ -1,6 +1,7 @@
 .header {
   backdrop-filter: blur(var(--filter-blur-size));
   background-color: rgba(var(--card-color), 0.7);
+  animation: header-show 700ms ease;
   .header-main {
     max-width: var(--max-width);
     margin: 0 auto;
@@ -28,5 +29,14 @@
     &:hover {
       color: rgb(var(--primary-color));
     }
+  }
+}
+
+@keyframes header-show {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
   }
 }

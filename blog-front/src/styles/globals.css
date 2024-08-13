@@ -2,15 +2,6 @@
 @import '@unocss/reset/tailwind.css';
 @unocss all;
 
-.hover-line-text {
-  background: linear-gradient(to right, rgb(var(--primary-color)), rgb(var(--primary-color))) no-repeat left bottom;
-  background-size: 0 2px;
-  transition: all 300ms ease;
-  &:hover {
-    background-size: 100% 2px;
-  }
-}
-
 * {
   box-sizing: border-box;
   padding: 0;
@@ -22,12 +13,45 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
   color: rgb(var(--text-color-1));
+}
+body {
   background:
           linear-gradient(rgba(var(--backgroundt-color), 0.5), rgba(var(--backgroundt-color), 0.5)),
           url("/images/bg.jpg");
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+}
+
+.hover-line-text {
+  background: linear-gradient(to right, rgb(var(--primary-color)), rgb(var(--primary-color))) no-repeat left bottom;
+  background-size: 0 2px;
+  transition: all 300ms ease;
+  &:hover {
+    background-size: 100% 2px;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4rem) scale(0.75);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 元素默认隐藏 */
+.animate-on-scroll {
+  opacity: 0;
+  transition: opacity 500ms, transform 500ms;
+}
+
+/* 显示元素 */
+.animate-on-scroll.visible {
+  animation: fade-in 1s forwards;
 }
 
 @media (prefers-color-scheme: dark) {
