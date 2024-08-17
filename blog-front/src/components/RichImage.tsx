@@ -1,7 +1,7 @@
 'use client'
 
 import '@/styles/components/rich-image.scss';
-import React, { useState } from 'react'
+import React, { CSSProperties, useState } from 'react'
 import Image, { ImageLoaderProps } from 'next/image'
 import { sliceThumbnailImageUrl } from '@/tools/utils'
 
@@ -31,6 +31,9 @@ interface Props {
   mode?: ImageMode;
   // 图片加载完成的事件
   onDone?: () => void;
+  // 类名列表
+  className?: string,
+  style?: CSSProperties,
 }
 
 const RichImage: React.FC<Props> = ({
@@ -44,6 +47,8 @@ const RichImage: React.FC<Props> = ({
   radius = 0,
   mode = 'cover',
   onDone,
+  className,
+  style
 }): React.ReactNode => {
   const _radius = typeof radius === 'number' ? `${radius}px` : radius;
   const [imageStatus, setImageStatus] = useState<ImageState>('loading');
@@ -67,10 +72,11 @@ const RichImage: React.FC<Props> = ({
     return src
   }
   return (
-    <div className="rich-image" style={{
+    <div className={ className ? `${className} rich-image` : 'rich-image' } style={{
       borderRadius: _radius,
       height: `${height}px`,
-      width: `${width}px`
+      width: `${width}px`,
+      ...style,
     }}>
       {
         thumbnail ? (

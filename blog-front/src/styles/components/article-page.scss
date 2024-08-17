@@ -1,0 +1,10 @@
+.article-page-item {
+  &:hover {
+    .article-item-cover {
+      transform: scale(1.25);
+    }
+  }
+  .article-item-cover {
+    transition: transform 500ms ease;
+  }
+}

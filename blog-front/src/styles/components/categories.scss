@@ -1,0 +1,18 @@
+.categories-li {
+  padding: 0.5rem 0;
+  background: linear-gradient(to right, rgb(var(--primary-color)), rgb(var(--primary-color))) no-repeat left bottom;
+  background-size: 0 100%;
+  transition: background-size 500ms ease, padding 300ms ease;
+  &:hover {
+    padding: 0.5rem 1rem;
+    background-size: 100% 100%;
+  }
+  .count-text {
+    border-radius: 0.25rem;
+    background-color: rgb(var(--button-background-color));
+    padding: 0.25rem 0.5rem 0.25rem 0.5rem;
+  }
+}
+.category-children-ul {
+  border-left: 1px solid rgb(var(--text-color-3));
+}

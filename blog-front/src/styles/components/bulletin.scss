@@ -1,0 +1,39 @@
+.bulletin-swiper {
+  display: flex;
+  transition: transform 0.5s ease;
+  width: calc(300% + 3rem * 3);
+  animation: 10s linear 0s infinite alternate swiper-slide ;
+  margin: 0 -1.5rem;
+  box-sizing: border-box;
+  justify-content: space-around;
+  .bulletin-swiper-item {
+    flex-shrink: 0;
+    width: calc(100% / 3);
+    padding: 0 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .danger-swiper-tag, .waring-swiper-tag {
+    position: absolute;
+    padding: 0.25rem 1rem;
+    font-size: 0.5rem;
+    top: 0.25rem;
+    right: -1rem;
+    transform: rotate(45deg);
+  }
+  .danger-swiper-tag {
+    background-color: rgb(var(--danger-color));
+  }
+  .waring-swiper-tag {
+    background-color: rgb(var(--warning-color));
+  }
+}
+
+@keyframes swiper-slide {
+  0% { transform: translateX(0%); }
+  33% { transform: translateX(0%); }
+  38% { transform: translateX(calc(100% / 3 * -1)); }
+  71% { transform: translateX(calc(100% / 3 * -1)); }
+  76% { transform: translateX(calc(100% / 3 * -2)); }
+  100% { transform: translateX(calc(100% / 3 * -2)); }
+}

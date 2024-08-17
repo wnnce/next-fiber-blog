@@ -5,7 +5,7 @@ import Image from 'next/image'
 const Footer: React.FC = (): React.ReactNode => {
   return (
     <footer className="footer">
-      <div className="footer-main sm:flex justify-between">
+      <div className="dynamic-container sm:flex justify-between">
         <div className="footer-left-summary">
           <a href="#">
             <Image src="/images/logo.svg" alt="logo" width="100" height="60" />

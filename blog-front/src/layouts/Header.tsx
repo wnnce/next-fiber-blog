@@ -16,8 +16,8 @@ interface Props {
  */
 const Header: React.FC<Props> = ({ navList }): React.ReactNode => {
   return (
-    <header className="p-2 w-full text-sm header">
-      <div className="flex justify-between header-main">
+    <header className="p-4 w-full text-sm header">
+      <div className="flex justify-between dynamic-container">
         <div className="nav-div flex">
           <div className="logo">
             <a href="#">

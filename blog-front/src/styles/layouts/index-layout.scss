@@ -1,0 +1,44 @@
+.layout-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  .layout-left, .layout-right {
+    width: 20rem;
+  }
+  .layout-content {
+    flex: 1;
+  }
+}
+@media screen and (max-width: 1280px) {
+  .layout-container {
+    .layout-right {
+      display: none;
+    }
+  }
+}
+@media screen and (max-width: 1024px) {
+  .layout-container {
+    .layout-left {
+      width: 35%;
+    }
+  }
+}
+@media screen and (max-width: 768px) {
+  .layout-container {
+    > div {
+      flex-basis: 100%;
+    }
+    .layout-right {
+      display: block;
+    }
+    .layout-content {
+      order: 1;
+    }
+    .layout-left {
+      order: 2;
+    }
+    .layout-right {
+      order: 3;
+    }
+  }
+}

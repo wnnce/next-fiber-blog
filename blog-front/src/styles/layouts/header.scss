@@ -1,14 +1,10 @@
 .header {
   backdrop-filter: blur(var(--filter-blur-size));
-  background-color: rgba(var(--card-color), 0.7);
+  background-color: rgba(var(--card-background-color), 0.7);
   animation: header-show 700ms ease;
-  .header-main {
-    max-width: var(--max-width);
-    margin: 0 auto;
-  }
   .nav-div {
     .logo {
-      margin: auto 24px auto 0;
+      margin: auto 1.5rem auto 0;
     }
     ul {
       list-style: none;
