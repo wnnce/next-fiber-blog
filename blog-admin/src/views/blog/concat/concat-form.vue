@@ -19,21 +19,19 @@ const { successMessage } = useArcoMessage();
 const modalShow = ref<boolean>(false);
 const show = (record?: Concat) => {
   if (record) {
-    const { concatId, name, logoUrl, targetUrl, isMain, sort, status } = record;
-    Object.assign(formData, { concatId, name, logoUrl: logoUrl || '', targetUrl, isMain, sort, status })
-    formatAvatarToFileList();
+    const { concatId, name, iconName, targetUrl, isMain, sort, status } = record;
+    Object.assign(formData, { concatId, name, iconName, targetUrl, isMain, sort, status })
   }
   modalShow.value = true;
 }
 const onClose = () => {
-  fileList.value = [];
   Object.assign(formData, defaultFormData);
 }
 
 const defaultFormData: ConcatForm = {
   concatId: undefined,
   name: '',
-  logoUrl: '',
+  iconName: '',
   targetUrl: '',
   isMain: false,
   sort: 1,
@@ -42,7 +40,7 @@ const defaultFormData: ConcatForm = {
 const formData = reactive<ConcatForm>({ ...defaultFormData })
 const formRules: Record<string, FieldRule<any> | FieldRule<any>[]> = {
   name: { required: true, message: '联系方式名称不能为空' },
-  logoUrl: { required: true, message: 'Logo不能为空' },
+  Icon: { required: true, message: 'Icon不能为空' },
   targetUrl: { required: true, message: '源链接不能为空', type: 'url' },
   sort: { required: true, message: '显示顺序不能为空' },
   status: { required: true, message: '状态不能为空' },
@@ -68,19 +66,6 @@ const formSubmit = async () => {
   }
 }
 
-const fileList = ref<FileItem[]>([]);
-const formatAvatarToFileList = () => {
-  if (!formData.logoUrl || formData.logoUrl.trim().length === 0) {
-    return;
-  }
-  fileList.value = [{
-    uid: new Date().getTime().toString(),
-    status: 'done',
-    percent: 1,
-    url: formData.logoUrl
-  }]
-}
-
 defineExpose({
   show
 })
@@ -96,8 +81,8 @@ defineExpose({
       <a-form-item label="源链接" field="targetUrl">
         <a-input v-model="formData.targetUrl" placeholder="请输入源链接" />
       </a-form-item>
-      <a-form-item label="Logo" field="logoUrl">
-        <image-upload v-model:file-list="fileList" v-model:file-url="formData.logoUrl" width="60px" height="60px" />
+      <a-form-item label="Icon" field="Icon">
+        <a-input v-model="formData.iconName" placeholder="请输入Icon名称(小写名称)" />
       </a-form-item>
       <a-form-item label="是否主要" field="isMain">
         <a-switch v-model="formData.isMain" />
