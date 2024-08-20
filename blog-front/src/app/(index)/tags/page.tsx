@@ -1,8 +1,23 @@
+import React from 'react'
+import DynamicCard from '@/components/DynamicCard'
+import { listTag } from '@/lib/api'
 
-export default function Tags() {
+const Tags: React.FC = async () => {
+  const { data: tags } = await listTag();
   return (
-    <div className="min-h-screen flex justify-center items-center">
-      <h1 className="">Tags</h1>
-    </div>
+    <DynamicCard padding="1.5rem" title="TAGS" icon="i-tabler:tags">
+      <ul className="list-none flex flex-wrap gap-4 text-sm">
+        {tags.map(tag => (
+          <li key={tag.tagId}>
+            <a href="#" title={tag.tagName}>
+              <span className="inline-block px-2 py-1 rounded-l-1" style={{backgroundColor: tag.color}}>{tag.tagName}</span>
+              <span className="inline-block px-2 py-1 rounded-r-1 bg-gray-5">{tag.articleNum}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </DynamicCard>
   )
 }
+
+export default Tags;
