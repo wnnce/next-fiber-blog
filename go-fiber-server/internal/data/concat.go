@@ -23,8 +23,8 @@ func NewConcatRepo(data *Data) usercase.IConcatRepo {
 
 func (self *ConcatRepo) Save(concat *usercase.Concat) error {
 	builder := sqlbuild.NewInsertBuilder("t_blog_concat").
-		Fields("name", "logo_url", "target_url", "is_main", "sort", "status").
-		Values(concat.Name, concat.LogoUrl, concat.TargetUrl, concat.IsMain, concat.Sort, concat.Status).
+		Fields("name", "icon_name", "target_url", "is_main", "sort", "status").
+		Values(concat.Name, concat.IconName, concat.TargetUrl, concat.IsMain, concat.Sort, concat.Status).
 		Returning("concat_id")
 	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var concatId uint
@@ -41,7 +41,7 @@ func (self *ConcatRepo) Update(concat *usercase.Concat) error {
 		SetRaw("update_time", "now()").
 		SetByMap(map[string]any{
 			"name":       concat.Name,
-			"logo_url":   concat.LogoUrl,
+			"icon_name":  concat.IconName,
 			"target_url": concat.TargetUrl,
 			"is_main":    concat.IsMain,
 			"sort":       concat.Sort,
@@ -69,7 +69,7 @@ func (self *ConcatRepo) UpdateSelective(form *usercase.ConcatUpdateForm) error {
 
 func (self *ConcatRepo) List() ([]*usercase.Concat, error) {
 	builder := sqlbuild.NewSelectBuilder("t_blog_concat").
-		Select("concat_id", "name", "logo_url", "target_url", "is_main").
+		Select("concat_id", "name", "icon_name", "target_url", "is_main").
 		Where("status").EqRaw("0").
 		And("delete_at").EqRaw("0").BuildAsSelect().
 		OrderBy("sort", "create_time desc")

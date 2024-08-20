@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-const SITE_CONFIGURATION_CACHE_KEY = "BLOG:site_configuration"
+const SiteConfigurationCacheKey = "BLOG:site_configuration"
 
 type OtherService struct {
 	repo          usercase.IOtherRepo
@@ -35,7 +35,7 @@ func NewOtherService(repo usercase.IOtherRepo, redisTemplate *data.RedisTemplate
 
 func (self *OtherService) SiteConfiguration() map[string]usercase.SiteConfigurationItem {
 	config, err := data.RedisGetStruct[map[string]usercase.SiteConfigurationItem](context.Background(),
-		SITE_CONFIGURATION_CACHE_KEY, self.redisTemplate.Client())
+		SiteConfigurationCacheKey, self.redisTemplate.Client())
 	if err == nil && config != nil {
 		return config
 	}
@@ -43,7 +43,7 @@ func (self *OtherService) SiteConfiguration() map[string]usercase.SiteConfigurat
 }
 
 func (self *OtherService) UpdateSiteConfiguration(config map[string]usercase.SiteConfigurationItem) error {
-	err := self.redisTemplate.Set(context.Background(), SITE_CONFIGURATION_CACHE_KEY, config, time.Duration(math.MaxInt64))
+	err := self.redisTemplate.Set(context.Background(), SiteConfigurationCacheKey, config, time.Duration(math.MaxInt64))
 	if err != nil {
 		slog.Error("更新站点配置失败", "error", err.Error())
 		return tools.FiberServerError("更新失败")
