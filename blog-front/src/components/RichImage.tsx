@@ -67,7 +67,7 @@ const RichImage: React.FC<Props> = ({
 
   const imageLoader = ({width, src, quality}: ImageLoaderProps) => {
     if (src.startsWith('/b-oss')) {
-      return 'https://file.qiniu.vnc.ink' + src.substring(6);
+      return process.env.NEXT_PUBLIC_QINIU_IMAGE_DOMAIN + src.substring(6);
     }
     return src
   }

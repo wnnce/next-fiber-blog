@@ -1,6 +1,7 @@
 import '@/styles/layouts/header.scss';
 import React from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 interface Props {
   navList: {
@@ -20,16 +21,16 @@ const Header: React.FC<Props> = ({ navList }): React.ReactNode => {
       <div className="flex justify-between dynamic-container">
         <div className="nav-div flex">
           <div className="logo">
-            <a href="#">
+            <Link href="#">
               <Image src="/images/logo.svg" alt="logo" width="100" height="60" />
-            </a>
+            </Link>
           </div>
           <nav>
             <ul className="list-none">
               { navList.map(item => {
                 return (
                   <li className="hover-line-text inline-block text-center" key={item.name}>
-                    <a className="inline-block" href={item.url}>{item.name}</a>
+                    <Link className="inline-block" href={item.url}>{item.name}</Link>
                   </li>
                 )
               })}

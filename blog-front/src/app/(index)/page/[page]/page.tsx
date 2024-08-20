@@ -8,7 +8,7 @@ const ArticlePage: React.FC<{
   params: {
     page: number
   }
-}> = ({ params }) => {
+}> = async ({ params }) => {
   const nums: number[] = [1, 2, 3, 4, 5, 6, 7];
   return (
     <>

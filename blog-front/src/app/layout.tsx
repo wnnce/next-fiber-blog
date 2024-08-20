@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 // 顶部导航列表
 const navList = [
-  { name: '博客', url: '#' },
+  { name: '博客', url: '/' },
   { name: '动态', url: '#' },
   { name: '分类', url: '/categorys' },
   { name: '标签', url: '/tags' },
