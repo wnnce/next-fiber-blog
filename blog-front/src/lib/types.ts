@@ -34,3 +34,25 @@ export interface Category {
   articleNum: number;
   children?: Category[]
 }
+
+/**
+ * 联系方式
+ */
+export interface Concat {
+  concatId: number;
+  name: string;
+  iconSvg: string;
+  targetUrl: string;
+  isMain: boolean;
+}
+
+/**
+ * 通知公告数据
+ */
+export interface Notice {
+  noticeId: number;
+  title: string;
+  message: string;
+  level: number; // 通知级别 1:info 2:warn 3:error
+  noticeType: number;
+}
