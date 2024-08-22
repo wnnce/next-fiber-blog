@@ -5,7 +5,6 @@ import { useArcoMessage } from '@/hooks/message'
 import type { Concat, ConcatQueryForm, ConcatUpdateForm } from '@/api/blog/concat/types'
 import { concatApi } from '@/api/blog/concat'
 import ConcatForm from '@/views/blog/concat/concat-form.vue'
-import { IconAB } from '@tabler/icons-vue';
 
 const { successMessage, loading } = useArcoMessage();
 
@@ -127,7 +126,11 @@ onMounted(() => {
       <template #columns>
         <a-table-column title="联系方式ID" data-index="concatId" />
         <a-table-column title="联系方式名称" data-index="name" />
-        <a-table-column title="Icon" data-index="iconName" />
+        <a-table-column title="Icon">
+          <template #cell="{ record }">
+            <i v-html="record.iconSvg" />
+          </template>
+        </a-table-column>
         <a-table-column title="源链接">
           <template #cell="{ record }">
             <a :href="record.targetUrl" target="_blank" class="link-text">{{ record.targetUrl }}</a>

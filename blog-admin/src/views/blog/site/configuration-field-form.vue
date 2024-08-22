@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import ImageUpload from '@/components/ImageUpload.vue'
-import Editor from '@/components/Editor.vue'
 import DictSelect from '@/components/DictSelect.vue'
 
 const emits = defineEmits<{

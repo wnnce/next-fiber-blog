@@ -3,9 +3,7 @@
 import { reactive, ref } from 'vue'
 import { useArcoMessage } from '@/hooks/message'
 import type { Result } from '@/api/request'
-import type { FileItem } from '@arco-design/web-vue'
 import type { FieldRule } from '@arco-design/web-vue/es/form/interface'
-import ImageUpload from '@/components/ImageUpload.vue'
 import type { Concat, ConcatForm } from '@/api/blog/concat/types'
 import { concatApi } from '@/api/blog/concat'
 import DictSelect from '@/components/DictSelect.vue'
@@ -19,8 +17,8 @@ const { successMessage } = useArcoMessage();
 const modalShow = ref<boolean>(false);
 const show = (record?: Concat) => {
   if (record) {
-    const { concatId, name, iconName, targetUrl, isMain, sort, status } = record;
-    Object.assign(formData, { concatId, name, iconName, targetUrl, isMain, sort, status })
+    const { concatId, name, iconSvg, targetUrl, isMain, sort, status } = record;
+    Object.assign(formData, { concatId, name, iconSvg, targetUrl, isMain, sort, status })
   }
   modalShow.value = true;
 }
@@ -31,7 +29,7 @@ const onClose = () => {
 const defaultFormData: ConcatForm = {
   concatId: undefined,
   name: '',
-  iconName: '',
+  iconSvg: '',
   targetUrl: '',
   isMain: false,
   sort: 1,
@@ -40,7 +38,7 @@ const defaultFormData: ConcatForm = {
 const formData = reactive<ConcatForm>({ ...defaultFormData })
 const formRules: Record<string, FieldRule<any> | FieldRule<any>[]> = {
   name: { required: true, message: '联系方式名称不能为空' },
-  Icon: { required: true, message: 'Icon不能为空' },
+  iconSvg: { required: true, message: 'Icon不能为空' },
   targetUrl: { required: true, message: '源链接不能为空', type: 'url' },
   sort: { required: true, message: '显示顺序不能为空' },
   status: { required: true, message: '状态不能为空' },
@@ -82,7 +80,7 @@ defineExpose({
         <a-input v-model="formData.targetUrl" placeholder="请输入源链接" />
       </a-form-item>
       <a-form-item label="Icon" field="Icon">
-        <a-input v-model="formData.iconName" placeholder="请输入Icon名称(小写名称)" />
+        <a-textarea v-model="formData.iconSvg" placeholder="请输入Icon SVG图片内容" />
       </a-form-item>
       <a-form-item label="是否主要" field="isMain">
         <a-switch v-model="formData.isMain" />

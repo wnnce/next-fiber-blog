@@ -2,7 +2,7 @@
 export interface Concat {
   concatId: number;
   name: string;
-  iconName: string;
+  iconSvg: string;
   targetUrl: string;
   isMain: boolean,
   sort: number;
@@ -14,7 +14,7 @@ export interface Concat {
 export interface ConcatForm {
   concatId?: number;
   name: string;
-  iconName: string;
+  iconSvg: string;
   targetUrl: string;
   isMain: boolean;
   sort: number;
