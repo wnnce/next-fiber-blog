@@ -1,6 +1,6 @@
 import '@/styles/layouts/index-layout.scss';
 import React from 'react'
-import AuthorLink from '@/components/AuthorLink'
+import AuthorConcat from '@/components/AuthorConcat'
 import Bulletin from '@/components/Bulletin'
 import Categories from '@/components/Categories'
 import TagsWordCloud from '@/components/TagsWordCloud'
@@ -14,7 +14,7 @@ const IndexLayout: React.FC<{
     <div className="dynamic-container min-h-screen">
       <div className="layout-container py-8 px-4">
         <div className="layout-left flex flex-col gap-row-4">
-          <AuthorLink />
+          <AuthorConcat />
           <Bulletin />
           <Categories />
           <TagsWordCloud />

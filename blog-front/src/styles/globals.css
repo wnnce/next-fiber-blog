@@ -33,11 +33,7 @@ html {
 }
 
 body {
-  background:
-          linear-gradient(rgba(var(--backgroundt-color), 0.5), rgba(var(--backgroundt-color), 0.5)),
-          url("/images/bg.webp");
-  background-repeat: no-repeat;
-  background-position: center;
+  background: linear-gradient(rgba(var(--backgroundt-color), 0.5), rgba(var(--backgroundt-color), 0.5)), url("/images/bg.webp") no-repeat center;
   background-size: cover;
 }
 

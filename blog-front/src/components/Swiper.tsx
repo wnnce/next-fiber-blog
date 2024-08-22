@@ -1,7 +1,7 @@
 'use client'
 
 import '@/styles/components/swiper.scss';
-import React, { type MouseEvent, TouchEvent, useEffect, useMemo, useRef } from 'react'
+import React, { CSSProperties, type MouseEvent, TouchEvent, useEffect, useMemo, useRef } from 'react'
 import { throttle } from '@/tools/utils'
 
 interface SwiperProps {
@@ -217,10 +217,14 @@ export const Swiper: React.FC<SwiperProps> = ({
 /**
  * 轮播图子组件
  * @param children
+ * @param className css列表
+ * @param style
  * @constructor
  */
 export const SwiperSlide: React.FC<{
-  children: React.ReactNode
-}> = ({ children }): React.ReactNode => {
-  return <li className="swiper-slide">{ children }</li>
+  children: React.ReactNode;
+  className?: string;
+  style?: CSSProperties;
+}> = ({ children, className, style }): React.ReactNode => {
+  return <li className={className ? `${className} swiper-slide` : 'swiper-slide'} style={style}>{ children }</li>
 }
