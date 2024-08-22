@@ -3,6 +3,7 @@ package tools
 import (
 	"github.com/gofiber/fiber/v3"
 	"go-fiber-ent-web-layout/internal/usercase"
+	"math"
 )
 
 func FiberRequestError(message string) *fiber.Error {
@@ -47,13 +48,11 @@ func ComputeOffset(total int64, page, size int, safe bool) int64 {
 	offset := int64((page - 1) * size)
 	if !safe || offset < total {
 		return offset
-	} else {
-		int64Size := int64(size)
-		pages := total / int64Size
-		if pages > 0 {
-			return (pages - 1) * int64Size
-		}
-		return 0
 	}
-
+	int64Size := int64(size)
+	pages := int64(math.Ceil(float64(total) / float64(int64Size)))
+	if pages > 0 {
+		return (pages - 1) * int64Size
+	}
+	return 0
 }

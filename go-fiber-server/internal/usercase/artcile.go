@@ -42,11 +42,12 @@ type ArticleUpdateForm struct {
 // ArticleQueryForm 文章查询表单
 type ArticleQueryForm struct {
 	Title           string `json:"title"`
-	TagId           *uint  `json:"tagId"`
-	CategoryId      *uint  `json:"categoryId"`
+	TagId           uint   `json:"tagId"`
+	CategoryId      uint   `json:"categoryId"`
 	Status          *uint8 `json:"status"`
 	CreateTimeBegin string `json:"createTimeBegin"`
 	CreateTimeEnd   string `json:"createTimeEnd"`
+	IsAdmin         bool
 	PageQueryForm
 }
 
@@ -58,6 +59,8 @@ type IArticleRepo interface {
 	UpdateSelective(form *ArticleUpdateForm) error
 
 	Page(query *ArticleQueryForm) ([]*ArticleVo, int64, error)
+
+	PageByLabel(query *ArticleQueryForm) ([]*Article, int64, error)
 
 	SelectById(articleId uint64, checkStatus bool) (*ArticleVo, error)
 
@@ -80,6 +83,8 @@ type IArticleService interface {
 	UpdateSelectiveArticle(form *ArticleUpdateForm) error
 
 	Page(query *ArticleQueryForm) (*PageData[ArticleVo], error)
+
+	PageByLabel(query *ArticleQueryForm) (*PageData[Article], error)
 
 	SelectById(articleId uint64, checkStatus bool) (*ArticleVo, error)
 

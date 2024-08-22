@@ -62,8 +62,21 @@ func (self *HttpApi) Page(ctx fiber.Ctx) error {
 	return ctx.JSON(res.OkByData(page))
 }
 
+func (self *HttpApi) PageByLabel(ctx fiber.Ctx) error {
+	query := &usercase.ArticleQueryForm{}
+	if err := ctx.Bind().JSON(query); err != nil {
+		return err
+	}
+	page, err := self.service.PageByLabel(query)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(page))
+}
+
 func (self *HttpApi) ManagePage(ctx fiber.Ctx) error {
 	query := &usercase.ArticleQueryForm{}
+	query.IsAdmin = true
 	if err := ctx.Bind().JSON(query); err != nil {
 		return err
 	}

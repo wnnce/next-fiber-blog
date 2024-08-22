@@ -72,8 +72,8 @@ func (h *HttpApi) ManageTree(ctx fiber.Ctx) error {
 
 // QueryInfo 查询分类详情
 func (h *HttpApi) QueryInfo(ctx fiber.Ctx) error {
-	id, _ := strconv.ParseInt(ctx.Params("id"), 10, 0)
-	category, err := h.service.QueryCategoryInfo(int(id))
+	id := fiber.Params[int](ctx, "id")
+	category, err := h.service.QueryCategoryInfo(id)
 	if err != nil {
 		return err
 	}

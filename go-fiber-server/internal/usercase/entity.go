@@ -46,7 +46,15 @@ type PageData[T any] struct {
 
 // NewPageData 创建分页数据返回对象
 func NewPageData[T any](records []*T, total int64, current, size int) *PageData[T] {
-	pages := int(math.Ceil(float64(total) / float64(size)))
+	var pages int
+	if total > 0 {
+		pages = int(math.Ceil(float64(total) / float64(size)))
+	}
+	// 如果当前页大于总页数 但是 记录仍然有值的话
+	// 说明数据库查询时启用了offset安全检查 无论页码超过多大 始终会返回最后一页的数据
+	if len(records) > 0 && current > pages {
+		current = pages
+	}
 	return &PageData[T]{
 		Current: current,
 		Pages:   pages,

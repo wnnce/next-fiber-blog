@@ -52,8 +52,8 @@ func (self *HttpApi) UpdateStatus(ctx fiber.Ctx) error {
 }
 
 func (h *HttpApi) QueryInfo(ctx fiber.Ctx) error {
-	id, _ := strconv.ParseInt(ctx.Params("id"), 10, 0)
-	info, err := h.service.QueryTagInfo(int(id))
+	tagId := fiber.Params[int](ctx, "id")
+	info, err := h.service.QueryTagInfo(tagId)
 	if err != nil {
 		return err
 	}

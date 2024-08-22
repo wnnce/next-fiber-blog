@@ -88,10 +88,17 @@ func (self *ArticleRepo) UpdateSelective(form *usercase.ArticleUpdateForm) error
 }
 
 func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.ArticleVo, int64, error) {
+	var articleSelectFields []string
+	if query.IsAdmin {
+		articleSelectFields = []string{"ba.article_id", "ba.title", "ba.summary", "ba.cover_url", "ba.category_ids",
+			"ba.tag_ids", "ba.view_num", "ba.share_num", "ba.vote_up", "ba.protocol", "ba.tips", "ba.password", "ba.is_hot",
+			"ba.is_top", "ba.is_comment", "ba.is_private", "ba.create_time", "ba.sort", "ba.status"}
+	} else {
+		articleSelectFields = []string{"ba.article_id", "ba.title", "ba.summary", "ba.cover_url", "ba.view_num",
+			"ba.share_num", "ba.vote_up", "ba.is_hot", "ba.is_top", "ba.create_time"}
+	}
 	builder := sqlbuild.NewSelectBuilder("t_blog_article as ba").
-		Select("ba.article_id", "ba.title", "ba.summary", "ba.cover_url", "ba.category_ids", "ba.tag_ids",
-			"ba.view_num", "ba.share_num", "ba.vote_up", "ba.protocol", "ba.tips", "ba.password", "ba.is_hot", "ba.is_top",
-			"ba.is_comment", "ba.is_private", "ba.create_time", "ba.sort", "ba.status").
+		Select(articleSelectFields...).
 		LeftJoin("t_blog_comment as bc").On("bc.article_id").EqRaw("ba.article_id").And("bc.status").EqRaw("0").And("bc.delete_at").EqRaw("0").BuildAsSelect().
 		Select("count(DISTINCT bc.comment_id) as comment_num").
 		LeftJoin("t_blog_category as ct").On("ct.category_id").EqRaw("ANY(ba.category_ids)").And("ct.status").EqRaw("0").And("ct.delete_at").EqRaw("0").BuildAsSelect().
@@ -102,13 +109,13 @@ func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Art
 		// 聚合为标签列表
 		Select("jsonb_agg(DISTINCT jsonb_build_object('tagId', bt.tag_id, 'tagName', bt.tag_name, 'color', bt.color)) AS tags").
 		WhereByCondition(query.Title != "", "ba.title").Like("%"+query.Title+"%").
-		AndByCondition(query.TagId != nil, fmt.Sprintf("%d", query.TagId)).EqRaw("ANY(ba.tag_ids)").
-		AndByCondition(query.CategoryId != nil, fmt.Sprintf("%d", query.CategoryId)).EqRaw("ANY(ba.category_ids)").
+		AndByCondition(query.TagId > 0, fmt.Sprintf("%d", query.TagId)).EqRaw("ANY(ba.tag_ids)").
+		AndByCondition(query.CategoryId > 0, fmt.Sprintf("%d", query.CategoryId)).EqRaw("ANY(ba.category_ids)").
 		AndByCondition(query.Status != nil, "ba.status").Eq(query.Status).
 		AndByCondition(query.CreateTimeBegin != "", "ba.create_time").Ge(query.CreateTimeBegin).
 		AndByCondition(query.CreateTimeEnd != "", "ba.create_time").Le(query.CreateTimeEnd).
 		And("ba.delete_at").EqRaw("0").BuildAsSelect().
-		GroupBy("ba.article_id")
+		GroupBy("ba.article_id").OrderBy("is_top desc", "sort", "create_time desc")
 	row := self.db.QueryRow(context.Background(), builder.CountSql(), builder.Args()...)
 	var total int64
 	if err := row.Scan(&total); err != nil {
@@ -127,6 +134,35 @@ func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Art
 	defer rows.Close()
 	articles, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.ArticleVo, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.ArticleVo](row)
+	})
+	return articles, total, err
+}
+
+func (self *ArticleRepo) PageByLabel(query *usercase.ArticleQueryForm) ([]*usercase.Article, int64, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_article").
+		Select("article_id", "title", "summary", "cover_url", "view_num", "share_num", "vote_up", "is_hot", "is_top", "create_time").
+		Where("status").EqRaw("0").
+		AndByCondition(query.TagId > 0, fmt.Sprintf("%d", query.TagId)).EqRaw("ANY(tag_ids)").
+		AndByCondition(query.CategoryId > 0, fmt.Sprintf("%d", query.CategoryId)).EqRaw("ANY(category_ids)").BuildAsSelect().
+		OrderBy("is_top desc", "sort", "create_time desc")
+	row := self.db.QueryRow(context.Background(), builder.CountSql(), builder.Args()...)
+	var total int64
+	if err := row.Scan(&total); err != nil {
+		return nil, 0, err
+	}
+	articles := make([]*usercase.Article, 0)
+	if total == 0 {
+		return articles, 0, nil
+	}
+	offset := tools.ComputeOffset(total, query.Page, query.Size, true)
+	builder.Limit(int64(query.Size)).Offset(offset)
+	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	articles, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Article, error) {
+		return pgx.RowToAddrOfStructByNameLax[usercase.Article](row)
 	})
 	return articles, total, err
 }

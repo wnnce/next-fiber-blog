@@ -65,6 +65,15 @@ func (self *ArticleService) Page(query *usercase.ArticleQueryForm) (*usercase.Pa
 	return usercase.NewPageData(articles, total, query.Page, query.Size), nil
 }
 
+func (self *ArticleService) PageByLabel(query *usercase.ArticleQueryForm) (*usercase.PageData[usercase.Article], error) {
+	articles, total, err := self.repo.PageByLabel(query)
+	if err != nil {
+		slog.Error("查询分类,标签关联文章失败", "error", err.Error())
+		return nil, tools.FiberServerError("查询失败")
+	}
+	return usercase.NewPageData(articles, total, query.Page, query.Size), nil
+}
+
 func (self *ArticleService) SelectById(articleId uint64, checkStatus bool) (*usercase.ArticleVo, error) {
 	article, err := self.repo.SelectById(articleId, checkStatus)
 	if err != nil {

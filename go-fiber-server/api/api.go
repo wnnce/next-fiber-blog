@@ -91,7 +91,7 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 
 	// 标签管理接口
 	tagRoute := app.Group("/tag", auth.ManageAuth)
-	tagRoute.Get("/:id<int;min<1>>", tagApi.QueryInfo)
+	tagRoute.Get("/:id", tagApi.QueryInfo)
 	tagRoute.Get("/list", tagApi.List)
 	tagRoute.Post("/page", tagApi.Page)
 	tagRoute.Post("/", tagApi.Sava)
@@ -101,7 +101,7 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 
 	// 分类管理接口
 	catRoute := app.Group("/category", auth.ManageAuth)
-	catRoute.Get("/:id<int;min=<1>>", catApi.QueryInfo)
+	catRoute.Get("/:id", catApi.QueryInfo)
 	catRoute.Post("/", catApi.Save)
 	catRoute.Put("/", catApi.Update)
 	catRoute.Put("/status", catApi.UpdateSelective)
@@ -160,10 +160,18 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	openRoute.Get("/notice/public", noticeApi.ListPublicNotice)
 	// 获取分类树形列表
 	openRoute.Get("/category/list", catApi.Tree)
+	// 获取分类详情
+	openRoute.Get("/category/:id", catApi.QueryInfo)
 	// 获取标签列表
 	openRoute.Get("/tag/list", tagApi.List)
+	// 获取标签详情
+	openRoute.Get("/tag/:id", tagApi.QueryInfo)
 	// 获取联系方式列表
 	openRoute.Get("/concat/list", conApi.List)
 	// 获取友情链接列表
 	openRoute.Get("/link/list", linkApi.List)
+	// 分页查询博客文章列表
+	openRoute.Post("/article/page", articleApi.Page)
+	// 分页查询分类和标签的文章列表
+	openRoute.Post("/article/label/page", articleApi.PageByLabel)
 }
