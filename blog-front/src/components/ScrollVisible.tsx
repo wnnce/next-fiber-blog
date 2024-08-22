@@ -1,6 +1,7 @@
-"use client"
+'use client'
 
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 
 /**
  * 处理组件滚动到可视区域后显示动画
@@ -9,26 +10,44 @@ import React, { useEffect } from 'react'
  * @constructor
  */
 const ScrollVisible: React.FC = (): null => {
-  useEffect(() => {
-    const elements = document.querySelectorAll('.animate-on-scroll');
-    const obsServer = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      })
-    }, { threshold: 0.1 })
-    elements.forEach(item => {
-      obsServer.observe(item);
+  const pathName = usePathname();
+  const elements = useRef<Set<Element>>(new Set<Element>());
+  const obsServer = useRef<IntersectionObserver>();
+  const updateObserveElements = useCallback((newElement: Set<Element>) => {
+    const toRemove: Element[] = [], toAdd: Element[] = [];
+    elements.current.forEach(item => {
+      if (!newElement.has(item)) {
+        toRemove.push(item);
+      }
     })
-    return () => {
-      elements.forEach(item => {
-        obsServer.unobserve(item);
-      })
-    }
+    newElement.forEach(item => {
+      if (!elements.current.has(item)) {
+        toAdd.push(item);
+      }
+    })
+    toRemove.forEach(item => {
+      obsServer.current?.unobserve(item);
+    })
+    toAdd.forEach(item => {
+      obsServer.current?.observe(item);
+    })
+    elements.current = newElement;
   }, [])
 
+  useEffect(() => {
+    if (!obsServer.current) {
+      obsServer.current = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        })
+      }, { threshold: 0.1 })
+    }
+    const newElements = new Set(document.querySelectorAll('.animate-on-scroll'));
+    updateObserveElements(newElements);
+  }, [pathName, updateObserveElements])
   return null
 }
 
