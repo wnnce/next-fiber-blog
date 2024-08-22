@@ -1,0 +1,20 @@
+.label-info-container {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  .label-info-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.2);
+    > h1 {
+      text-shadow: 0 0 1rem black;
+    }
+    .label-info-summary {
+      padding: 1rem;
+      background-color: rgba(var(--backgroundt-color), 0.7);
+    }
+  }
+}

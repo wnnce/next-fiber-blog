@@ -6,8 +6,8 @@ import DynamicCard from '@/components/DynamicCard'
 import TagCloud from 'TagCloud'
 import { listTag } from '@/lib/api'
 
-const createWordCloudTag = (text: string, color: string): string => {
-  return `<a href="https://baidu.com" class="word-cloud-item" style="color: ${color};" target="_blank" title="${text}">${text}</a>`;
+const createWordCloudTag = (id: number | string, text: string, color: string): string => {
+  return `<a href="/tag/${id}/page/1" class="word-cloud-item" style="color: ${color};" target="_blank" title="${text}">${text}</a>`;
 }
 
 /**
@@ -20,7 +20,7 @@ const TagsWordCloud: React.FC = (): React.ReactNode => {
     const queryData = async () => {
       const result = await listTag();
       if (result.code === 200 && result.data) {
-        const texts: string[] = result.data.map(tag => createWordCloudTag(tag.tagName, tag.color))
+        const texts: string[] = result.data.map(tag => createWordCloudTag(tag.tagId, tag.tagName, tag.color))
         setTexts(texts)
       }
     }

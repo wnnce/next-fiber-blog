@@ -2,7 +2,6 @@ import '@/styles/layouts/article-page-layout.scss';
 import React from 'react'
 import { Swiper, SwiperSlide } from '@/components/Swiper'
 import RichImage from '@/components/RichImage'
-import { ArticleTopLabel } from '@/components/ArticleLabels'
 
 const ArticlePageLayout: React.FC<{
   children: React.ReactNode

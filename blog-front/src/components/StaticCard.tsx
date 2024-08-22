@@ -7,12 +7,16 @@ import { CardProps } from '@/components/DynamicCard'
  * @param children 子元素
  * @param padding 内边距
  * @param radius 圆角
+ * @param title 标题
+ * @param icon 图标
  * @constructor
  */
 const StaticCard: React.FC<CardProps> = ({
   children,
   padding = 0,
   radius = 12,
+  title,
+  icon
 }):React.ReactNode => {
 
   const cardStyle = useMemo((): Record<string, string> => ({
@@ -21,12 +25,14 @@ const StaticCard: React.FC<CardProps> = ({
   }), [padding, radius])
 
   return (
-    <div className="animate-on-scroll h-100 w-100">
-      <div className={`${styles.card} w-full h-full`}
-           style={cardStyle}
-      >
-        {children}
-      </div>
+    <div className={`${styles.card} animate-on-scroll w-full`}
+         style={cardStyle}
+    >
+      { (icon || title) && <div className="pb-2 flex gap-col-1.5 desc-text">
+        { icon && <i className={`${icon} inline-block`}></i> }
+        { title && <p className="text-sm">{ title }</p> }
+      </div> }
+      {children}
     </div>
   )
 }

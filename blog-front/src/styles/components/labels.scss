@@ -1,0 +1,13 @@
+.hot-label, .top-label {
+  padding: 0 2px;
+  border-radius: 0.125rem;
+}
+.hot-label::before {
+  content: 'HOT';
+}
+.top-label {
+  background-color: rgb(var(--primary-color));
+  &::before {
+    content: 'TOP';
+  }
+}

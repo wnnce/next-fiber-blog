@@ -16,10 +16,7 @@ export function request<T> (url: string, method: HttpMethod, params?: Record<str
       body: body ? JSON.stringify(body) : undefined,
     }).then(async response => {
       const result = await response.json() as Result<T>;
-      if (result.code === 200) {
-        resolve(result)
-      }
-      reject(result.message)
+      resolve(result);
     }).catch(err => {
       reject(err)
     })

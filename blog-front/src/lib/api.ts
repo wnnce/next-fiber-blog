@@ -1,5 +1,5 @@
 import { request } from '@/lib/request'
-import { Category, Concat, Notice, Result, Tag } from '@/lib/types'
+import { Article, Category, Concat, Notice, Page, Result, Tag } from '@/lib/types'
 import { SiteConfigurationItem } from '@/hooks/site-configuration'
 
 /**
@@ -8,6 +8,13 @@ import { SiteConfigurationItem } from '@/hooks/site-configuration'
 export const listCategory = (): Promise<Result<Category[]>> => {
   return request<Category[]>('/open/category/list', 'GET');
 }
+/**
+ * 查询博客分类详情
+ * @param id 分类Id
+ */
+export const queryCategory = (id: number): Promise<Result<Category>> => {
+  return request<Category>(`/open/category/${id}`, 'GET')
+}
 
 /**
  * 获取博客标签列表
@@ -15,7 +22,13 @@ export const listCategory = (): Promise<Result<Category[]>> => {
 export const listTag = (): Promise<Result<Tag[]>> => {
   return request<Tag[]>('/open/tag/list', 'GET');
 }
-
+/**
+ * 查询博客标签详情
+ * @param id 标签id
+ */
+export const queryTag = (id: number): Promise<Result<Tag>> => {
+  return request<Tag>(`/open/tag/${id}`, 'GET');
+}
 /**
  * 配置博客站点配置
  */
@@ -37,4 +50,12 @@ export const listConcat = (): Promise<Result<Concat[]>> => {
 export const listNoticeByType = (noticeType: 1 | 2): Promise<Result<Notice[]>> => {
   const requestUrl = noticeType === 1 ? '/open/notice/index' : '/open/notice/public';
   return request<Notice[]>(requestUrl, 'GET');
+}
+
+/**
+ * 查询分类 / 标签所关联的文章列表
+ * @param data
+ */
+export const pageLabelArticle = (data: Record<string, any>) => {
+  return request<Page<Article>>('/open/article/label/page', 'POST', undefined, data);
 }

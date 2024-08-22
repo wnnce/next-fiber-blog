@@ -2,6 +2,7 @@
 import '@/styles/components/pagination.scss';
 import React, { useMemo } from 'react'
 import page from '@/app/(index)/page/[page]/page'
+import Link from 'next/link'
 
 interface Props {
   current: number;
@@ -35,7 +36,7 @@ const ServerPagination: React.FC<Props> = ({
 
   const showPageList = useMemo<number[]>(() => {
     const pageList: number[] = [];
-    if (current <= 1) {
+    if (current < pages) {
       for (let i = 0; i < 3; i++) {
         const nextPage = current + i;
         if (nextPage > pages) {
@@ -43,8 +44,7 @@ const ServerPagination: React.FC<Props> = ({
         }
         pageList.push(nextPage);
       }
-    }
-    if (current === pages) {
+    } else {
       for (let i = 0; i < 3; i++) {
         const nextPage = current - i;
         if (nextPage < 1) {
@@ -67,31 +67,33 @@ const ServerPagination: React.FC<Props> = ({
   return (
     <div className={`pagination-container flex justify-between items-center text-sm ${className}`}>
       <div>
-        {current > 1 ? <a href="#" className="inline-block page-button">
+        {current > 1 ? <Link href={`${targetUrlPrefix}${current - 1}`}
+                          className="inline-block page-button"
+        >
           Pre
-        </a> : <span />}
+        </Link> : <span />}
       </div>
       <div className="flex gap-col-2 items-end">
         {showFirstButton && <>
-          <a href="#" className="inline-block page-button">1</a>
+          <Link href={`${targetUrlPrefix}1`} className="inline-block page-button">1</Link>
           <i className="inline-block i-tabler:line-dashed text-lg" />
         </>}
         {showPageList.map(item => (
-          <a href="#" key={item}
+          <Link href={`${targetUrlPrefix}${item}`} key={item}
              className={`inline-block ${item === current ? 'active-page-button' : 'page-button'}`}
           >
             {item}
-          </a>
+          </Link>
         ))}
         {showLastButton && <>
           <i className="inline-block i-tabler:line-dashed text-lg" />
-          <a href="#" className="inline-block page-button">{pages}</a>
+          <Link href={`${targetUrlPrefix}${pages}`} className="inline-block page-button">{pages}</Link>
         </>}
       </div>
       <div>
-        {current < pages ? <a href="#" className="inline-block page-button">
+        {current < pages ? <Link href={`${targetUrlPrefix}${current - 1}`} className="inline-block page-button">
           Next
-        </a> : <span />}
+        </Link> : <span />}
       </div>
     </div>
   )
