@@ -29,3 +29,12 @@ export const querySiteConfiguration = (): Promise<Result<Record<string, SiteConf
 export const listConcat = (): Promise<Result<Concat[]>> => {
   return request<Concat[]>('/open/concat/list', 'GET');
 }
+
+/**
+ * 通过通知类型查询通知公告列表
+ * @param noticeType 1: 首页弹窗通知 2:公告板通知
+ */
+export const listNoticeByType = (noticeType: 1 | 2): Promise<Result<Notice[]>> => {
+  const requestUrl = noticeType === 1 ? '/open/notice/index' : '/open/notice/public';
+  return request<Notice[]>(requestUrl, 'GET');
+}
