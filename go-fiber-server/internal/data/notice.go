@@ -56,7 +56,7 @@ func (self *NoticeRepo) Update(notice *usercase.Notice) error {
 
 func (self *NoticeRepo) ListByType(noticeType int) ([]usercase.Notice, error) {
 	builder := sqlbuild.NewSelectBuilder("t_blog_notice").
-		Select("title", "message", "level", "notice_type").
+		Select("notice_id", "title", "message", "level", "notice_type").
 		Where("notice_type").Eq(noticeType).
 		And("status").EqRaw("0").
 		And("delete_at").EqRaw("0").BuildAsSelect().
