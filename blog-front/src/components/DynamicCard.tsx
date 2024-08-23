@@ -14,9 +14,9 @@ export interface CardProps {
   title?: number | string | boolean;
   // 图标
   icon?: string;
+  // 盒子晃动的阈值
+  multiple?: number;
 }
-
-const multiple = 20;
 
 /**
  * 动态卡片组件
@@ -26,6 +26,7 @@ const multiple = 20;
  * @param radius 圆角
  * @param title 卡片标题
  * @param icon 卡片图标
+ * @param multiple 图片晃动除以的阈值 越大晃动幅度越小
  * @constructor
  */
 const DynamicCard: React.FC<CardProps> = (
@@ -36,6 +37,7 @@ const DynamicCard: React.FC<CardProps> = (
     radius = 12,
     title,
     icon,
+    multiple = 20
   }
 ): React.ReactNode => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -89,7 +91,7 @@ const DynamicCard: React.FC<CardProps> = (
            onMouseMove={handleMouseMove}
            onMouseLeave={handleMouseLeave}
       >
-        { (icon || title) && <div className="pb-2 flex gap-col-1.5 desc-text">
+        { (icon || title) && <div className="pb-2 flex gap-col-1.5 items-center desc-text">
           { icon && <i className={`${icon} inline-block`}></i> }
           { title && <p className="text-sm">{ title }</p> }
         </div> }

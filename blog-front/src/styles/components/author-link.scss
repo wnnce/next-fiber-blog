@@ -10,7 +10,7 @@
   padding: 0.5rem;
   justify-content: center;
   position: relative;
-  background: linear-gradient(to right, #1E90FF, #1E90FF) no-repeat right bottom;
+  background: linear-gradient(to right, rgb(var(--seco-color)),  rgb(var(--seco-color))) no-repeat right bottom;
   background-size: 0 100%;
   transition: all 500ms ease;
   &:hover {

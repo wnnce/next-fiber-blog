@@ -3,6 +3,7 @@ import DynamicCard from '@/components/DynamicCard'
 import { pageLabelArticle } from '@/lib/api'
 import LabelArticleList from '@/components/LabelArticleList'
 import ServerPagination from '@/components/ServerPagination'
+import Empty from '@/components/Empty'
 
 const CategoryArticlePage: React.FC<{
   params: {
@@ -19,10 +20,7 @@ const CategoryArticlePage: React.FC<{
   if (!articlePage || isNaN(articlePage) || articlePage < 1) {
     return (
       <DynamicCard padding="1.5rem" title="POSTS" icon="i-tabler:news">
-        <div className="text-center info-text">
-          <i className="text-center inline-block text-red-4 text-24 i-tabler:exclamation-circle" />
-          <p className="text-center mt-4">文章页码不存在</p>
-        </div>
+        <Empty text="文章页码不存在" icon="i-tabler:exclamation-circle" iconClassName="text-24 text-red-4" />
       </DynamicCard>
     )
   }
@@ -30,10 +28,7 @@ const CategoryArticlePage: React.FC<{
   if ( !pageData || pageData.records.length === 0) {
     return (
       <DynamicCard padding="1.5rem" title="POSTS" icon="i-tabler:news">
-        <div className="text-center desc-text">
-          <i className="text-center inline-block text-24 i-tabler:template" />
-          <p className="text-center mt-4">还没有关联文章哦...</p>
-        </div>
+        <Empty text="还没有关联文章哦..." icon="i-tabler:template" iconClassName="text-24 desc-text" textClassName="desc-text" />
       </DynamicCard>
     )
   }

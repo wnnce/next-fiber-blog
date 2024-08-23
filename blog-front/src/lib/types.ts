@@ -124,3 +124,15 @@ export interface Article {
   // 标签列表
   tags: ArticleTag[];
 }
+
+/**
+ * 友情链接数据
+ */
+export interface Link {
+  linkId: number;
+  name: string;
+  summary: string;
+  coverUrl: string;
+  targetUrl: string;
+  clickNum: number;
+}

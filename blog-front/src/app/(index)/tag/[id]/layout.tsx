@@ -4,6 +4,7 @@ import StaticCard from '@/components/StaticCard'
 import { queryTag } from '@/lib/api'
 import RichImage from '@/components/RichImage'
 import Link from 'next/link'
+import Empty from '@/components/Empty'
 
 const TagInfo: React.FC<{
   params: {
@@ -15,10 +16,7 @@ const TagInfo: React.FC<{
   if (!tagId || isNaN(tagId) || tagId <= 0) {
     return (
       <StaticCard padding="1.5rem">
-        <div className="text-center info-text">
-          <i className="inline-block text-24 text-red-4 i-tabler:exclamation-circle" />
-          <p className="text-center mt-4">标签参数错误</p>
-        </div>
+        <Empty text="标签参数错误" icon="i-tabler:exclamation-circle" iconClassName="text-24 text-red-4" />
       </StaticCard>
     )
   }
@@ -26,10 +24,7 @@ const TagInfo: React.FC<{
   if (!tag) {
     return (
       <StaticCard padding="1.5rem">
-        <div className="text-center">
-          <i className="inline-block info-text text-24 i-tabler:error-404" />
-          <p className="text-center mt-4 info-text">当前标签不存在</p>
-        </div>
+        <Empty text="当前标签不存在" icon="i-tabler:error-404" iconClassName="text-24" />
       </StaticCard>
     )
   }

@@ -1,44 +1,22 @@
-'use client'
-
-import '@/styles/components/tags-word-cloud.scss'
-import React, { useEffect, useState } from 'react'
-import DynamicCard from '@/components/DynamicCard'
-import TagCloud from 'TagCloud'
+import React from 'react'
 import { listTag } from '@/lib/api'
+import { WordCloud, WordCloudItem } from '@/components/WordCloud'
+import Link from 'next/link'
 
-const createWordCloudTag = (id: number | string, text: string, color: string): string => {
-  return `<a href="/tag/${id}/page/1" class="word-cloud-item" style="color: ${color};" target="_blank" title="${text}">${text}</a>`;
-}
-
-/**
- * 标签词云组件
- * @constructor
- */
-const TagsWordCloud: React.FC = (): React.ReactNode => {
-  const [texts, setTexts] = useState<string[]>([]);
-  useEffect(() => {
-    const queryData = async () => {
-      const result = await listTag();
-      if (result.code === 200 && result.data) {
-        const texts: string[] = result.data.map(tag => createWordCloudTag(tag.tagId, tag.tagName, tag.color))
-        setTexts(texts)
-      }
-    }
-    queryData();
-  }, [])
-  useEffect( () => {
-    const wordCloud = TagCloud('.tags-word-cloud', texts, {
-      useContainerInlineStyles: false,
-      useHTML: true,
-    });
-    return () => {
-      wordCloud.destroy();
-    }
-  }, [texts])
+const TagsWordCloud: React.FC = async () => {
+  const { data: tags } = await listTag();
   return (
-    <DynamicCard padding="1.5rem" title="TAGS" icon="i-tabler:tags">
-      <div className="tags-word-cloud"></div>
-    </DynamicCard>
+    <WordCloud>
+      { tags.map(tag => (
+        <WordCloudItem key={tag.tagId}>
+          <Link href={`/tag/${tag.tagId}/page/1`} target="_blank" style={{color: tag.color}}
+                title={tag.tagName}
+          >
+            { tag.tagName }
+          </Link>
+        </WordCloudItem>
+      )) }
+    </WordCloud>
   )
 }
 

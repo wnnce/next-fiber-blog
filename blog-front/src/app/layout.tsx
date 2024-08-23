@@ -26,8 +26,8 @@ const navList = [
   { name: '分类', url: '/categorys' },
   { name: '标签', url: '/tags' },
   { name: '相册', url: '#' },
-  { name: '关于', url: '#' },
-  { name: '友情链接', url: '#' },
+  { name: '关于', url: '/about' },
+  { name: '友情链接', url: '/links' },
 ]
 
 const RootLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {

@@ -3,9 +3,9 @@ import React from 'react'
 import AuthorConcat from '@/components/AuthorConcat'
 import Bulletin from '@/components/Bulletin'
 import Categories from '@/components/Categories'
-import TagsWordCloud from '@/components/TagsWordCloud'
 import HotArticles from '@/components/HotArticles'
 import SiteAbstract from '@/components/SiteAbstract'
+import TagsWordCloud from '@/components/TagsWordCloud'
 
 const IndexLayout: React.FC<{
   children: React.ReactNode

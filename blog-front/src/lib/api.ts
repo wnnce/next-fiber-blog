@@ -1,5 +1,5 @@
 import { request } from '@/lib/request'
-import { Article, Category, Concat, Notice, Page, Result, Tag } from '@/lib/types'
+import { Article, Category, Concat, Link, Notice, Page, Result, Tag } from '@/lib/types'
 import { SiteConfigurationItem } from '@/hooks/site-configuration'
 
 /**
@@ -58,4 +58,11 @@ export const listNoticeByType = (noticeType: 1 | 2): Promise<Result<Notice[]>> =
  */
 export const pageLabelArticle = (data: Record<string, any>) => {
   return request<Page<Article>>('/open/article/label/page', 'POST', undefined, data);
+}
+
+/**
+ * 获取友情链接列表
+ */
+export const listLinks = (): Promise<Result<Link[]>> => {
+  return request<Link[]>('/open/link/list', 'GET');
 }

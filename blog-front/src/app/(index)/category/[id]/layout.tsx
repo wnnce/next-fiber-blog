@@ -5,6 +5,7 @@ import { queryCategory } from '@/lib/api'
 import RichImage from '@/components/RichImage'
 import Link from 'next/link'
 import { HotLabel, TopLabel } from '@/components/Labels'
+import Empty from '@/components/Empty'
 
 const CategoryInfo: React.FC<{
   params: {
@@ -16,10 +17,7 @@ const CategoryInfo: React.FC<{
   if (!categoryId || isNaN(categoryId) || categoryId <= 0) {
     return (
       <StaticCard padding="1.5rem">
-        <div className="text-center info-text">
-          <i className="inline-block text-24 text-red-4 i-tabler:exclamation-circle" />
-          <p className="text-center mt-4">分类参数错误</p>
-        </div>
+        <Empty text="分类参数错误" icon="i-tabler:exclamation-circle" iconClassName="text-24 text-red-4" />
       </StaticCard>
     )
   }
@@ -27,10 +25,7 @@ const CategoryInfo: React.FC<{
   if (!category) {
     return (
       <StaticCard padding="1.5rem">
-        <div className="text-center">
-          <i className="inline-block info-text text-24 i-tabler:error-404" />
-          <p className="text-center mt-4 info-text">当前分类不存在</p>
-        </div>
+        <Empty text="当前分类不存在" icon="i-tabler:error-404" iconClassName="text-24" />
       </StaticCard>
     )
   }
