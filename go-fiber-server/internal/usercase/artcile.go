@@ -12,6 +12,7 @@ type Article struct {
 	ShareNum    int64  `json:"shareNum" db:"share_num"`                                     // 文章的分享次数
 	VoteUp      int64  `json:"voteUp" db:"vote_up"`                                         // 文章的点赞次数
 	Content     string `json:"content,omitempty" db:"content"`                              // 文章正文 数据库会经过gzip压缩
+	WordCount   int64  `json:"wordCount" db:"word_count"`                                   // 文字正文字数
 	Protocol    string `json:"protocol,omitempty" db:"protocol"`                            // 文章的许可协议
 	Tips        string `json:"tips,omitempty" db:"tips"`                                    // 文章底部自定义提示
 	Password    string `json:"password,omitempty" db:"password"`                            // 文章密码 私密文章需要

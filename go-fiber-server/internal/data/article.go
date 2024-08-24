@@ -26,11 +26,11 @@ func NewArticleRepo(data *Data) usercase.IArticleRepo {
 
 func (self *ArticleRepo) Save(article *usercase.Article) error {
 	builder := sqlbuild.NewInsertBuilder("t_blog_article").
-		Fields("title", "summary", "cover_url", "category_ids", "tag_ids", "content", "protocol", "tips",
-			"password", "is_hot", "is_top", "is_comment", "is_private", "sort", "status").
+		Fields("title", "summary", "cover_url", "category_ids", "tag_ids", "content", "word_count", "protocol",
+			"tips", "password", "is_hot", "is_top", "is_comment", "is_private", "sort", "status").
 		Values(article.Title, article.Summary, article.CoverUrl, article.CategoryIds, article.TagIds, article.Content,
-			article.Protocol, article.Tips, article.Password, article.IsHot, article.IsTop, article.IsComment,
-			article.IsPrivate, *article.Sort, *article.Status).
+			article.WordCount, article.Protocol, article.Tips, article.Password, article.IsHot, article.IsTop,
+			article.IsComment, article.IsPrivate, *article.Sort, *article.Status).
 		Returning("article_id")
 	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var articleId uint64
@@ -63,6 +63,7 @@ func (self *ArticleRepo) Update(article *usercase.Article) error {
 		})
 	if strings.TrimSpace(article.Content) != "" {
 		builder.Set("content", article.Content)
+		builder.Set("word_count", article.WordCount)
 	}
 	builder.Where("article_id").Eq(article.ArticleId).BuildAsUpdate()
 	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
@@ -92,10 +93,10 @@ func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Art
 	if query.IsAdmin {
 		articleSelectFields = []string{"ba.article_id", "ba.title", "ba.summary", "ba.cover_url", "ba.category_ids",
 			"ba.tag_ids", "ba.view_num", "ba.share_num", "ba.vote_up", "ba.protocol", "ba.tips", "ba.password", "ba.is_hot",
-			"ba.is_top", "ba.is_comment", "ba.is_private", "ba.create_time", "ba.sort", "ba.status"}
+			"ba.is_top", "ba.is_comment", "ba.is_private", "ba.create_time", "ba.sort", "ba.status", "ba.word_count"}
 	} else {
 		articleSelectFields = []string{"ba.article_id", "ba.title", "ba.summary", "ba.cover_url", "ba.view_num",
-			"ba.share_num", "ba.vote_up", "ba.is_hot", "ba.is_top", "ba.create_time"}
+			"ba.share_num", "ba.vote_up", "ba.is_hot", "ba.is_top", "ba.create_time", "ba.word_count"}
 	}
 	builder := sqlbuild.NewSelectBuilder("t_blog_article as ba").
 		Select(articleSelectFields...).
