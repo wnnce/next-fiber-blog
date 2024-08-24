@@ -31,15 +31,18 @@ const handleReaderDraft = () => {
 const formRef = ref();
 const handleNext = () => {
   const articleContent = editorRef.value.getMarkdownValue();
+  const wordCount = editorRef.value.getWordCount();
   if (!articleContent || articleContent.trim().length === 0) {
     errorMessage('文章内容不能为空');
     return;
   }
+  console.log(wordCount)
   if (articleInfo.value) {
     articleInfo.value.content = articleContent;
+    articleInfo.value.wordCount = wordCount;
     formRef.value.show(articleInfo.value);
   } else {
-    formRef.value.show(undefined, articleContent);
+    formRef.value.show(undefined, articleContent, wordCount);
   }
 }
 

@@ -20,14 +20,17 @@ const emits = defineEmits<{
 const { successMessage } = useArcoMessage();
 
 const modalShow = ref<boolean>(false);
-const show = (record?: Article, content?: string) => {
+const show = (record?: Article, content?: string, wordCount?: number) => {
   if (record) {
-    const { articleId, title, summary, coverUrl, categoryIds, tagIds, content, protocol, tips, password, isTop, isHot, isComment, isPrivate, sort, status } = record;
-    Object.assign(formData, { articleId, title, summary, coverUrl : coverUrl || '', categoryIds, tagIds, content, protocol, tips, password, isTop, isHot, isComment, isPrivate, sort, status })
+    const { articleId, title, summary, coverUrl, categoryIds, tagIds, content, wordCount, protocol, tips, password, isTop, isHot, isComment, isPrivate, sort, status } = record;
+    Object.assign(formData, { articleId, title, summary, coverUrl : coverUrl || '', categoryIds, tagIds, content, wordCount, protocol, tips, password, isTop, isHot, isComment, isPrivate, sort, status })
     formatAvatarToFileList();
   }
   if (!formData.content && content) {
     formData.content = content;
+  }
+  if ((formData.wordCount === undefined || formData.wordCount === 0) && wordCount) {
+    formData.wordCount = wordCount;
   }
   modalShow.value = true;
 }
@@ -43,6 +46,7 @@ const defaultFormData: ArticleForm = {
   coverUrl: '',
   categoryIds: [],
   tagIds: [],
+  wordCount: 0,
   protocol: undefined,
   tips: undefined,
   password: undefined,

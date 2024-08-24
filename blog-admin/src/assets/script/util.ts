@@ -29,6 +29,14 @@ export const sliceThumbnailImageUrl = (imageUrl: string, h: number = 100) => {
   return imageUrl;
 }
 
+
+export const parseWordCount = (count: number): number | string => {
+  if (count < 1000) {
+    return count
+  }
+  return `${(count / 1000).toFixed(1)}k`
+}
+
 /**
  * 节流函数 借助window.requestAnimationFrame实现节流
  * @param func 需要执行的函数

@@ -14,6 +14,7 @@ export interface Article {
   shareNum: number;
   voteUp: number;
   content: string;
+  wordCount: number;
   protocol: string;
   tips: string;
   password: string;
@@ -41,6 +42,7 @@ export interface ArticleForm {
   categoryIds: number[];
   tagIds: number[];
   content?: string;
+  wordCount?: number;
   protocol?: string;
   tips?: string;
   password?: string;

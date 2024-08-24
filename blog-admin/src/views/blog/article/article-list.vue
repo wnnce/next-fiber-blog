@@ -13,6 +13,7 @@ import { categoryApi } from '@/api/blog/category'
 import type { Category } from '@/api/blog/category/types'
 import { useLocalStorage } from '@/hooks/local-storage'
 import { useRouter } from 'vue-router'
+import { parseWordCount } from '../../../assets/script/util'
 
 const { successMessage, loading } = useArcoMessage();
 const router = useRouter();
@@ -220,6 +221,7 @@ onMounted(() => {
                 <li><icon-share-alt/><span>{{ item.shareNum }}</span></li>
                 <li><icon-thumb-up/><span>{{ item.voteUp }}</span></li>
                 <li><icon-message/><span>{{ item.commentNum }}</span></li>
+                <li><icon-book/><span>{{ parseWordCount(item.wordCount) }}</span></li>
                 <li><icon-clock-circle/><span>{{ item.createTime }}</span></li>
               </ul>
             </div>

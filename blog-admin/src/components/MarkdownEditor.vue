@@ -32,6 +32,7 @@ const updateModelValue = () => {
 }
 
 let vditor!: Vditor;
+let wordCount: number = 0;
 const templateId: string = new Date().getTime().toString();
 
 // 监听主题变化
@@ -68,6 +69,10 @@ const getHtmlValue = (): string => {
   return vditor.getHTML();
 }
 
+const getWordCount = (): number => {
+  return wordCount;
+}
+
 const getVditor = (): Vditor => {
   return vditor;
 }
@@ -81,13 +86,17 @@ const clear = () => {
 }
 
 defineExpose({
-  getMarkdownValue, getHtmlValue, getVditor, setValue, clear
+  getMarkdownValue, getHtmlValue, getWordCount, getVditor, setValue, clear
 })
 
 onMounted(() => {
   vditor = new Vditor(templateId, {
     counter: {
       enable: true,
+      type: 'text',
+      after: (length) => {
+        wordCount = length;
+      }
     },
     preview: {
       hljs: {
