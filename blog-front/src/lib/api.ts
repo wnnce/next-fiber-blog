@@ -1,5 +1,5 @@
 import { request } from '@/lib/request'
-import { Article, Category, Concat, Link, Notice, Page, Result, Tag } from '@/lib/types'
+import { Article, Category, Concat, Link, Notice, Page, Result, SiteStats, Tag } from '@/lib/types'
 import { SiteConfigurationItem } from '@/hooks/site-configuration'
 
 /**
@@ -34,6 +34,13 @@ export const queryTag = (id: number): Promise<Result<Tag>> => {
  */
 export const querySiteConfiguration = (): Promise<Result<Record<string, SiteConfigurationItem>>> => {
   return request<Record<string, SiteConfigurationItem>>('/open/site/configuration', 'GET')
+}
+
+/**
+ * 获取站点统计数据
+ */
+export const querySiteStats = (): Promise<Result<SiteStats>> => {
+  return request<SiteStats>('/open/site/stats', 'GET')
 }
 
 /**

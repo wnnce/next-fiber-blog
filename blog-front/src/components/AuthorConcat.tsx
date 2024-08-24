@@ -4,7 +4,7 @@ import DynamicCard from '@/components/DynamicCard'
 import RichImage from '@/components/RichImage'
 import { Concat } from '@/lib/types'
 import useSiteConfiguration from '@/hooks/site-configuration'
-import { listConcat } from '@/lib/api'
+import { listConcat, querySiteStats } from '@/lib/api'
 
 /**
  * 作者联系方式组件
@@ -42,8 +42,15 @@ const ConcatList: React.FC<{
  * @constructor
  */
 const AuthorConcat: React.FC = async () => {
-  const [avatar, title, summary] = await useSiteConfiguration().queryConfigs('avatar', 'title', 'summary');
-  const { data: concats } = await listConcat();
+  const [
+    { data: stats},
+    { data: concats },
+    [avatar, title, summary]
+  ] = await Promise.all([
+    querySiteStats(),
+    listConcat(),
+    useSiteConfiguration().queryConfigs('avatar', 'title', 'summary')
+  ])
   return (
     <DynamicCard padding="1.5rem">
       <section>
@@ -59,15 +66,15 @@ const AuthorConcat: React.FC = async () => {
         <ul className="list-none flex justify-around mt-4">
           <li className="text-center">
             <span className="text-sm font-mono info-text">POSTS</span><br />
-            <a href="/page/1" className="text-lg"><strong>5</strong></a>
+            <a href="/page/1" className="text-lg"><strong>{ stats.articleCount || 0 }</strong></a>
           </li>
           <li className="text-center">
             <span className="text-sm font-mono info-text">CATEGORIES</span><br />
-            <a href="/categorys" className="text-lg"><strong>5</strong></a>
+            <a href="/categorys" className="text-lg"><strong>{ stats.categoryCount || 0 }</strong></a>
           </li>
           <li className="text-center">
             <span className="text-sm font-mono info-text">TAGS</span><br />
-            <a href="/tags" className="text-lg"><strong>5</strong></a>
+            <a href="/tags" className="text-lg"><strong>{ stats.tagCount || 0 }</strong></a>
           </li>
         </ul>
         <ConcatList concats={concats} />

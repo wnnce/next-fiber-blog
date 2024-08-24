@@ -61,3 +61,10 @@ export const throttleTimer = (func: (...args: any[]) => void, delay: number, cal
     }, delay)
   }
 }
+
+export const formatWordCount = (num: number): number | string => {
+  if (num < 1000) {
+    return num
+  }
+  return `${(num / 1000).toFixed(1)}k`
+}

@@ -136,3 +136,16 @@ export interface Link {
   targetUrl: string;
   clickNum: number;
 }
+
+/**
+ * 站点统计数据
+ */
+export interface SiteStats {
+  articleCount: number;
+  categoryCount: number;
+  tagCount: number;
+  commentCount: number;
+  visitorCount: number;
+  accessCount: number;
+  wordTotal: number;
+}
