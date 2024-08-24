@@ -77,3 +77,11 @@ func (self *HttpApi) UpdateSiteConfiguration(ctx fiber.Ctx) error {
 	}
 	return ctx.JSON(res.SimpleOK())
 }
+
+func (self *HttpApi) SiteStats(ctx fiber.Ctx) error {
+	state, err := self.service.SiteStats()
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(state))
+}

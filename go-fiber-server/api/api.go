@@ -139,7 +139,7 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	topicRoute.Post("/", topicApi.Save)
 	topicRoute.Put("/", topicApi.Update)
 	topicRoute.Put("/status", topicApi.UpdateSelective)
-	topicRoute.Post("/page", topicApi.Page)
+	topicRoute.Post("/page", topicApi.ManagePage)
 	topicRoute.Delete("/:id", topicApi.Delete)
 
 	// 开放接口
@@ -154,6 +154,8 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	openRoute.Get("/dict/:dictKey", dictApi.ListDictValue)
 	// 获取站点配置接口
 	openRoute.Get("/site/configuration", oApi.QuerySiteConfiguration)
+	// 获取站点统计数据
+	openRoute.Get("/site/stats", oApi.SiteStats)
 	// 获取弹窗通知
 	openRoute.Get("/notice/index", noticeApi.ListIndexNotice)
 	// 获取公告通知
@@ -174,4 +176,6 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	openRoute.Post("/article/page", articleApi.Page)
 	// 分页查询分类和标签的文章列表
 	openRoute.Post("/article/label/page", articleApi.PageByLabel)
+	// 分页查询动态列表
+	openRoute.Post("/topic/page", topicApi.Page)
 }

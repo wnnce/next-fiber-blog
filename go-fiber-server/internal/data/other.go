@@ -133,3 +133,17 @@ func (self *OtherRepo) PageAccessRecord(query *usercase.AccessLogQueryForm) ([]*
 	})
 	return records, total, err
 }
+
+func (self *OtherRepo) SiteStats() (usercase.SiteStats, error) {
+	sql := `select (select count(*) from t_blog_article where status = 0 and delete_at = 0)         as article_count,
+       (select count(*) from t_blog_category where status = 0 and delete_at = 0)                    as category_count,
+       (select count(*) from t_blog_tag where status = 0 and delete_at = 0)                         as tag_count,
+       (select count(*) from t_blog_comment where status = 0 and delete_at = 0)                     as comment_count,
+       (select count(*) from (select distinct access_ip, access_ua from t_blog_access_log) as aiau) as visitor_count,
+       (select count(*) from t_blog_access_log)                                                     as access_count,
+       (select coalesce(sum(word_count), 0) from t_blog_article where status = 0 and delete_at = 0) as word_total`
+	row := self.db.QueryRow(context.Background(), sql)
+	stats := &usercase.SiteStats{}
+	err := row.Scan(&stats.ArticleCount, &stats.CategoryCount, &stats.TagCount, &stats.CommentCount, &stats.VisitorCount, &stats.AccessCount, &stats.WordTotal)
+	return *stats, err
+}

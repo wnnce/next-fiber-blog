@@ -211,6 +211,15 @@ func (self *OtherService) PageAccess(query *usercase.AccessLogQueryForm) (*userc
 	}, nil
 }
 
+func (self *OtherService) SiteStats() (usercase.SiteStats, error) {
+	stats, err := self.repo.SiteStats()
+	if err != nil {
+		slog.Error("查询站点统计数据失败", "error", err.Error())
+		return stats, tools.FiberServerError("查询失败")
+	}
+	return stats, nil
+}
+
 func (self *OtherService) generateUploadPath(prefix, fileName string) string {
 	datePath := time.Now().Format("2006/0102/")
 	return prefix + datePath + fileName

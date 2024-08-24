@@ -82,6 +82,17 @@ var DefaultSiteConfiguration = map[string]SiteConfigurationItem{
 	"primaryColor": {Name: "主要颜色", Type: "color", Value: "#ffffff"},
 }
 
+// SiteStats 站点信息统计数据
+type SiteStats struct {
+	ArticleCount  uint   `json:"articleCount" db:"article_count"`
+	CategoryCount uint   `json:"categoryCount" db:"category_count"`
+	TagCount      uint   `json:"tagCount" db:"tag_count"`
+	CommentCount  uint   `json:"commentCount" db:"comment_count"`
+	VisitorCount  uint   `json:"visitorCount" db:"visitor_count"`
+	AccessCount   uint64 `json:"accessCount" db:"access_count"`
+	WordTotal     uint64 `json:"wordTotal" db:"word_total"`
+}
+
 type IOtherRepo interface {
 	// SaveFileRecord 保存文件上传记录
 	SaveFileRecord(file *UploadFile)
@@ -103,6 +114,9 @@ type IOtherRepo interface {
 
 	// PageAccessRecord 分页查询访问记录
 	PageAccessRecord(query *AccessLogQueryForm) ([]*AccessLog, int64, error)
+
+	// SiteStats 获取站点的统计信息
+	SiteStats() (SiteStats, error)
 }
 
 type IOtherService interface {
@@ -133,4 +147,7 @@ type IOtherService interface {
 
 	// PageAccess 分页查询访问日志
 	PageAccess(query *AccessLogQueryForm) (*PageData[AccessLog], error)
+
+	// SiteStats 获取站点的统计信息
+	SiteStats() (SiteStats, error)
 }

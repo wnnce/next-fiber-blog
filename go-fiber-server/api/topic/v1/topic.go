@@ -49,8 +49,21 @@ func (self *HttpApi) UpdateSelective(ctx fiber.Ctx) error {
 	return ctx.JSON(res.SimpleOK())
 }
 
+func (self *HttpApi) ManagePage(ctx fiber.Ctx) error {
+	query := &usercase.TopicQueryForm{}
+	if err := ctx.Bind().JSON(query); err != nil {
+		return err
+	}
+	page, err := self.service.PageTopic(query)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(page))
+}
+
 func (self *HttpApi) Page(ctx fiber.Ctx) error {
 	query := &usercase.TopicQueryForm{}
+	*query.Status = 0
 	if err := ctx.Bind().JSON(query); err != nil {
 		return err
 	}
