@@ -27,6 +27,7 @@ type TopicQueryForm struct {
 	Status          *uint8 `json:"status"`
 	CreateTimeBegin string `json:"createTimeBegin"`
 	CreateTimeEnd   string `json:"createTimeEnd"`
+	IsAdmin         bool
 	PageQueryForm
 }
 

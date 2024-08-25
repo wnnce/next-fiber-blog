@@ -72,7 +72,14 @@ func (self *TopicRepo) UpdateSelective(form *usercase.TopicUpdateForm) error {
 }
 
 func (self *TopicRepo) Page(query *usercase.TopicQueryForm) ([]*usercase.Topic, int64, error) {
+	var selectFields []string
+	if query.IsAdmin {
+		selectFields = []string{"*"}
+	} else {
+		selectFields = []string{"topic_id", "content", "image_urls", "location", "is_hot", "is_top", "vote_up", "mode", "create_time"}
+	}
 	builder := sqlbuild.NewSelectBuilder("t_blog_topic").
+		Select(selectFields...).
 		WhereByCondition(query.Location != "", "location").Eq(query.Location).
 		AndByCondition(query.Status != nil, "status").Eq(query.Status).
 		AndByCondition(query.CreateTimeBegin != "", "create_time").Ge(query.CreateTimeBegin).
@@ -96,7 +103,7 @@ func (self *TopicRepo) Page(query *usercase.TopicQueryForm) ([]*usercase.Topic, 
 	}
 	defer rows.Close()
 	topics, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Topic, error) {
-		return pgx.RowToAddrOfStructByName[usercase.Topic](row)
+		return pgx.RowToAddrOfStructByNameLax[usercase.Topic](row)
 	})
 	return topics, total, err
 }

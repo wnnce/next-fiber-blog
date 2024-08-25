@@ -51,6 +51,7 @@ func (self *HttpApi) UpdateSelective(ctx fiber.Ctx) error {
 
 func (self *HttpApi) ManagePage(ctx fiber.Ctx) error {
 	query := &usercase.TopicQueryForm{}
+	query.IsAdmin = true
 	if err := ctx.Bind().JSON(query); err != nil {
 		return err
 	}
@@ -63,7 +64,8 @@ func (self *HttpApi) ManagePage(ctx fiber.Ctx) error {
 
 func (self *HttpApi) Page(ctx fiber.Ctx) error {
 	query := &usercase.TopicQueryForm{}
-	*query.Status = 0
+	var statusValue uint8 = 0
+	query.Status = &statusValue
 	if err := ctx.Bind().JSON(query); err != nil {
 		return err
 	}
