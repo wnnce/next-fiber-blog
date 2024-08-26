@@ -1,9 +1,10 @@
 'use client'
 
 import '@/styles/components/rich-image.scss';
-import React, { CSSProperties, useState } from 'react'
+import React, { CSSProperties, ReactPortal, useState } from 'react'
 import Image, { ImageLoaderProps } from 'next/image'
 import { sliceThumbnailImageUrl } from '@/tools/utils'
+import useImagePreview from '@/hooks/image-preview'
 
 // 图片的显示模式
 declare type ImageMode = 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
@@ -29,6 +30,8 @@ interface Props {
   radius?: number | string;
   // 图片显示模式
   mode?: ImageMode;
+  // 是否可以预览图片
+  preview?: boolean;
   // 图片加载完成的事件
   onDone?: () => void;
   // 类名列表
@@ -46,6 +49,7 @@ const RichImage: React.FC<Props> = ({
   alt = 'image',
   radius = 0,
   mode = 'cover',
+  preview = false,
   onDone,
   className,
   style
@@ -53,7 +57,9 @@ const RichImage: React.FC<Props> = ({
   const _radius = typeof radius === 'number' ? `${radius}px` : radius;
   const [imageStatus, setImageStatus] = useState<ImageState>('loading');
   const [blurMaskShow, setBlurMaskShow] = useState<boolean>(true);
+  const [previewPortal, setPreviewPortal] = useState<ReactPortal>();
   const thumbnailUrl = sliceThumbnailImageUrl(src, Math.min(height, width));
+  const { previewImage } = useImagePreview();
 
   const handleLoadDone = () => {
     setImageStatus('success');
@@ -63,6 +69,14 @@ const RichImage: React.FC<Props> = ({
       }, 500)
     }
     onDone && onDone();
+  }
+
+  const handleImagePreview = () => {
+    console.log('preview')
+    if (imageStatus != 'success') {
+      return;
+    }
+    setPreviewPortal(previewImage(src));
   }
 
   const imageLoader = ({width, src, quality}: ImageLoaderProps) => {
@@ -110,9 +124,12 @@ const RichImage: React.FC<Props> = ({
         onLoad={handleLoadDone}
         style={{
           borderRadius: radius,
-          objectFit: mode
+          objectFit: mode,
+          cursor: preview ? 'zoom-in' : 'default'
         }}
+        onClick={preview ? handleImagePreview : undefined}
       />
+      { previewPortal }
     </div>
   )
 }
