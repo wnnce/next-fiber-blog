@@ -40,10 +40,14 @@
     list-style: initial !important;
   }
 
-  p:has(img:nth-child(2)){
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+  p {
+    font-size: 0.85rem;
+    line-height: 1.35rem;
+    &:has(img:nth-child(2)){
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
   }
 
   // 使用css计数器添加代码行号
