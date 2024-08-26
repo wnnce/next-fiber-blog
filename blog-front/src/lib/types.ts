@@ -149,3 +149,18 @@ export interface SiteStats {
   accessCount: number;
   wordTotal: number;
 }
+
+/**
+ * 站点动态数据
+ */
+export interface Topic {
+  topicId: number;
+  content: string;
+  imageUrls: string[];
+  location: string;
+  isHot: boolean;
+  isTop: boolean;
+  voteUp: number;
+  mode: number;
+  createTime: string
+}

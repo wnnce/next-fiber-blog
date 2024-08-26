@@ -1,5 +1,5 @@
 import { request } from '@/lib/request'
-import { Article, Category, Concat, Link, Notice, Page, Result, SiteStats, Tag } from '@/lib/types'
+import { Article, Category, Concat, Link, Notice, Page, Result, SiteStats, Tag, Topic } from '@/lib/types'
 import { SiteConfigurationItem } from '@/hooks/site-configuration'
 
 /**
@@ -72,4 +72,12 @@ export const pageLabelArticle = (data: Record<string, any>) => {
  */
 export const listLinks = (): Promise<Result<Link[]>> => {
   return request<Link[]>('/open/link/list', 'GET');
+}
+
+/**
+ * 获取动态列表
+ * @param data 查询条件
+ */
+export const pageTopic = (data: Record<string, any>) => {
+  return request<Page<Topic>>('/open/topic/page', 'POST', undefined, data);
 }

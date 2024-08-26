@@ -78,7 +78,7 @@ const ArticlePage: React.FC<{
           ))
         }
       </ul>
-      <ServerPagination className="mt-4 w-full" current={4} size={5} total={20} />
+      <ServerPagination className="mt-4 w-full animate-on-scroll" current={4} size={5} total={20} />
     </>
   )
 }
