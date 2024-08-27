@@ -1,7 +1,7 @@
 'use client'
 
 import '@/styles/components/rich-image.scss';
-import React, { CSSProperties, ReactPortal, useState } from 'react'
+import React, { CSSProperties, ReactPortal, useRef, useState } from 'react'
 import Image, { ImageLoaderProps } from 'next/image'
 import { sliceThumbnailImageUrl } from '@/tools/utils'
 import useImagePreview from '@/hooks/image-preview'
@@ -37,13 +37,14 @@ interface Props {
   // 类名列表
   className?: string,
   style?: CSSProperties,
+  imageClassName?: string,
 }
 
 const RichImage: React.FC<Props> = ({
   src,
   thumbnail = false,
-  width = 100,
-  height = 100,
+  width,
+  height,
   fill = false,
   lazy = true,
   alt = 'image',
@@ -52,13 +53,24 @@ const RichImage: React.FC<Props> = ({
   preview = false,
   onDone,
   className,
-  style
+  style,
+  imageClassName
 }): React.ReactNode => {
   const _radius = typeof radius === 'number' ? `${radius}px` : radius;
   const [imageStatus, setImageStatus] = useState<ImageState>('loading');
   const [blurMaskShow, setBlurMaskShow] = useState<boolean>(true);
   const [previewPortal, setPreviewPortal] = useState<ReactPortal>();
-  const thumbnailUrl = sliceThumbnailImageUrl(src, Math.min(height, width));
+  const imageRef = useRef<HTMLImageElement>(null);
+  const thumbnailUrl = sliceThumbnailImageUrl(src, function(): number{
+    if (height && width) {
+      return Math.min(height, width);
+    }
+    if (!imageRef.current) {
+      return 100;
+    }
+    const { offsetHeight, offsetWidth } = imageRef.current;
+    return Math.min(offsetWidth, offsetHeight)
+  }());
   const { previewImage } = useImagePreview();
 
   const handleLoadDone = () => {
@@ -72,7 +84,6 @@ const RichImage: React.FC<Props> = ({
   }
 
   const handleImagePreview = () => {
-    console.log('preview')
     if (imageStatus != 'success') {
       return;
     }
@@ -88,8 +99,8 @@ const RichImage: React.FC<Props> = ({
   return (
     <div className={ className ? `${className} rich-image` : 'rich-image' } style={{
       borderRadius: _radius,
-      height: `${height}px`,
-      width: `${width}px`,
+      height: height ? `${height}px` : 'auto',
+      width: width ? `${width}px` : 'auto',
       ...style,
     }}>
       {
@@ -122,6 +133,8 @@ const RichImage: React.FC<Props> = ({
         placeholder="empty"
         loader={imageLoader}
         onLoad={handleLoadDone}
+        className={imageClassName}
+        ref={imageRef}
         style={{
           borderRadius: radius,
           objectFit: mode,
