@@ -1,7 +1,5 @@
-
 import '@/styles/components/pagination.scss';
 import React, { useMemo } from 'react'
-import page from '@/app/(index)/page/[page]/page'
 import Link from 'next/link'
 
 interface Props {

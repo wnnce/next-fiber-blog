@@ -2,7 +2,6 @@ import '@/styles/components/categories.scss';
 import React from 'react'
 import DynamicCard from '@/components/DynamicCard'
 import { listCategory } from '@/lib/api'
-import { Category } from '@/lib/types'
 import Link from 'next/link'
 
 /**
