@@ -9,7 +9,10 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"go-fiber-ent-web-layout/internal/conf"
-	"strings"
+	"go-fiber-ent-web-layout/internal/tools"
+	"go-fiber-ent-web-layout/internal/usercase"
+	sqlbuild "go-fiber-ent-web-layout/pkg/sql-build"
+	"math"
 )
 
 var InjectSet = wire.NewSet(NewData, NewRedisTemplate, NewTagRepo, NewCategoryRepo, NewConcatRepo, NewLinkRepo, NewSysMenuRepo, NewOtherRepo,
@@ -48,28 +51,45 @@ func NewData(conf *conf.Data) (*Data, func(), error) {
 	}, cleanup, nil
 }
 
-// commonFieldUpdateBuilder 动态构建通过字段的更新sql
-func commonFieldUpdateBuilder(sort *uint, status *uint8, builder *strings.Builder, args *[]any) {
-	if sort != nil {
-		*args = append(*args, *sort)
-		builder.WriteString(fmt.Sprintf(", sort = $%d", len(*args)))
+// SelectPage 通用泛型分页查询方法
+func SelectPage[T any](builder sqlbuild.SelectBuilder, page, size int, safe bool, db *pgxpool.Pool) (*usercase.PageData[T], error) {
+	var total int64
+	row := db.QueryRow(context.Background(), builder.CountSql(), builder.Args()...)
+	if err := row.Scan(&total); err != nil {
+		return nil, err
 	}
-	if status != nil {
-		*args = append(*args, *status)
-		builder.WriteString(fmt.Sprintf(", status = $%d", len(*args)))
+	if total == 0 {
+		return &usercase.PageData[T]{
+			Current: page,
+			Size:    size,
+			Total:   total,
+			Pages:   0,
+			Records: make([]*T, 0),
+		}, nil
 	}
-}
-
-// timeQueryConditionBuilder 动态构建时间查询SQL
-func timeQueryConditionBuilder(begin, end string, builder *strings.Builder, args *[]any) {
-	if begin != "" {
-		*args = append(*args, begin)
-		builder.WriteString(fmt.Sprintf(" and create_time >= $%d", len(*args)))
+	offset := tools.ComputeOffset(total, page, size, safe)
+	builder.Limit(int64(size)).Offset(offset)
+	rows, err := db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	if err != nil {
+		return nil, err
 	}
-	if end != "" {
-		*args = append(*args, end)
-		builder.WriteString(fmt.Sprintf(" and create_time <= $%d", len(*args)))
+	records, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (*T, error) {
+		return pgx.RowToAddrOfStructByNameLax[T](row)
+	})
+	if err != nil {
+		return nil, err
 	}
+	pages := int(math.Ceil(float64(total) / float64(size)))
+	if page > pages && safe {
+		page = pages
+	}
+	return &usercase.PageData[T]{
+		Current: page,
+		Size:    size,
+		Total:   total,
+		Pages:   pages,
+		Records: records,
+	}, nil
 }
 
 // smartExec 通用执行方法 用于区分事务执行和普通执行
