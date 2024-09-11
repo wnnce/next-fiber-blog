@@ -2,7 +2,6 @@ package conf
 
 import (
 	"go-fiber-ent-web-layout/internal/middleware/limiter"
-	"go-fiber-ent-web-layout/internal/tools/github"
 	"gopkg.in/yaml.v3"
 	"os"
 	"sync"
@@ -17,12 +16,12 @@ var (
 )
 
 type Bootstrap struct {
-	Server      Server        `json:"server" yaml:"server"`
-	Data        Data          `json:"data" yaml:"data"`
-	Jwt         Jwt           `json:"jwt" yaml:"jwt"`
-	Qiniu       QiniuConfig   `json:"qiniu" yaml:"qiniu"`
-	Github      github.Config `json:"github" yaml:"github"`
-	XdbFilePath string        `json:"xdbFilePath" yaml:"xdb-file-path"`
+	Server      Server       `json:"server" yaml:"server"`
+	Data        Data         `json:"data" yaml:"data"`
+	Jwt         Jwt          `json:"jwt" yaml:"jwt"`
+	Qiniu       QiniuConfig  `json:"qiniu" yaml:"qiniu"`
+	Github      GithubConfig `json:"github" yaml:"github"`
+	XdbFilePath string       `json:"xdbFilePath" yaml:"xdb-file-path"`
 }
 
 type Server struct {
@@ -68,6 +67,12 @@ type QiniuConfig struct {
 	Bucket       string `json:"bucket" yaml:"bucket"`              // 存储桶名称
 	Region       string `json:"region" yaml:"region"`              // 存储区域域名
 	BucketDomain string `json:"bucketDomain" yaml:"bucket-domain"` // 存储桶加速域名
+}
+
+type GithubConfig struct {
+	ClientId     string `json:"clientId" yaml:"client-id"`
+	ClientSecret string `json:"clientSecret" yaml:"client-secret"`
+	Proxy        string `json:"proxy" yaml:"proxy"`
 }
 
 // ReadConfig 读取配置文件
