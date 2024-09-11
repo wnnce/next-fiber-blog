@@ -1,11 +1,9 @@
 package auth
 
 import (
-	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v3"
 	"github.com/golang-jwt/jwt/v5"
 	"go-fiber-ent-web-layout/internal/tools"
-	"go-fiber-ent-web-layout/internal/usercase"
 	"time"
 )
 
@@ -50,29 +48,19 @@ func ManageAuth(ctx fiber.Ctx) error {
 	return ctx.Next()
 }
 
-// TokenAuth 登录验证，如果Token验证成功就将Sub参数和Scope权限参数存储到ctx.Locals中
-// 后续中间件或者请求处理函数需要使用时，可以直接获取并使用类型转换
-func TokenAuth(ctx fiber.Ctx) error {
-	headers := ctx.GetReqHeaders()
-	authorization, ok := headers[fiber.HeaderAuthorization]
-	if !ok || len(authorization[0]) <= 7 {
-		return tools.FiberAuthError("The token does not exist")
+// ClassicAuth 博客用户登录验证
+// 验证成功将用户登录信息保存到 Locals
+func ClassicAuth(ctx fiber.Ctx) error {
+	claims, err := CheckToken(ctx)
+	if err != nil {
+		return err
 	}
-	claims, err := tools.VerifyToken(authorization[0][7:])
-	// 判断Token时间是否符合要求
-	currentTime := time.Now()
-	if err != nil || claims.NotBefore.After(currentTime) {
-		return tools.FiberAuthError("Invalid token")
+	token := claims.Subject
+	classicUser := GetClassicLoginUser(token)
+	if classicUser == nil {
+		return tools.FiberAuthError("Login user has expired")
 	}
-	if claims.ExpiresAt.Before(currentTime) {
-		return tools.FiberAuthError("The token has expired")
-	}
-	// 是否能从Token中解析出用户配置
-	user := &usercase.User{}
-	if err = sonic.UnmarshalString(claims.Subject, user); err != nil {
-		return tools.FiberAuthError("Invalid token")
-	}
-	fiber.Locals[*usercase.User](ctx, "user")
+	fiber.Locals[ClassicLoginUser](ctx, "classicUser", classicUser)
 	return ctx.Next()
 }
 
