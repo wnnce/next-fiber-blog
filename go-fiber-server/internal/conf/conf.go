@@ -2,6 +2,7 @@ package conf
 
 import (
 	"go-fiber-ent-web-layout/internal/middleware/limiter"
+	"go-fiber-ent-web-layout/internal/tools/github"
 	"gopkg.in/yaml.v3"
 	"os"
 	"sync"
@@ -16,11 +17,12 @@ var (
 )
 
 type Bootstrap struct {
-	Server      Server      `json:"server" yaml:"server"`
-	Data        Data        `json:"data" yaml:"data"`
-	Jwt         Jwt         `json:"jwt" yaml:"jwt"`
-	Qiniu       QiniuConfig `json:"qiniu" yaml:"qiniu"`
-	XdbFilePath string      `json:"xdbFilePath" yaml:"xdb-file-path"`
+	Server      Server        `json:"server" yaml:"server"`
+	Data        Data          `json:"data" yaml:"data"`
+	Jwt         Jwt           `json:"jwt" yaml:"jwt"`
+	Qiniu       QiniuConfig   `json:"qiniu" yaml:"qiniu"`
+	Github      github.Config `json:"github" yaml:"github"`
+	XdbFilePath string        `json:"xdbFilePath" yaml:"xdb-file-path"`
 }
 
 type Server struct {
