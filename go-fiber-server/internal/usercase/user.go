@@ -44,17 +44,7 @@ type ExpertiseDetail struct {
 	Remark     string     `json:"remark,omitempty" db:"remark"`
 }
 
-func (u *User) GetUserId() uint64 {
-	return u.UserId
-}
-func (u *User) GetUsername() string {
-	return u.Username
-}
-func (u *User) GetRoles() []string {
-	return make([]string, 0)
-}
-func (u *User) GetPermissions() []string {
-	return make([]string, 0)
+type IUserRepo interface {
 }
 
 type IUserService interface {
