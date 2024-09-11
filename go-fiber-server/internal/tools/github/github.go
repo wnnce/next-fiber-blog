@@ -8,13 +8,6 @@ import (
 	"go-fiber-ent-web-layout/internal/conf"
 )
 
-// Config Github配置
-type Config struct {
-	ClientId     string `json:"clientId" yaml:"client-id"`
-	ClientSecret string `json:"clientSecret" yaml:"client-secret"`
-	Proxy        string `json:"proxy" yaml:"proxy"`
-}
-
 // Email Github邮箱详细信息
 type Email struct {
 	Email      string `json:"email"`                // 邮箱地址
