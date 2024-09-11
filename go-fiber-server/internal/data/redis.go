@@ -11,21 +11,20 @@ import (
 	"time"
 )
 
-type RedisTemplate struct {
-	rdb *redis.Client
+var defaultRedisTemplate *RedisTemplate
+
+// DefaultRedisTemplate 获取默认初始化的redisTemplate
+// 由于使用了wire依赖注入 所以注入的redisTemplate和这里的defaultRedisTemplate是同一个对象
+func DefaultRedisTemplate() *RedisTemplate {
+	return defaultRedisTemplate
 }
 
-func NewRedisTemplate(data *Data) *RedisTemplate {
-	return &RedisTemplate{
-		rdb: data.Rc,
-	}
-}
-
-// RedisGetStruct 查询在Redis中缓存的结构体
+// RedisGetStruct 使用默认redisTemplate查询在Redis中缓存的结构体
+// 如果默认redisTemplate为nil 那么会报nil空地址异常
 // 使用泛型指定返回结构体类型
-func RedisGetStruct[T any](ctx context.Context, key string, client *redis.Client) (T, error) {
+func RedisGetStruct[T any](ctx context.Context, key string) (T, error) {
 	value := new(T)
-	result, err := client.Get(ctx, key).Result()
+	result, err := defaultRedisTemplate.Client().Get(ctx, key).Result()
 	if err != nil {
 		return *value, err
 	}
@@ -33,9 +32,11 @@ func RedisGetStruct[T any](ctx context.Context, key string, client *redis.Client
 	return *value, err
 }
 
-// RedisGetSlice 查询在redis中缓存的切片
-func RedisGetSlice[T any](ctx context.Context, key string, client *redis.Client) ([]T, error) {
-	result, err := client.Get(ctx, key).Result()
+// RedisGetSlice 使用默认redisTemplate查询在redis中缓存的切片
+// 如果默认redisTemplate为nil 那么会报nil空地址异常
+// 使用泛型指定切片的类型 泛型可以为指针
+func RedisGetSlice[T any](ctx context.Context, key string) ([]T, error) {
+	result, err := defaultRedisTemplate.Client().Get(ctx, key).Result()
 	if err != nil {
 		slog.Error("查询Redis缓存结构体失败", "error", err.Error(), "key", key)
 		return nil, err
@@ -43,6 +44,17 @@ func RedisGetSlice[T any](ctx context.Context, key string, client *redis.Client)
 	value := make([]T, 0)
 	err = sonic.UnmarshalString(result, &value)
 	return value, err
+}
+
+type RedisTemplate struct {
+	rdb *redis.Client
+}
+
+func NewRedisTemplate(data *Data) *RedisTemplate {
+	defaultRedisTemplate = &RedisTemplate{
+		rdb: data.Rc,
+	}
+	return defaultRedisTemplate
 }
 
 func (self *RedisTemplate) Set(ctx context.Context, key string, value any, expireTime time.Duration) error {

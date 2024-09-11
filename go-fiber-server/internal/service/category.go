@@ -66,7 +66,7 @@ func (self *CategoryService) UpdateSelectiveCategory(form *usercase.CategoryUpda
 }
 
 func (self *CategoryService) TreeCategory() ([]*usercase.CategoryVo, error) {
-	categoryTree, err := data.RedisGetSlice[*usercase.CategoryVo](context.Background(), categoryTreeListCacheKey, self.redisTemplate.Client())
+	categoryTree, err := data.RedisGetSlice[*usercase.CategoryVo](context.Background(), categoryTreeListCacheKey)
 	if err == nil && len(categoryTree) > 0 {
 		return categoryTree, nil
 	}

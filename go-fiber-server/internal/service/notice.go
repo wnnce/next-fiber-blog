@@ -58,7 +58,7 @@ func (self *NoticeService) Page(query *usercase.NoticeQueryForm) (*usercase.Page
 
 func (self *NoticeService) ListNoticeByType(noticeType int) ([]usercase.Notice, error) {
 	cacheKey := noticeCachePrefix + "list:" + strconv.Itoa(noticeType)
-	notices, err := data.RedisGetSlice[usercase.Notice](context.Background(), cacheKey, self.redisTemplate.Client())
+	notices, err := data.RedisGetSlice[usercase.Notice](context.Background(), cacheKey)
 	if err == nil && len(notices) > 0 {
 		return notices, nil
 	}

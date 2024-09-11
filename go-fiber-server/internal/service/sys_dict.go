@@ -214,7 +214,7 @@ func (self *SysDictService) DeleteDictValue(valueId int64) error {
 
 func (self *SysDictService) ListDictValueByDictKey(dictKey string) ([]usercase.SysDictValue, error) {
 	dictCacheKey := dictCachePrefix + dictKey
-	cacheValue, err := data.RedisGetSlice[usercase.SysDictValue](context.Background(), dictCacheKey, self.redisTemplate.Client())
+	cacheValue, err := data.RedisGetSlice[usercase.SysDictValue](context.Background(), dictCacheKey)
 	if err == nil && len(cacheValue) > 0 {
 		return cacheValue, nil
 	}

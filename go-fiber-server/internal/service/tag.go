@@ -97,7 +97,7 @@ func (self *TagService) PageTag(form *usercase.TagQueryForm) (*usercase.PageData
 }
 
 func (self *TagService) AllTag() []*usercase.TagVo {
-	tags, err := data.RedisGetSlice[*usercase.TagVo](context.Background(), tagListCacheKey, self.redisTemplate.Client())
+	tags, err := data.RedisGetSlice[*usercase.TagVo](context.Background(), tagListCacheKey)
 	if err == nil && len(tags) > 0 {
 		return tags
 	}

@@ -64,7 +64,7 @@ func (self *ConcatService) UpdateSelectiveConcat(form *usercase.ConcatUpdateForm
 }
 
 func (self *ConcatService) ListConcat() ([]*usercase.Concat, error) {
-	concats, err := data.RedisGetSlice[*usercase.Concat](context.Background(), concatListCacheKey, self.redisTemplate.Client())
+	concats, err := data.RedisGetSlice[*usercase.Concat](context.Background(), concatListCacheKey)
 	if err == nil && len(concats) > 0 {
 		return concats, nil
 	}

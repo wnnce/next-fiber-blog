@@ -34,8 +34,7 @@ func NewOtherService(repo usercase.IOtherRepo, redisTemplate *data.RedisTemplate
 }
 
 func (self *OtherService) SiteConfiguration() map[string]usercase.SiteConfigurationItem {
-	config, err := data.RedisGetStruct[map[string]usercase.SiteConfigurationItem](context.Background(),
-		SiteConfigurationCacheKey, self.redisTemplate.Client())
+	config, err := data.RedisGetStruct[map[string]usercase.SiteConfigurationItem](context.Background(), SiteConfigurationCacheKey)
 	if err == nil && config != nil {
 		return config
 	}

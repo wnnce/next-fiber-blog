@@ -41,7 +41,7 @@ func (h *MenuApi) Update(ctx fiber.Ctx) error {
 }
 
 func (h *MenuApi) Tree(ctx fiber.Ctx) error {
-	loginUser := fiber.Locals[auth.LoginUser](ctx, "loginUser")
+	loginUser := fiber.Locals[auth.ManageLoginUser](ctx, "loginUser")
 	menus, err := h.service.TreeMenu(loginUser.GetRoles())
 	if err != nil {
 		return err
