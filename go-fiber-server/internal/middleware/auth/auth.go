@@ -42,7 +42,7 @@ func ManageAuth(ctx fiber.Ctx) error {
 	if loginUser == nil {
 		return tools.FiberAuthError("Login user has expired")
 	}
-	fiber.Locals[LoginUser](ctx, "loginUser", loginUser)
+	fiber.Locals[ManageLoginUser](ctx, "loginUser", loginUser)
 	// 请求处理完成后重设用户的过期时间
 	defer ResetManageLoginUserExpire(token, ManageUserCacheExpireTime)
 	return ctx.Next()

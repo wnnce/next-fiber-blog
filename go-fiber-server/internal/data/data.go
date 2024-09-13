@@ -15,8 +15,9 @@ import (
 	"math"
 )
 
-var InjectSet = wire.NewSet(NewData, NewRedisTemplate, NewTagRepo, NewCategoryRepo, NewConcatRepo, NewLinkRepo, NewSysMenuRepo, NewOtherRepo,
-	NewSysConfigRepo, NewSysRoleRepo, NewSysUserRepo, NewSysDictRepo, NewNoticeRepo, NewArticleRepo, NewTopicRepo)
+var InjectSet = wire.NewSet(NewData, NewRedisTemplate, NewTagRepo, NewCategoryRepo, NewConcatRepo, NewLinkRepo,
+	NewSysMenuRepo, NewOtherRepo, NewSysConfigRepo, NewSysRoleRepo, NewSysUserRepo, NewSysDictRepo, NewNoticeRepo,
+	NewArticleRepo, NewTopicRepo, NewUserRepo)
 
 type Data struct {
 	Db *pgxpool.Pool // pgx连接

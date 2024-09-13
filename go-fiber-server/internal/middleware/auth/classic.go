@@ -4,17 +4,18 @@ import (
 	"context"
 	"fmt"
 	"go-fiber-ent-web-layout/internal/data"
+	"go-fiber-ent-web-layout/internal/usercase"
 	"log/slog"
 	"math"
 	"strconv"
+	"sync"
 )
 
 const redisKeyPrefix = "CLASSIC:USER:"
 
 type ClassicLoginUser interface {
 	LoginUser
-	// SetLabels 更新用户标签
-	SetLabels(labels []string) error
+	SetLabels(labels []string) error // SetLabels 更新用户标签
 }
 
 type ClassicUserCache interface {
@@ -67,12 +68,12 @@ func (self *InRedisClassicUserCache) GetUser(token string) ClassicLoginUser {
 	if "" == key {
 		return nil
 	}
-	result, err := data.RedisGetStruct[ClassicLoginUser](context.Background(), key)
+	result, err := data.RedisGetStruct[usercase.User](context.Background(), key)
 	if err != nil {
 		slog.Error("获取博客登录用户失败", "key", key, "err", err.Error())
 		return nil
 	}
-	return result
+	return &result
 }
 
 func (self *InRedisClassicUserCache) GetUserById(userId uint64) ClassicLoginUser {
@@ -80,12 +81,12 @@ func (self *InRedisClassicUserCache) GetUserById(userId uint64) ClassicLoginUser
 	if "" == key {
 		return nil
 	}
-	result, err := data.RedisGetStruct[ClassicLoginUser](context.Background(), key)
+	result, err := data.RedisGetStruct[usercase.User](context.Background(), key)
 	if err != nil {
 		slog.Error("获取博客登录用户失败", "key", key, "err", err.Error())
 		return nil
 	}
-	return result
+	return &result
 }
 
 func (self *InRedisClassicUserCache) FindUserCacheKey(token string, userId uint64) string {
@@ -93,7 +94,7 @@ func (self *InRedisClassicUserCache) FindUserCacheKey(token string, userId uint6
 		return redisKeyPrefix + token + ":" + strconv.FormatUint(userId, 10)
 	}
 	var key string
-	if userId == 0 {
+	if userId != 0 {
 		key = redisKeyPrefix + "*" + ":" + strconv.FormatUint(userId, 10)
 	} else {
 		key = redisKeyPrefix + token + ":*"
@@ -111,28 +112,36 @@ func (self *InRedisClassicUserCache) FindUserCacheKey(token string, userId uint6
 }
 
 // 默认博客用户登录管理缓存
-var defaultClassicUserCache ClassicUserCache
+var (
+	defaultClassicUserCache ClassicUserCache
+	classicUserCacheOnce    sync.Once
+)
 
-func init() {
+func initDefaultClassicUserCache() {
 	defaultClassicUserCache = NewClassicUserCache()
 }
 
 func AddClassicLoginUser(token string, user ClassicLoginUser) error {
+	classicUserCacheOnce.Do(initDefaultClassicUserCache)
 	return defaultClassicUserCache.AddUser(token, user)
 }
 
 func RemoveClassicLoginUser(token string) error {
+	classicUserCacheOnce.Do(initDefaultClassicUserCache)
 	return defaultClassicUserCache.RemoveUser(token)
 }
 
 func RemoveClassicLoginUserById(userId uint64) error {
+	classicUserCacheOnce.Do(initDefaultClassicUserCache)
 	return defaultClassicUserCache.RemoveUserById(userId)
 }
 
 func GetClassicLoginUser(token string) ClassicLoginUser {
+	classicUserCacheOnce.Do(initDefaultClassicUserCache)
 	return defaultClassicUserCache.GetUser(token)
 }
 
 func GetClassicLoginUserById(userId uint64) ClassicLoginUser {
+	classicUserCacheOnce.Do(initDefaultClassicUserCache)
 	return defaultClassicUserCache.GetUserById(userId)
 }
