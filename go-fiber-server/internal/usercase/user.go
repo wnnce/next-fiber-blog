@@ -79,4 +79,7 @@ type IUserService interface {
 
 	// UserInfo 获取用户详细信息包含扩展数据
 	UserInfo(user *User) (*UserVo, error)
+
+	// Logout 注销登录
+	Logout(userId uint64) error
 }

@@ -38,3 +38,11 @@ func (self *HttpApi) UserInfo(ctx fiber.Ctx) error {
 	}
 	return ctx.JSON(res.OkByData(userinfo))
 }
+
+func (self *HttpApi) Logout(ctx fiber.Ctx) error {
+	classicUser := fiber.Locals[auth.ClassicLoginUser](ctx, "classicUser")
+	if err := self.service.Logout(classicUser.GetUserId()); err != nil {
+		return err
+	}
+	return ctx.JSON(res.SimpleOK())
+}

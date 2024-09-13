@@ -145,7 +145,10 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	topicRoute.Delete("/:id", topicApi.Delete)
 
 	classicUserRoute := app.Group("/user")
+	// 获取登录用户详细信息
 	classicUserRoute.Get("/info", classicUserApi.UserInfo, auth.ClassicAuth)
+	// 注销登录用户
+	classicUserRoute.Get("/logout", classicUserApi.Logout, auth.ClassicAuth)
 
 	// 开放接口
 	openRoute := app.Group("/open")

@@ -118,3 +118,11 @@ func (self *UserService) UserInfo(user *usercase.User) (*usercase.UserVo, error)
 		RegisterLocation: extend.RegisterLocation,
 	}, nil
 }
+
+func (self *UserService) Logout(userId uint64) error {
+	if err := auth.RemoveClassicLoginUserById(userId); err != nil {
+		slog.Error("注销博客端登录用户失败", "err", err.Error())
+		return tools.FiberServerError("注销登录失败")
+	}
+	return nil
+}
