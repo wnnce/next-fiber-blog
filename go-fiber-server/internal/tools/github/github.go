@@ -16,6 +16,19 @@ type Email struct {
 	Visibility string `json:"visibility,omitempty"` // 邮箱是否可见
 }
 
+// Profile Github用户信息
+type Profile struct {
+	Login     string `json:"login"`              // 登录用户名
+	Id        int64  `json:"id"`                 // 用户id
+	NodeId    string `json:"node_id"`            // 节点Id
+	AvatarUrl string `json:"avatar_url"`         // 用户头像链接地址
+	HtmlUrl   string `json:"html_url"`           // 用户Github网页链接
+	Name      string `json:"name,omitempty"`     // 昵称
+	Company   string `json:"company,omitempty"`  // 简介
+	Blog      string `json:"blog,omitempty"`     // 用户博客地址
+	Location  string `json:"location,omitempty"` // 用户所属地区
+}
+
 const (
 	tokenUrl    = "https://github.com/login/oauth/access_token"
 	userInfoUrl = "https://api.github.com/user"
@@ -64,7 +77,7 @@ func AccessToken(code string) (string, error) {
 	return accessToken, nil
 }
 
-func UserProfile(accessToken string) (map[string]string, error) {
+func UserProfile(accessToken string) (*Profile, error) {
 	request := fasthttp.AcquireRequest()
 	response := fasthttp.AcquireResponse()
 	request.Header.SetMethod(fiber.MethodGet)
@@ -81,8 +94,8 @@ func UserProfile(accessToken string) (map[string]string, error) {
 	if fiber.StatusOK != response.StatusCode() {
 		return nil, fmt.Errorf("request field response status: %d", response.StatusCode())
 	}
-	result := make(map[string]string)
-	if err := sonic.Unmarshal(response.Body(), &result); err != nil {
+	result := &Profile{}
+	if err := sonic.Unmarshal(response.Body(), result); err != nil {
 		return nil, err
 	}
 	return result, nil
