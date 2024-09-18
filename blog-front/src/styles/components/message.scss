@@ -1,0 +1,24 @@
+#message-container {
+  position: fixed;
+  top: 4rem;
+  width: 20rem;
+  left: 50%;
+  bottom: 0;
+  z-index: 999;
+  transform: translateX(-50%);
+  .message-list {
+    .message-item {
+      background-color: rgba(var(--input-background-color), 0.7);
+      backdrop-filter: blur(0.25rem);
+      .item-close-button {
+        transition: color 300ms, transform 300ms;
+        &:hover {
+          color: rgb(var(--primary-color));
+          cursor: pointer;
+          transform: rotate(180deg);
+        }
+      }
+    }
+  }
+
+}
