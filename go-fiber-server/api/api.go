@@ -5,6 +5,7 @@ import (
 	"github.com/google/wire"
 	"go-fiber-ent-web-layout/api/article/v1"
 	"go-fiber-ent-web-layout/api/category/v1"
+	"go-fiber-ent-web-layout/api/comment/v1"
 	"go-fiber-ent-web-layout/api/concat/v1"
 	"go-fiber-ent-web-layout/api/link/v1"
 	"go-fiber-ent-web-layout/api/manage/v1"
@@ -17,13 +18,13 @@ import (
 
 var InjectSet = wire.NewSet(tag.NewHttpApi, category.NewHttpApi, concat.NewHttpApi, link.NewHttpApi, article.NewHttpApi,
 	manage.NewMenuApi, manage.NewConfigApi, other.NewHttpApi, manage.NewRoleApi, manage.NewUserApi, manage.NewDictApi,
-	manage.NewNoticeApi, topic.NewHttpApi, user.NewHttpApi)
+	manage.NewNoticeApi, topic.NewHttpApi, user.NewHttpApi, comment.NewHttpApi)
 
 // RegisterRoutes 全局路由绑定处理函数 在newApp函数中调用 不然wire无法处理依赖注入
 func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpApi, conApi *concat.HttpApi, linkApi *link.HttpApi,
 	menuApi *manage.MenuApi, cfgApi *manage.ConfigApi, oApi *other.HttpApi, roleApi *manage.RoleApi, userApi *manage.UserApi,
 	dictApi *manage.DictApi, noticeApi *manage.NoticeApi, articleApi *article.HttpApi, topicApi *topic.HttpApi,
-	classicUserApi *user.HttpApi) {
+	classicUserApi *user.HttpApi, commentApi *comment.HttpApi) {
 	// 系统接口路由
 	sysRoute := app.Group("/system", auth.ManageAuth, auth.VerifyRoles("admin"))
 	sysRoute.Post("/record/login", oApi.PageLoginRecord)
@@ -149,6 +150,11 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	classicUserRoute.Get("/info", classicUserApi.UserInfo, auth.ClassicAuth)
 	// 注销登录用户
 	classicUserRoute.Get("/logout", classicUserApi.Logout, auth.ClassicAuth)
+
+	commentRoute := app.Group("/comment")
+	commentRoute.Post("/total", commentApi.Total)
+	commentRoute.Post("/page", commentApi.Page)
+	commentRoute.Post("/", commentApi.Save, auth.ClassicAuth)
 
 	// 开放接口
 	openRoute := app.Group("/open")

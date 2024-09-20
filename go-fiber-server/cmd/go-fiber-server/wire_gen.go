@@ -11,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"go-fiber-ent-web-layout/api/article/v1"
 	"go-fiber-ent-web-layout/api/category/v1"
+	"go-fiber-ent-web-layout/api/comment/v1"
 	"go-fiber-ent-web-layout/api/concat/v1"
 	"go-fiber-ent-web-layout/api/link/v1"
 	"go-fiber-ent-web-layout/api/manage/v1"
@@ -74,7 +75,10 @@ func wireApp(contextContext context.Context, confData *conf.Data, jwt *conf.Jwt,
 	iUserRepo := data.NewUserRepo(dataData)
 	iUserService := service.NewUserService(iUserRepo)
 	userHttpApi := user.NewHttpApi(iUserService)
-	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi, roleApi, userApi, dictApi, noticeApi, articleHttpApi, topicHttpApi, userHttpApi)
+	iCommentRepo := data.NewCommentRepo(dataData)
+	iCommentService := service.NewCommentService(iCommentRepo, iUserService)
+	commentHttpApi := comment.NewHttpApi(iCommentService)
+	app := newApp(contextContext, server, httpApi, categoryHttpApi, concatHttpApi, linkHttpApi, menuApi, configApi, otherHttpApi, roleApi, userApi, dictApi, noticeApi, articleHttpApi, topicHttpApi, userHttpApi, commentHttpApi)
 	return app, func() {
 		cleanup()
 	}, nil
