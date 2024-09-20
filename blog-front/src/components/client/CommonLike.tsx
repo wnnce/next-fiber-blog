@@ -3,11 +3,13 @@
 import '@/styles/components/client-components.scss'
 import React, { useMemo, useState } from 'react'
 
-export const CommonLike: React.FC<{
+const CommonLike: React.FC<{
   count: number,
   entityKey: string | number,
-  type: 'topic' | 'article' | 'comment'
-}> = ({ count, entityKey, type }) => {
+  type: 'topic' | 'article' | 'comment',
+  onLike: (key: string | number, done: () => void) => void,
+  className?: string
+}> = ({ count, entityKey, type, onLike, className }) => {
   const [likeCount, setLikeCount] = useState<number>(count);
 
   const storageKey = useMemo<string>(() => {
@@ -34,13 +36,20 @@ export const CommonLike: React.FC<{
     setLikeCount(next => next + 1);
   }
   return (
-    <>
-      { likeKeys[entityKey] === null ? (
-        <i className="inline-block text-red-5 i-tabler:heart-filled" />
+    <button className={`desc-text flex items-start common-like-button ${className || ''}`}
+            disabled={likeKeys[entityKey] === null}
+            onClick={likeKeys[entityKey] === undefined ? () => {
+              onLike(entityKey, handleLike)
+            } : undefined}
+    >
+      {likeKeys[entityKey] === null ? (
+        <i className="inline-block text-sm text-red-5 i-tabler:thumb-up-filled" />
       ) : (
-        <i className="inline-block i-tabler:heart common-like-icon" onClick={handleLike} />
-      ) }
-      <span className="font-mono ml-1">{likeCount}</span>
-    </>
+        <i className="inline-block text-sm i-tabler:thumb-up common-like-icon" />
+      )}
+      <span className="text-xs ml-0.5">{likeCount}</span>
+    </button>
   )
 }
+
+export default CommonLike;

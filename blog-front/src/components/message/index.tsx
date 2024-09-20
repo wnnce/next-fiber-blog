@@ -3,6 +3,7 @@
 import "@/styles/components/message.scss";
 import ReactDOM from 'react-dom/client'
 import React, { useEffect, useRef, useState } from 'react'
+import { TransitionGroup, CSSTransition } from 'react-transition-group'
 import { Notice, NoticeResult, NoticeType } from '@/components/message/types'
 import Message from '@/components/message/Message'
 
@@ -48,18 +49,23 @@ export const MessageContainer: React.FC = () => {
 
   return (
     <ul className="list-none message-list flex flex-col items-center gap-row-2">
-      { notices.map(item => (
-        <li key={item.key}>
-          <Message text={item.text} type={item.type} onClose={() => {
-            remove(item.key);
-          }} />
-        </li>
-      )) }
+      <TransitionGroup component={null}>
+        { notices.map(item => (
+          <CSSTransition timeout={300} key={item.key} classNames="message-slide">
+            <li key={item.key}>
+              <Message text={item.text} type={item.type} onClose={() => {
+                remove(item.key)
+              }} />
+            </li>
+          </CSSTransition>
+        ))}
+      </TransitionGroup>
+
     </ul>
   )
 }
 
-let messageContainerInit = false;
+let messageContainerInit = false
 const initMessageContainer = () => {
   let container = document.getElementById(messageContainerFlag);
   console.log(container, messageContainerInit)
@@ -73,19 +79,19 @@ const initMessageContainer = () => {
 }
 
 const useMessage = () => {
-  const info = (text: string): NoticeResult => {
+  const showInfo = (text: string): NoticeResult => {
     return addNotice(text, 'info')
   }
-  const success = (text: string): NoticeResult => {
+  const showSuccess = (text: string): NoticeResult => {
     return addNotice(text, 'success')
   }
-  const waring = (text: string): NoticeResult => {
+  const showWaring = (text: string): NoticeResult => {
     return addNotice(text, 'waring')
   }
-  const danger = (text: string): NoticeResult => {
+  const showDanger = (text: string): NoticeResult => {
     return addNotice(text, 'danger')
   }
-  const loading = (text: string): NoticeResult => {
+  const showLoading = (text: string): NoticeResult => {
     return addNotice(text, 'loading')
   }
 
@@ -97,7 +103,7 @@ const useMessage = () => {
     return add(text, type);
   }
 
-  return { info, success, waring, danger, loading };
+  return { showInfo, showSuccess, showWaring, showDanger, showLoading };
 }
 
 export default useMessage;

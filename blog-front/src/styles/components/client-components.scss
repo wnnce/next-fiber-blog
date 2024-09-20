@@ -1,0 +1,24 @@
+.common-like-button {
+  &:hover {
+    .common-like-icon {
+      transform: scale(1.15);
+      cursor: pointer;
+    }
+  }
+  .common-like-icon {
+    transition: transform 300ms;
+  }
+}
+.client-pagination {
+  .page-button {
+    transition: background-color 300ms, color 300ms;
+    background-color: rgb(var(--button-background-color));
+    border-radius: 0.25rem;
+  }
+  .active-button {
+    &:hover {
+      color: rgb(var(--text-color-1));
+      background-color: rgb(var(--primary-color));
+    }
+  }
+}

@@ -1,3 +1,6 @@
+import parse from 'ua-parser-js';
+import UAParser from 'ua-parser-js'
+
 /**
  * 拼接缩略图图片地址 （仅适用于七牛云）
  * @param imageUrl 后端返回的七牛图片地址
@@ -67,4 +70,43 @@ export const formatWordCount = (num: number): number | string => {
     return num
   }
   return `${(num / 1000).toFixed(1)}k`
+}
+
+/**
+ * 格式化时间为统一格式 一分钟内返回刚刚 一小时内返回xx分钟前 一天内返回xx小时前 否则返回yyyy-MM-dd格式时间
+ * @param datetime 需要被格式化的日期时间字符串
+ */
+export const formatDateTime = (datetime: string): string => {
+  const now = new Date();
+  if (datetime.indexOf('T') > -1) {
+    datetime = datetime.replace('T', ' ');
+  }
+  if (datetime.indexOf('Z') > -1) {
+    datetime = datetime.replace('Z', '')
+  }
+  const date = new Date(datetime);
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / 60000);
+  if (diffMinutes <= 1) {
+    return '刚刚';
+  }
+  if (diffMinutes < 60) {
+    return `${diffMinutes} 分钟前`;
+  }
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) {
+    return `${diffHours} 小时前`
+  }
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDay() + 1).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * 解析UserAgent头
+ * @param ua 待解析的ua
+ */
+export const formatUa = (ua: string): UAParser.IResult => {
+  return parse(ua);
 }

@@ -1,0 +1,14 @@
+.button-component {
+  outline: none;
+  background-color: rgb(var(--primary-color));
+  transition: all 300ms ease;
+  border-radius: 0.35rem;
+}
+.button-component-active {
+  &:hover {
+    filter: contrast(120%);
+  }
+}
+.button-component-disabled {
+  filter: contrast(70%);
+}

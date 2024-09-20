@@ -12,7 +12,7 @@ const ArticlePageLayout: React.FC<{
         <Swiper draggable={false} dotActive>
           <SwiperSlide>
             <div className="top-article-item">
-              <RichImage className="top-article-item-image" src="/images/bg.webp" fill />
+              <RichImage className="top-article-item-image" src="/b-oss/images/2024/0704/7d8e2b2e0aa20f139b8788aa38066403.webp" fill />
               <div className="top-article-summary p-4 flex flex-col sm:gap-row-2 gap-row-1">
                 <h2 className="sm:text-xl text-lg">
                   <a href="#" className="a-hover-line-text-md">
@@ -28,7 +28,7 @@ const ArticlePageLayout: React.FC<{
           </SwiperSlide>
           <SwiperSlide>
             <div className="top-article-item">
-              <RichImage className="top-article-item-image" src="/images/bg.webp" fill />
+              <RichImage className="top-article-item-image" src="/b-oss/images/2024/0704/7d8e2b2e0aa20f139b8788aa38066403.webp" fill />
               <div className="top-article-summary p-4 flex flex-col sm:gap-row-2 gap-row-1">
                 <h2 className="sm:text-xl text-lg">
                   <a href="#">
@@ -44,7 +44,7 @@ const ArticlePageLayout: React.FC<{
           </SwiperSlide>
           <SwiperSlide>
             <div className="top-article-item">
-              <RichImage className="top-article-item-image" src="/images/bg.webp" fill />
+              <RichImage className="top-article-item-image" src="/b-oss/images/2024/0704/7d8e2b2e0aa20f139b8788aa38066403.webp" fill />
               <div className="top-article-summary p-4 flex flex-col sm:gap-row-2 gap-row-1">
                 <h2 className="sm:text-xl text-lg">
                   <a href="#">

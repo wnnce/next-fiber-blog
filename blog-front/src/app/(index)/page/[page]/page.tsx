@@ -19,7 +19,7 @@ const ArticlePage: React.FC<{
               <article>
                 <DynamicCard>
                   <div className="overflow-hidden" style={{ width: '100%', aspectRatio: '16 / 6' }}>
-                    <RichImage className="article-item-cover" src="/images/bg.webp" fill
+                    <RichImage className="article-item-cover" src="/b-oss/images/2024/0704/7d8e2b2e0aa20f139b8788aa38066403.webp" fill
                                style={{ width: '100%', height: '100%' }} />
                   </div>
                   <div className="p-4 flex flex-col gap-row-2">

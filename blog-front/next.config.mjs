@@ -10,7 +10,8 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [
-      { hostname: 'file.qiniu.vnc.ink' }
+      { hostname: 'file.qiniu.vnc.ink' },
+      { hostname: 'avatars.githubusercontent.com' }
     ]
   },
 };

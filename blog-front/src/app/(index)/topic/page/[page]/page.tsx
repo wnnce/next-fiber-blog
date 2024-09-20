@@ -6,7 +6,7 @@ import SimpleMarkdown from '@/components/SimpleMarkdown'
 import StaticCard from '@/components/StaticCard'
 import { Timeline, TimeLineItem } from '@/components/Timeline'
 import RichImage from '@/components/RichImage'
-import { CommonLike } from '@/components/ClictComponents'
+import CommonLike from '@/components/client/CommonLike'
 
 const TopicPage: React.FC<{
   params: {
@@ -46,7 +46,11 @@ const TopicPage: React.FC<{
               )}
               <ul className="flex gap-col-4 mt-4 desc-text relative">
                 <li className="flex items-center">
-                  <CommonLike count={topic.voteUp} entityKey={topic.topicId} type="topic" />
+                  <CommonLike count={topic.voteUp} entityKey={topic.topicId} type="topic"
+                              onLike={(key, done) => {
+                                done();
+                              }}
+                  />
                 </li>
                 <li className="flex items-center">
                   <i className="inline-block i-tabler:message-chatbot" />

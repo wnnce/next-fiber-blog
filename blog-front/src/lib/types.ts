@@ -164,3 +164,43 @@ export interface Topic {
   mode: number;
   createTime: string
 }
+
+/**
+ * 博客端用户数据
+ */
+export interface User {
+  userId: number;
+  nickname: string;
+  summary: string;
+  avatar: string;
+  email: string;
+  link: string;
+  username: string;
+  labels: string[];
+  level: number;
+  expertise: number;
+  registerIp: string;
+  registerLocation: string;
+}
+
+/**
+ * 评论数据
+ */
+export interface Comment {
+  commentId: number;
+  content: string;
+  userId: number;
+  fid: number;
+  rid: number;
+  location: string;
+  commentUa: string;
+  voteUp: number;
+  commentType: number;
+  isHot: boolean;
+  isTop: boolean;
+  isColl: boolean;
+  createTime: string;
+  user: User;
+  parentUser?: User;
+  children: Page<Comment>
+}
