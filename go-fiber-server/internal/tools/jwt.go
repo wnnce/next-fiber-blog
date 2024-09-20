@@ -68,14 +68,22 @@ func readJwtConfig(bootstrap *conf.Bootstrap) {
 	}
 }
 
-func GenerateToken(sub string) (string, error) {
+// GenerateToken 生成Token
+// lasting 是否持久token
+func GenerateToken(sub string, lasting bool) (string, error) {
 	currentTime := time.Now()
 	numberDate := &jwt.NumericDate{Time: currentTime}
+	var expireAt *jwt.NumericDate
+	if !lasting {
+		expireAt = &jwt.NumericDate{
+			Time: currentTime.Add(expireTime),
+		}
+	}
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer:    issue,
 		NotBefore: numberDate,
 		IssuedAt:  numberDate,
-		ExpiresAt: &jwt.NumericDate{Time: currentTime.Add(expireTime)},
+		ExpiresAt: expireAt,
 		Subject:   sub,
 		ID:        strconv.FormatInt(currentTime.UnixMilli(), 10),
 	})

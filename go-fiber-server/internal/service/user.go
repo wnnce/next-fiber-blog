@@ -1,7 +1,9 @@
 package service
 
 import (
+	"context"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"go-fiber-ent-web-layout/internal/middleware/auth"
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/tools/github"
@@ -10,6 +12,8 @@ import (
 	"go-fiber-ent-web-layout/pkg/pool"
 	"log/slog"
 )
+
+const levelExpertiseNumber = 100
 
 type UserService struct {
 	repo usercase.IUserRepo
@@ -72,7 +76,7 @@ func (self *UserService) LoginWithGithub(code, ip string) (string, error) {
 		userVo := &usercase.UserVo{
 			User: usercase.User{
 				Username: profile.Login,
-				NickName: profile.Name,
+				Nickname: profile.Name,
 				Email:    email,
 				Avatar:   profile.AvatarUrl,
 				Summary:  profile.Company,
@@ -92,7 +96,7 @@ func (self *UserService) LoginWithGithub(code, ip string) (string, error) {
 		return "", tools.FiberServerError("用户被禁用或状态异常")
 	}
 	subject := uuid.New().String()
-	token, err := tools.GenerateToken(subject)
+	token, err := tools.GenerateToken(subject, true)
 	if err != nil {
 		slog.Error("生成用户登录Token失败", "err", err.Error())
 		return "", tools.FiberServerError("登录失败")
@@ -125,4 +129,36 @@ func (self *UserService) Logout(userId uint64) error {
 		return tools.FiberServerError("注销登录失败")
 	}
 	return nil
+}
+
+// UpdateUserExpertise 更新用户经验值
+// 在更新用户经验值时 判断当前经验值是否达到了这个等级的经验上限
+// 如果达到 那么就将用户升级
+func (self *UserService) UpdateUserExpertise(count int64, userId uint64) error {
+	return self.repo.Transaction(context.Background(), func(tx pgx.Tx) error {
+		if err := self.repo.SaveExpertiseDetail(&usercase.ExpertiseDetail{
+			UserId:     userId,
+			Detail:     count,
+			DetailType: 1,
+			Source:     2,
+		}, tx); err != nil {
+			slog.Error("保存经验值变更明细失败", "err", err.Error())
+			return err
+		}
+		expertise, level, err := self.repo.UpdateUserExpertise(count, userId, tx)
+		if err != nil {
+			slog.Error("更新用户经验值失败", "err", err.Error(), "userId", userId)
+			return err
+		}
+		// 计算用户当前等级所需要的升级经验值
+		upgradeExpertise := levelExpertiseNumber << level
+		// 如果当前经验值大于当前等级的总经验值 那么就将用户升级
+		if expertise >= uint64(upgradeExpertise) {
+			if upgradeErr := self.repo.UpdateUserLevel(level+1, userId, tx); upgradeErr != nil {
+				slog.Error("更新用户等级失败", "err", err.Error(), "userId", userId, "level", level)
+				return upgradeErr
+			}
+		}
+		return nil
+	})
 }

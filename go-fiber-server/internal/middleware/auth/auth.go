@@ -24,7 +24,7 @@ func CheckToken(ctx fiber.Ctx) (*jwt.RegisteredClaims, error) {
 	if err != nil || claims.NotBefore.After(now) {
 		return nil, tools.FiberAuthError("Invalid token")
 	}
-	if claims.ExpiresAt.Before(now) {
+	if claims.ExpiresAt != nil && claims.ExpiresAt.Before(now) {
 		return nil, tools.FiberAuthError("The token has expired")
 	}
 	return claims, nil

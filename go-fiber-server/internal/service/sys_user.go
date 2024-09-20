@@ -145,7 +145,7 @@ func (self *SysUserService) Login(form *usercase.LoginForm, ip, ua string) (stri
 	}
 	user.RoleNames = keys
 	subject := uuid.New().String()
-	token, err := tools.GenerateToken(subject)
+	token, err := tools.GenerateToken(subject, false)
 	if err != nil {
 		slog.Error("登录Token生成失败", "err", err)
 		return "", tools.FiberServerError("登录失败")
