@@ -1,6 +1,9 @@
 package sqlbuild
 
-import "strconv"
+import (
+	"slices"
+	"strconv"
+)
 
 // UpdateBuilder update语句构造器
 type UpdateBuilder interface {
@@ -9,6 +12,7 @@ type UpdateBuilder interface {
 	SetByCondition(condition bool, column string, value any) UpdateBuilder
 	SetBySlice(columns []string, values []any) UpdateBuilder
 	SetByMap(kv map[string]any) UpdateBuilder
+	Returning(fields ...string) UpdateBuilder
 	SqlBuilder
 	Condition
 }
@@ -16,6 +20,7 @@ type UpdateBuilder interface {
 type PostgresUpdateBuilder struct {
 	tableName string
 	sets      []string
+	returns   []string
 	PostgresStatementParameterBuffer
 	PostgresCondition
 }
@@ -35,6 +40,10 @@ func (self *PostgresUpdateBuilder) Sql() string {
 	if self.wheres != nil && len(self.wheres) > 0 {
 		builder.WriteString(" WHERE ")
 		handleStringsSplice(self.wheres, " AND ", builder)
+	}
+	if self.returns != nil && len(self.returns) > 0 {
+		builder.WriteString(" RETURNING ")
+		handleStringsSplice(self.returns, ", ", builder)
 	}
 	defer defaultPool.RecycleStringBuilder(builder)
 	return builder.String()
@@ -78,6 +87,14 @@ func (self *PostgresUpdateBuilder) SetByMap(kv map[string]any) UpdateBuilder {
 	for k, v := range kv {
 		self.addSet(k, v)
 	}
+	return self
+}
+
+func (self *PostgresUpdateBuilder) Returning(fields ...string) UpdateBuilder {
+	if self.returns == nil {
+		self.returns = make([]string, 0)
+	}
+	self.returns = slices.Concat(self.returns, fields)
 	return self
 }
 
