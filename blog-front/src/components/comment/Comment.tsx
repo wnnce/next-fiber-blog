@@ -1,15 +1,19 @@
 'use client'
 
 import '@/styles/components/comment.scss'
-import React, { FormEvent, useCallback, useContext, useEffect, useReducer, useRef, useState } from 'react'
+import 'highlight.js/styles/atom-one-dark.min.css'
+import 'github-markdown-css/github-markdown-dark.css'
+import '@/styles/components/markdown.scss'
+import React, { ChangeEvent, FormEvent, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import Button from '@/components/Button'
-import type { Page, Comment } from '@/lib/types'
+import type { Comment, Page } from '@/lib/types'
 import { clientAuthTokenKey, pageComment, saveComment, totalComment, userInfo } from '@/lib/client-api'
 import CommentList from '@/components/comment/CommentList'
 import { LevelContext } from '@/components/comment/context/LevelContext'
 import useMessage from '@/components/message'
 import { CommentState, StateContext, StateContextProps } from '@/components/comment/context/StateContext'
 import Image from 'next/image'
+import useMarkdownParse from '@/hooks/markdown'
 
 export interface CommentProps {
   type: number;
@@ -126,11 +130,15 @@ export const CommentEditor: React.FC<{
   parentNickname?: string;
   onClose?: () => void;
 }> = ({ fid, rid, parentNickname, onClose }) => {
-  const [inputValue, setInputValue] = useState<string>('');
-  const [buttonLoading, setButtonLoading] = useState<boolean>(false);
+  const [ inputValue, setInputValue ] = useState<string>('');
+  const [ buttonLoading, setButtonLoading ] = useState<boolean>(false);
+  const [ previewContent, setPreviewContent ] = useState<string>('');
+  const [ isPreview, setIsPreview ] = useState<boolean>(false);
+
   const { state } = useContext<StateContextProps>(StateContext);
   const { showLoading, showDanger, showSuccess } = useMessage();
-
+  const commentRender = useMarkdownParse().commentRender();
+  
   const onSubmit = async (e: FormEvent) => {
     // 阻止默认提交
     e.preventDefault();
@@ -148,6 +156,7 @@ export const CommentEditor: React.FC<{
       if (result.code === 200) {
         showSuccess('评论成功');
         setInputValue('');
+        isPreview && setIsPreview(false);
       } else {
         showDanger(result.message);
       }
@@ -157,6 +166,13 @@ export const CommentEditor: React.FC<{
     }
   }
 
+  useEffect(() => {
+    if (!isPreview) {
+      return;
+    }
+    setPreviewContent(commentRender.render(inputValue))
+  }, [commentRender, inputValue, isPreview])
+  
   return (
     <form className="comment-editor flex flex-col gap-row-4" onSubmit={onSubmit}>
       <textarea className="text-sm"
@@ -165,10 +181,11 @@ export const CommentEditor: React.FC<{
                 rows={5}
                 disabled={!state.user}
                 required
-                onChange={(event) => {
-                  setInputValue(event.target.value)
+                onChange={e => {
+                  setInputValue(e.target.value)
                 }}
       ></textarea>
+      {isPreview && <div className="markdown-body" dangerouslySetInnerHTML={{__html: previewContent}} />}
       <div className="flex justify-between">
         <div className="editor-option flex gap-col-2 items-center">
           { parentNickname && (
@@ -182,7 +199,9 @@ export const CommentEditor: React.FC<{
             </div>
 
           )}
-          <button className="px-1.5" type="button">
+          <button className="px-1.5" type="button" onClick={() => {
+            setIsPreview(prevState => !prevState);
+          }}>
             <i className="inline-block i-tabler:markdown" />
           </button>
         </div>

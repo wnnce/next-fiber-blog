@@ -38,15 +38,8 @@
     border-radius: 0.5rem;
     padding: 0.5rem;
     position: relative;
-    background-color: rgb(var(--button-background-color));
-    &::after {
-      position: absolute;
-      top: -2px;
-      bottom: -2px;
-      left: -2px;
-      right: -2px;
-      background-color: rgb(var(--border-color));
-    }
+    margin: -0.125rem;
+    background-color: rgb(var(--input-background-color));
     textarea {
       padding: 0.5rem;
       width: 100%;
@@ -54,6 +47,12 @@
       background-color: transparent;
       resize: none;
       overflow: auto;
+    }
+    .markdown-body {
+      padding: 0.5rem;
+      height: 10rem;
+      overflow: auto;
+      border-top: 2px solid rgb(var(--border-color));
     }
     .editor-option {
       .parent-nickname-container {

@@ -25,7 +25,7 @@ const Pagination: React.FC<{
         Pre
       </button>
       <span>{`第${page}页，共${pages}页`}</span>
-      <button className={`page-button px-2 py-1 ${nextButtonIsDisabled ? '' : 'active-button'}`}
+      <button className={`page-button px-2 py-1 ${nextButtonIsDisabled ? 'cursor-not-allowed' : 'active-button'}`}
               disabled={nextButtonIsDisabled} onClick={() => onChange(page + 1)}
       >
         Next

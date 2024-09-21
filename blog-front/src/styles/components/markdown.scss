@@ -50,14 +50,34 @@
     }
   }
 
-  // 使用css计数器添加代码行号
-  code {
-    counter-reset: line;
-  }
-  code > [data-line]::before {
-    counter-increment: line;
-    content: counter(line);
-    padding-right: 1rem;
-    color: rgb(var(--text-color-3));
+  pre {
+    background: rgb(var(--button-background-color));
+    padding: 2.25rem 0.75rem 0.75rem 0.75rem;
+    position: relative;
+    &::after {
+      content: "";
+      background: rgb(var(--border-color));
+      position: absolute;
+      left: 0;
+      width: 100%;
+      top: 0;
+      height: 1.75rem;
+    }
+    .hljs::before {
+      position: absolute;
+      top: 0.25rem;
+      left: 0.75rem;
+      z-index: 2;
+      color: rgb(var(--text-color-3));
+    }
+    $languages: (java: 'Java', go: 'Go', python: 'Python', javascript: 'JavaScript', typescript: 'TypeScript', vue: 'Vue',
+    react: 'React', 'xml': XML, 'html': HTML, css: CSS, 'yaml': Yaml, 'json': JSON, 'bash': BASH, 'properties': Properties,
+            'protobuf': Protobuf, 'rust': Rust, 'sql': SQL, 'toml': Toml, 'cmd': CMD, 'dart': Dart, 'jsx': JSX, 'tsx': TSX,
+            'shell': Shell);
+    @each $lang, $name in $languages {
+      .language-#{$lang}::before {
+        content: "#{$name}";
+      }
+    }
   }
 }

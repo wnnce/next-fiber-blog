@@ -1,4 +1,7 @@
 import '@/styles/components/comment.scss'
+import '@/styles/components/markdown.scss'
+import 'github-markdown-css/github-markdown-dark.css'
+import 'highlight.js/styles/atom-one-dark.min.css'
 import React, { useContext, useMemo, useState } from 'react'
 import { Comment } from '@/lib/types'
 import Image from 'next/image'
@@ -7,6 +10,7 @@ import CommentList from '@/components/comment/CommentList'
 import CommonLike from '@/components/client/CommonLike'
 import { LevelContext } from '@/components/comment/context/LevelContext'
 import { CommentEditor } from '@/components/comment/Comment'
+import useMarkdownParse from '@/hooks/markdown'
 
 const CommentItem: React.FC<{
   comment: Comment;
@@ -15,6 +19,11 @@ const CommentItem: React.FC<{
 }> = ({ comment, articleId, topicId }) => {
   const level = useContext<number>(LevelContext);
   const [ isReply, setIsReply ] = useState<boolean>(false);
+  const commentRender = useMarkdownParse().commentRender();
+
+  const commentContent = useMemo<string>(() => {
+    return commentRender.render(comment.content);
+  }, [ comment, commentRender ])
 
   const avatarSize = useMemo<number>(() => {
     const size = 48 - ((level - 1) * 12)
@@ -80,9 +89,9 @@ const CommentItem: React.FC<{
           <span className="body-header-tag text-xs">{browser}</span>
           <span className="body-header-tag text-xs">{system}</span>
         </div>
-        <div className="item-body-content text-sm info-text">
-        {comment.content}
-        </div>
+        <div className="item-body-content info-text markdown-body"
+             dangerouslySetInnerHTML={{ __html: commentContent }}
+        />
         <div className="item-options flex gap-col-3 items-center">
           <CommonLike className="option-button" count={comment.voteUp} entityKey={comment.commentId}
                       type="comment"
