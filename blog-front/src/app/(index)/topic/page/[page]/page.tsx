@@ -1,12 +1,15 @@
+import 'github-markdown-css/github-markdown-dark.css'
+import 'highlight.js/styles/atom-one-dark.min.css'
+import '@/styles/components/markdown.scss'
 import '@/styles/components/topic.scss'
 import React from 'react'
 import { pageTopic } from '@/lib/api'
 import ServerPagination from '@/components/ServerPagination'
-import SimpleMarkdown from '@/components/SimpleMarkdown'
 import StaticCard from '@/components/StaticCard'
 import { Timeline, TimeLineItem } from '@/components/Timeline'
 import RichImage from '@/components/RichImage'
-import CommonLike from '@/components/client/CommonLike'
+import { TopicLike } from '@/components/client/CommonLike'
+import useMarkdownParse from '@/hooks/markdown'
 
 const TopicPage: React.FC<{
   params: {
@@ -19,6 +22,9 @@ const TopicPage: React.FC<{
     throw new Error('动态参数错误')
   }
   const { data: topicPage } = await pageTopic({ page: numberPage, size: 10 });
+
+  const topicRender = useMarkdownParse().topicRender();
+
   return (
     <>
       <StaticCard padding="1.5rem" title="TOPICS" icon="i-tabler:world" multiple={40}>
@@ -28,7 +34,9 @@ const TopicPage: React.FC<{
         <Timeline>
           { topicPage.records.map(topic => (
             <TimeLineItem key={topic.topicId} time={topic.createTime}>
-              <SimpleMarkdown className="topic-list-li-content" markdown={topic.content} />
+              <div className="topic-list-li-content markdown-body"
+                   dangerouslySetInnerHTML={{ __html: topicRender.render(topic.content) }}
+              />
               { (topic.imageUrls && topic.imageUrls.length > 0) && (
                 topic.mode === 1 ? (
                   <div className="flex flex-wrap gap-1 mt-4">
@@ -46,11 +54,7 @@ const TopicPage: React.FC<{
               )}
               <ul className="flex gap-col-4 mt-4 desc-text relative">
                 <li className="flex items-center">
-                  <CommonLike count={topic.voteUp} entityKey={topic.topicId} type="topic"
-                              onLike={(key, done) => {
-                                done();
-                              }}
-                  />
+                  <TopicLike topicId={topic.topicId} count={topic.voteUp} />
                 </li>
                 <li className="flex items-center">
                   <i className="inline-block i-tabler:message-chatbot" />

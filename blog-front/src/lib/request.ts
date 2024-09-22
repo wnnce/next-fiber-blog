@@ -14,6 +14,7 @@ export function request<T> (url: string, method: HttpMethod, params?: Record<str
       method: method,
       headers: headers,
       body: body ? JSON.stringify(body) : undefined,
+      cache: 'no-cache',
     }).then(async response => {
       const result = await response.json() as Result<T>;
       resolve(result);

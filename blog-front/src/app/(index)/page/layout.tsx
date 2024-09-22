@@ -2,62 +2,39 @@ import '@/styles/layouts/article-page-layout.scss';
 import React from 'react'
 import { Swiper, SwiperSlide } from '@/components/Swiper'
 import RichImage from '@/components/RichImage'
+import { listTopArticle } from '@/lib/api'
+import Link from 'next/link'
 
 const ArticlePageLayout: React.FC<{
-  children: React.ReactNode
-}> = ({ children }) => {
+  children: React.ReactNode;
+}> = async ({ children }) => {
+  const result = await listTopArticle();
+  if (!result || result.code !== 200 || !result.data || result.data.length === 0) {
+    return (
+     <>{ children }</>
+    )
+  }
   return (
     <section>
       <div className="top-article-container animate-on-scroll">
         <Swiper draggable={false} dotActive>
-          <SwiperSlide>
-            <div className="top-article-item">
-              <RichImage className="top-article-item-image" src="/b-oss/images/2024/0704/7d8e2b2e0aa20f139b8788aa38066403.webp" fill />
-              <div className="top-article-summary p-4 flex flex-col sm:gap-row-2 gap-row-1">
-                <h2 className="sm:text-xl text-lg">
-                  <a href="#" className="a-hover-line-text-md">
-                    测试标题测试标题测试标题测试标题测试标
-                  </a>
-                </h2>
-                <p className="line-clamp-2 sm:text-sm text-xs desc-text">
-                  测试简介测试简介测试简介测试简介测试简介测试简介测试简介测试简介测试简介测试简介试简介测试简介
-                  试简介测试简介试简介测试简介试简介测试简介试简介测试简介试简介测试简介试简介测试简介试简介测试简介
-                </p>
+          { result.data.map(article => (
+            <SwiperSlide key={article.articleId}>
+              <div className="top-article-item">
+                <RichImage className="top-article-item-image" src={article.coverUrl} fill />
+                <div className="top-article-summary p-4 flex flex-col sm:gap-row-2 gap-row-1">
+                  <h2 className="sm:text-xl text-lg">
+                    <Link href="#" className="a-hover-line-text-md"
+                          title={article.title}
+                    >
+                      { article.title }
+                    </Link>
+                  </h2>
+                  <p className="line-clamp-1 sm:text-sm text-xs desc-text">{ article.summary }</p>
+                </div>
               </div>
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="top-article-item">
-              <RichImage className="top-article-item-image" src="/b-oss/images/2024/0704/7d8e2b2e0aa20f139b8788aa38066403.webp" fill />
-              <div className="top-article-summary p-4 flex flex-col sm:gap-row-2 gap-row-1">
-                <h2 className="sm:text-xl text-lg">
-                  <a href="#">
-                    测试标题测试标题测试标题测试标题测试标
-                  </a>
-                </h2>
-                <p className="line-clamp-2 sm:text-sm text-xs desc-text">
-                  测试简介测试简介测试简介测试简介测试简介测试简介测试简介测试简介测试简介测试简介试简介测试简介
-                  试简介测试简介试简介测试简介试简介测试简介试简介测试简介试简介测试简介试简介测试简介试简介测试简介
-                </p>
-              </div>
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="top-article-item">
-              <RichImage className="top-article-item-image" src="/b-oss/images/2024/0704/7d8e2b2e0aa20f139b8788aa38066403.webp" fill />
-              <div className="top-article-summary p-4 flex flex-col sm:gap-row-2 gap-row-1">
-                <h2 className="sm:text-xl text-lg">
-                  <a href="#">
-                    测试标题测试标题测试标题测试标题测试标
-                  </a>
-                </h2>
-                <p className="line-clamp-2 sm:text-sm text-xs desc-text">
-                  测试简介测试简介测试简介测试简介测试简介测试简介测试简介测试简介测试简介测试简介试简介测试简介
-                  试简介测试简介试简介测试简介试简介测试简介试简介测试简介试简介测试简介试简介测试简介试简介测试简介
-                </p>
-              </div>
-            </div>
-          </SwiperSlide>
+            </SwiperSlide>
+          )) }
         </Swiper>
       </div>
       <div className="mt-4">

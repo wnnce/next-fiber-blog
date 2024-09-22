@@ -105,6 +105,7 @@ export interface Article {
   tagIds: number[];
   viewNum: number;
   shareNum: number;
+  wordCount: number;
   voteUp: number;
   content: string;
   protocol: string;

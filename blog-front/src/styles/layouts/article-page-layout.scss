@@ -28,6 +28,7 @@
       bottom: 0;
       width: 100%;
       background-color: rgba(rgb(0, 0, 0), 0.6);
+      backdrop-filter: blur(4px);
       z-index: 1;
     }
   }

@@ -60,11 +60,26 @@ export const listNoticeByType = (noticeType: 1 | 2): Promise<Result<Notice[]>> =
 }
 
 /**
+ * 分页查询文章列表
+ * @param data 查询参数
+ */
+export const pageArticle = (data: Record<string, any>) => {
+  return request<Page<Article>>('/open/article/page', 'POST', undefined, data);
+}
+
+/**
  * 查询分类 / 标签所关联的文章列表
  * @param data
  */
 export const pageLabelArticle = (data: Record<string, any>) => {
   return request<Page<Article>>('/open/article/label/page', 'POST', undefined, data);
+}
+
+/**
+ * 查询置顶的文章列表
+ */
+export const listTopArticle = () => {
+  return request<Article[]>('/open/article/top', 'GET')
 }
 
 /**

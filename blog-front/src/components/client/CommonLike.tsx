@@ -3,7 +3,20 @@
 import '@/styles/components/client-components.scss'
 import React, { useMemo, useState } from 'react'
 
-const CommonLike: React.FC<{
+export const TopicLike: React.FC<{
+  topicId: number;
+  count: number;
+}> = ({ topicId, count }) => {
+  const handleLike = (key: string | number, done: () => void) => {
+    done();
+  }
+
+  return (
+    <CommonLike count={count} entityKey={topicId} type="topic" onLike={handleLike} />
+  )
+}
+
+export const CommonLike: React.FC<{
   count: number,
   entityKey: string | number,
   type: 'topic' | 'article' | 'comment',
@@ -51,5 +64,3 @@ const CommonLike: React.FC<{
     </button>
   )
 }
-
-export default CommonLike;
