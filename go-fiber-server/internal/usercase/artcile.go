@@ -61,6 +61,8 @@ type IArticleRepo interface {
 
 	Page(query *ArticleQueryForm) ([]*ArticleVo, int64, error)
 
+	ListTopArticle() ([]*Article, error)
+
 	PageByLabel(query *ArticleQueryForm) ([]*Article, int64, error)
 
 	SelectById(articleId uint64, checkStatus bool) (*ArticleVo, error)
@@ -86,6 +88,8 @@ type IArticleService interface {
 	Page(query *ArticleQueryForm) (*PageData[ArticleVo], error)
 
 	PageByLabel(query *ArticleQueryForm) (*PageData[Article], error)
+
+	ListTopArticle() ([]*Article, error)
 
 	SelectById(articleId uint64, checkStatus bool) (*ArticleVo, error)
 

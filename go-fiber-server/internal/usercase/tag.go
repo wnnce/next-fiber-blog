@@ -17,8 +17,8 @@ type TagVo struct {
 
 // ArticleTagVo 博客文章标签Vo类 用户查询文章时一起返回
 type ArticleTagVo struct {
-	TagId   uint   `json:"TagId,omitempty" db:"tag_id"`
-	TagName string `json:"TagName,omitempty" db:"tag_name"`
+	TagId   uint   `json:"tagId,omitempty" db:"tag_id"`
+	TagName string `json:"tagName,omitempty" db:"tag_name"`
 	Color   string `json:"color,omitempty" db:"color"`
 }
 

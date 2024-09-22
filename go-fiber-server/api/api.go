@@ -192,6 +192,8 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	openRoute.Post("/article/page", articleApi.Page)
 	// 分页查询分类和标签的文章列表
 	openRoute.Post("/article/label/page", articleApi.PageByLabel)
+	// 获取置顶文章列表
+	openRoute.Get("/article/top", articleApi.ListTop)
 	// 分页查询动态列表
 	openRoute.Post("/topic/page", topicApi.Page)
 }

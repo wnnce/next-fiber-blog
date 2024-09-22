@@ -88,6 +88,14 @@ func (self *HttpApi) ManagePage(ctx fiber.Ctx) error {
 	return ctx.JSON(res.OkByData(page))
 }
 
+func (self *HttpApi) ListTop(ctx fiber.Ctx) error {
+	list, err := self.service.ListTopArticle()
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(list))
+}
+
 func (self *HttpApi) ManageQueryInfo(ctx fiber.Ctx) error {
 	articleId := fiber.Params[uint64](ctx, "id")
 	article, err := self.service.SelectById(articleId, false)

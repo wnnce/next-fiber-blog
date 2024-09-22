@@ -112,11 +112,12 @@ func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Art
 		WhereByCondition(query.Title != "", "ba.title").Like("%"+query.Title+"%").
 		AndByCondition(query.TagId > 0, fmt.Sprintf("%d", query.TagId)).EqRaw("ANY(ba.tag_ids)").
 		AndByCondition(query.CategoryId > 0, fmt.Sprintf("%d", query.CategoryId)).EqRaw("ANY(ba.category_ids)").
+		AndByCondition(!query.IsAdmin, "ba.is_top").EqRaw("false").
 		AndByCondition(query.Status != nil, "ba.status").Eq(query.Status).
 		AndByCondition(query.CreateTimeBegin != "", "ba.create_time").Ge(query.CreateTimeBegin).
 		AndByCondition(query.CreateTimeEnd != "", "ba.create_time").Le(query.CreateTimeEnd).
 		And("ba.delete_at").EqRaw("0").BuildAsSelect().
-		GroupBy("ba.article_id").OrderBy("is_top desc", "sort", "create_time desc")
+		GroupBy("ba.article_id").OrderBy("ba.is_top desc", "ba.sort", "ba.create_time desc")
 	row := self.db.QueryRow(context.Background(), builder.CountSql(), builder.Args()...)
 	var total int64
 	if err := row.Scan(&total); err != nil {
@@ -126,7 +127,7 @@ func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Art
 	if total == 0 {
 		return articles, 0, nil
 	}
-	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
+	offset := tools.ComputeOffset(total, query.Page, query.Size, true)
 	builder.Limit(int64(query.Size)).Offset(offset)
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
@@ -137,6 +138,24 @@ func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Art
 		return pgx.RowToAddrOfStructByNameLax[usercase.ArticleVo](row)
 	})
 	return articles, total, err
+}
+
+func (self *ArticleRepo) ListTopArticle() ([]*usercase.Article, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_article").
+		Select("article_id", "title", "summary", "cover_url", "view_num", "share_num", "vote_up", "is_hot", "is_top", "create_time", "word_count").
+		Where("is_top").EqRaw("true").
+		And("status").EqRaw("0").
+		And("delete_at").EqRaw("0").BuildAsSelect().
+		GroupBy("article_id").
+		OrderBy("sort", "create_time desc")
+	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Article, error) {
+		return pgx.RowToAddrOfStructByNameLax[usercase.Article](row)
+	})
 }
 
 func (self *ArticleRepo) PageByLabel(query *usercase.ArticleQueryForm) ([]*usercase.Article, int64, error) {

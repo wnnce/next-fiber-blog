@@ -95,7 +95,7 @@ func (self *TopicRepo) Page(query *usercase.TopicQueryForm) ([]*usercase.Topic, 
 	if total == 0 {
 		return topics, 0, nil
 	}
-	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
+	offset := tools.ComputeOffset(total, query.Page, query.Size, true)
 	builder.Limit(int64(query.Size)).Offset(offset)
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
