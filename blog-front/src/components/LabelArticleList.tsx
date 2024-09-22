@@ -3,6 +3,7 @@ import { Article } from '@/lib/types'
 import RichImage from '@/components/RichImage'
 import Link from 'next/link'
 import { HotLabel, TopLabel } from '@/components/Labels'
+import { formatDateTime } from '@/tools/utils'
 
 const LabelArticleList: React.FC<{
   articles:Article[]
@@ -15,7 +16,7 @@ const LabelArticleList: React.FC<{
           <div className="flex flex-col justify-between py-4">
             <p className="text-xs desc-text flex items-center">
               <i className="inline-block i-tabler:clock mr-1" />
-              { article.createTime }
+              <time dateTime={article.createTime}>{ formatDateTime(article.createTime) }</time>
             </p>
             <h3>
               { article.isTop && <TopLabel className="mr-2" /> }

@@ -6,6 +6,7 @@ import RichImage from '@/components/RichImage'
 import Link from 'next/link'
 import { HotLabel, TopLabel } from '@/components/Labels'
 import Empty from '@/components/Empty'
+import { formatDateTime } from '@/tools/utils'
 
 const CategoryInfo: React.FC<{
   params: {
@@ -54,7 +55,9 @@ const CategoryInfo: React.FC<{
                     0
                   </li>
                 </ul>
-                <p className="text-end">{category.createTime}</p>
+                <time dateTime={category.createTime} className="text-end">
+                  {formatDateTime(category.createTime)}
+                </time>
               </div>
             </div>
           </div>

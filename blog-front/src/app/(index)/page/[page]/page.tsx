@@ -39,8 +39,7 @@ const ArticlePage: React.FC<{
                   </div>
                   <div className="p-4 flex flex-col gap-row-2">
                     <p className="desc-text text-xs">
-                      POSTED
-                      <time dateTime={article.createTime}>
+                      POSTED <time dateTime={article.createTime}>
                         {formatDateTime(article.createTime)}
                       </time> &nbsp;&nbsp;&nbsp;&nbsp;WORDS <strong>{article.wordCount}</strong>
                     </p>
