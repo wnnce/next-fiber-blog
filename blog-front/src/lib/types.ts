@@ -127,6 +127,14 @@ export interface Article {
 }
 
 /**
+ * 文章归档信息
+ */
+export interface ArticleArchive {
+  month: string;
+  total: number;
+}
+
+/**
  * 友情链接数据
  */
 export interface Link {

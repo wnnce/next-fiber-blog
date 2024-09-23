@@ -1,5 +1,17 @@
 import { request } from '@/lib/request'
-import { Article, Category, Concat, Link, Notice, Page, Result, SiteStats, Tag, Topic } from '@/lib/types'
+import {
+  Article,
+  ArticleArchive,
+  Category,
+  Concat,
+  Link,
+  Notice,
+  Page,
+  Result,
+  SiteStats,
+  Tag,
+  Topic
+} from '@/lib/types'
 import { SiteConfigurationItem } from '@/hooks/site-configuration'
 
 /**
@@ -80,6 +92,13 @@ export const pageLabelArticle = (data: Record<string, any>) => {
  */
 export const listTopArticle = () => {
   return request<Article[]>('/open/article/top', 'GET')
+}
+
+/**
+ * 获取博客文章的归档信息
+ */
+export const articleArchives = () => {
+  return request<ArticleArchive[]>('/open/article/archives', 'GET')
 }
 
 /**
