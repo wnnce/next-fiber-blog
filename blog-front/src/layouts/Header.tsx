@@ -3,6 +3,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import HeaderDrawerMenu from '@/layouts/HeaderDrawerMenu'
+import Search from '@/components/client/Search'
 
 export interface HeaderProps {
   navList: {
@@ -42,8 +43,7 @@ const Header: React.FC<HeaderProps> = ({ navList }): React.ReactNode => {
             </ul>
           </nav>
         </div>
-        {/* TODO 使用 Search Client组件替换 */}
-        <div className="header-search i-tabler-search cursor-pointer"></div>
+        <Search />
       </div>
     </header>
   )

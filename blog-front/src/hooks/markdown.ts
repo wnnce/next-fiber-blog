@@ -1,6 +1,10 @@
 import markdownit from 'markdown-it';
 import hljs from 'highlight.js';
 import type MarkdownIt from 'markdown-it'
+import { alert } from "@mdit/plugin-alert"
+import { imgLazyload } from "@mdit/plugin-img-lazyload"
+import { tasklist } from "@mdit/plugin-tasklist"
+import anchor from 'markdown-it-anchor';
 
 const useMarkdownParse = () => {
   let _articleRender: MarkdownIt;
@@ -17,6 +21,10 @@ const useMarkdownParse = () => {
             resultValue = str;
           }
           return `<pre><code class="hljs ${lang && `language-${lang}`}">${resultValue}</code></pre>`
+        }
+      }).use(alert).use(imgLazyload).use(tasklist).use(anchor, {
+        callback: (token, info) => {
+          console.log(info);
         }
       });
     }

@@ -13,12 +13,29 @@
   transition: transform 300ms ease-out;
 }
 
+.search-fade-enter {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+.search-fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 500ms, transform 500ms;
+}
+.search-fade-exit {
+  opacity: 1;
+}
+.search-fade-exit-active {
+  opacity: 0;
+  transform: translateY(-100%);
+  transition: opacity 500ms, transform 500ms;
+}
 
 .mask-fade-enter {
   background-color: rgba(0, 0, 0, 0);
 }
 .mask-fade-enter-active {
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.6);
   transition: background-color 300ms;
 }
 .mask-fade-enter-done {
