@@ -187,6 +187,21 @@ func (self *ArticleRepo) PageByLabel(query *usercase.ArticleQueryForm) ([]*userc
 	return articles, total, err
 }
 
+func (self *ArticleRepo) Archives() ([]usercase.ArticleArchive, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_article").
+		Select("to_char(create_time, 'YYYY-MM') as month", "count(*) as total").
+		Where("status").EqRaw("0").And("delete_at").EqRaw("0").BuildAsSelect().
+		GroupBy("month").OrderByDesc("month")
+	rows, err := self.db.Query(context.Background(), builder.Sql())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (usercase.ArticleArchive, error) {
+		return pgx.RowToStructByName[usercase.ArticleArchive](row)
+	})
+}
+
 func (self *ArticleRepo) SelectById(articleId uint64, checkStatus bool) (*usercase.ArticleVo, error) {
 	builder := sqlbuild.NewSelectBuilder("t_blog_article as ba").
 		Select("ba.*").

@@ -52,6 +52,12 @@ type ArticleQueryForm struct {
 	PageQueryForm
 }
 
+// ArticleArchive 文章归档数据
+type ArticleArchive struct {
+	Month string `json:"month" db:"month"`
+	Total uint64 `json:"total" db:"total"`
+}
+
 type IArticleRepo interface {
 	Save(article *Article) error
 
@@ -64,6 +70,8 @@ type IArticleRepo interface {
 	ListTopArticle() ([]*Article, error)
 
 	PageByLabel(query *ArticleQueryForm) ([]*Article, int64, error)
+
+	Archives() ([]ArticleArchive, error)
 
 	SelectById(articleId uint64, checkStatus bool) (*ArticleVo, error)
 
@@ -90,6 +98,8 @@ type IArticleService interface {
 	PageByLabel(query *ArticleQueryForm) (*PageData[Article], error)
 
 	ListTopArticle() ([]*Article, error)
+
+	Archives() ([]ArticleArchive, error)
 
 	SelectById(articleId uint64, checkStatus bool) (*ArticleVo, error)
 
