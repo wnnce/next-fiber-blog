@@ -11,6 +11,7 @@ import { CommonLike } from '@/components/client/CommonLike'
 import { LevelContext } from '@/components/comment/context/LevelContext'
 import { CommentEditor } from '@/components/comment/Comment'
 import useMarkdownParse from '@/hooks/markdown'
+import { CSSTransition } from 'react-transition-group'
 
 const CommentItem: React.FC<{
   comment: Comment;
@@ -106,7 +107,7 @@ const CommentItem: React.FC<{
             回复
           </button>
         </div>
-        { isReply && (
+        <CSSTransition timeout={300} unmountOnExit in={isReply} classNames="comment-fade">
           <CommentEditor
             fid={comment.fid === 0 ? comment.commentId : comment.fid}
             rid={(comment.fid === 0 && comment.rid === 0) ? 0 : comment.commentId}
@@ -115,7 +116,7 @@ const CommentItem: React.FC<{
               setIsReply(false);
             }}
           />
-        ) }
+        </CSSTransition>
         {(comment.children && comment.children.records.length > 0) && (
           <LevelContext.Provider value={level + 1}>
             <CommentList

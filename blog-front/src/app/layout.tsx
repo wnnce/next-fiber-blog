@@ -21,13 +21,13 @@ export const metadata: Metadata = {
 
 // 顶部导航列表
 const navList = [
-  { name: '博客', url: '/' },
-  { name: '动态', url: '/topic' },
-  { name: '分类', url: '/categorys' },
-  { name: '标签', url: '/tags' },
-  { name: '相册', url: '#' },
-  { name: '关于', url: '/about' },
-  { name: '友情链接', url: '/links' },
+  { name: '博客', url: '/', icon: <i className="inline-block i-tabler:home" /> },
+  { name: '动态', url: '/topic', icon: <i className="inline-block i-tabler:news" /> },
+  { name: '分类', url: '/categorys', icon: <i className="inline-block i-tabler:category" /> },
+  { name: '标签', url: '/tags', icon: <i className="inline-block i-tabler:tags" /> },
+  { name: '相册', url: '#', icon: <i className="inline-block i-tabler:brand-google-photos" /> },
+  { name: '关于', url: '/about', icon: <i className="inline-block i-tabler:user-bolt" /> },
+  { name: '友情链接', url: '/links', icon: <i className="inline-block i-tabler:external-link" />  },
 ]
 
 const RootLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {

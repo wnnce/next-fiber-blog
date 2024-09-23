@@ -1,4 +1,21 @@
 .comment {
+  .comment-fade-enter {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  .comment-fade-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms, transform 300ms;
+  }
+  .comment-fade-exit {
+    opacity: 1;
+  }
+  .comment-fade-exit-active {
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 300ms, transform 300ms;
+  }
   .username {
     color: rgb(var(--primary-color));
   }

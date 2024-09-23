@@ -36,6 +36,7 @@
   align-items: center;
   pointer-events: none;
   transition: opacity 500ms;
+  z-index: 30;
   .preview-image-body {
     max-width: 100%;
     max-height: 100%;

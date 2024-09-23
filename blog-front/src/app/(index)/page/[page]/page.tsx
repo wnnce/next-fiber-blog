@@ -48,9 +48,9 @@ const ArticlePage: React.FC<{
                         {article.title}
                       </Link>
                     </h2>
-                    <div className="flex gap-col-8 text-xs desc-text">
+                    <div className="flex gap-col-8 gap-row-2 text-xs desc-text flex-wrap">
                       { (article.categories && article.categories.length) > 0 && (
-                        <ul className="list-none flex gap-col-2">
+                        <ul className="list-none flex gap-col-2 flex-wrap">
                           <i className="inline-block i-tabler:category text-sm" />
                           {article.categories.map(item => (
                             <li key={item.categoryId}>
@@ -60,7 +60,7 @@ const ArticlePage: React.FC<{
                         </ul>
                       )}
                       { (article.tags && article.tags.length > 0) && (
-                        <ul className="list-none flex gap-col-2">
+                        <ul className="list-none flex gap-col-2 flex-wrap">
                           <i className="inline-block i-tabler:tag text-sm" />
                           {article.tags.map(item => (
                             <li key={item.tagId}>

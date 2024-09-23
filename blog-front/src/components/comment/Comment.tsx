@@ -14,6 +14,7 @@ import useMessage from '@/components/message'
 import { CommentState, StateContext, StateContextProps } from '@/components/comment/context/StateContext'
 import Image from 'next/image'
 import useMarkdownParse from '@/hooks/markdown'
+import { CSSTransition } from 'react-transition-group'
 
 export interface CommentProps {
   type: number;
@@ -185,7 +186,7 @@ export const CommentEditor: React.FC<{
                   setInputValue(e.target.value)
                 }}
       ></textarea>
-      {isPreview && <div className="markdown-body" dangerouslySetInnerHTML={{__html: previewContent}} />}
+      {isPreview && <div className="markdown-body" dangerouslySetInnerHTML={{ __html: previewContent }} />}
       <div className="flex justify-between">
         <div className="editor-option flex gap-col-2 items-center">
           { parentNickname && (

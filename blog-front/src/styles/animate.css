@@ -1,0 +1,33 @@
+.drawer-fade-enter {
+  transform: translateX(-100%);
+}
+.drawer-fade-enter-active {
+  transform: translateX(0);
+  transition: transform 300ms ease-in-out;
+}
+.drawer-fade-exit {
+  transform: translateX(0);
+}
+.drawer-fade-exit-active {
+  transform: translateX(-100%);
+  transition: transform 300ms ease-out;
+}
+
+
+.mask-fade-enter {
+  background-color: rgba(0, 0, 0, 0);
+}
+.mask-fade-enter-active {
+  background-color: rgba(0, 0, 0, 0.7);
+  transition: background-color 300ms;
+}
+.mask-fade-enter-done {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+.mask-fade-exit {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+.mask-fade-exit-active {
+  background-color: rgba(0, 0, 0, 0);
+  transition: background-color 300ms;
+}

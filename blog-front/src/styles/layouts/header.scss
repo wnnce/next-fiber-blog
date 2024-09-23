@@ -2,6 +2,9 @@
   backdrop-filter: blur(var(--filter-blur-size));
   background-color: rgba(var(--card-background-color), 0.7);
   animation: header-show 700ms ease;
+  position: sticky;
+  z-index: 10;
+  top: 0;
   .nav-div {
     .logo {
       margin: auto 1.5rem auto 0;
