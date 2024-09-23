@@ -202,9 +202,17 @@ func (self *ArticleRepo) Archives() ([]usercase.ArticleArchive, error) {
 	})
 }
 
-func (self *ArticleRepo) SelectById(articleId uint64, checkStatus bool) (*usercase.ArticleVo, error) {
+func (self *ArticleRepo) SelectById(articleId uint64, isAdmin bool) (*usercase.ArticleVo, error) {
+	var selectFields []string
+	if isAdmin {
+		selectFields = []string{"ba.*"}
+	} else {
+		selectFields = []string{"ba.article_id", "ba.title", "ba.summary", "ba.cover_url", "ba.view_num", "ba.share_num",
+			"ba.content", "ba.protocol", "ba.tips", "ba.is_hot", "ba.is_top", "ba.is_comment", "ba.create_time",
+			"ba.update_time", "ba.vote_up", "ba.word_count"}
+	}
 	builder := sqlbuild.NewSelectBuilder("t_blog_article as ba").
-		Select("ba.*").
+		Select(selectFields...).
 		LeftJoin("t_blog_comment as bc").On("bc.article_id").EqRaw("ba.article_id").And("bc.status").EqRaw("0").And("bc.delete_at").EqRaw("0").BuildAsSelect().
 		Select("count(DISTINCT bc.comment_id) as comment_num").
 		LeftJoin("t_blog_category as ct").On("ct.category_id").EqRaw("ANY(ba.category_ids)").And("ct.status").EqRaw("0").And("ct.delete_at").EqRaw("0").BuildAsSelect().
@@ -212,7 +220,7 @@ func (self *ArticleRepo) SelectById(articleId uint64, checkStatus bool) (*userca
 		LeftJoin("t_blog_tag as bt").On("bt.tag_id").EqRaw("ANY(ba.tag_ids)").And("bt.status").EqRaw("0").And("bt.delete_at").EqRaw("0").BuildAsSelect().
 		Select("jsonb_agg(DISTINCT jsonb_build_object('tagId', bt.tag_id, 'tagName', bt.tag_name, 'color', bt.color)) AS tags").
 		Where("ba.article_id").Eq(articleId).
-		AndByCondition(checkStatus, "ba.status").EqRaw("0").
+		AndByCondition(!isAdmin, "ba.status").EqRaw("0").
 		And("ba.delete_at").EqRaw("0").BuildAsSelect().
 		GroupBy("ba.article_id")
 	rows, err := self.db.Query(context.Background(), builder.Sql(), articleId)

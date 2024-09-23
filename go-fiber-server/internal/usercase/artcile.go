@@ -73,7 +73,7 @@ type IArticleRepo interface {
 
 	Archives() ([]ArticleArchive, error)
 
-	SelectById(articleId uint64, checkStatus bool) (*ArticleVo, error)
+	SelectById(articleId uint64, isAdmin bool) (*ArticleVo, error)
 
 	// CountByTagId 统计该标签id下的文章数量 忽略status
 	CountByTagId(tagId int) (int64, error)
