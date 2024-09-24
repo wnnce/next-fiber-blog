@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import type { Menu } from '@/api/system/menu/types'
-import { computed, ref, shallowRef } from 'vue'
+import { computed, ref } from 'vue'
 import type { RouteRecordRaw } from 'vue-router'
 import type { KeepaliveItem } from '@/assets/script/types'
 import { useAppConfigStore } from '@/stores/app-config'
@@ -19,7 +19,7 @@ export const useLocalUserStore = defineStore('user', () => {
     menuRoutes.forEach(item => menuRouteMap.set(item.name ? item.name.toString() : '', item));
   }
   // 树形菜单
-  const treeMenu = shallowRef<Menu[]>([]);
+  const treeMenu = ref<Menu[]>([]);
   const _treeMenu = computed(() => {
     return treeMenu.value;
   })
@@ -81,7 +81,7 @@ export const useLocalUserStore = defineStore('user', () => {
 
 
   // 缓存的组件id列表
-  const keepaliveList = shallowRef<KeepaliveItem[]>([]);
+  const keepaliveList = ref<KeepaliveItem[]>([]);
   const _keepaliveList = computed(() => {
     return keepaliveList.value;
   })
