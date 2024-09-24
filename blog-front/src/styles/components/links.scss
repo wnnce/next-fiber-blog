@@ -1,0 +1,40 @@
+.link-list-ul {
+  .link-list-li {
+    width: calc(100% / 2 - 0.5rem);
+    border-radius: 0.5rem;
+    transition: all 300ms ease;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(to right,  rgb(var(--seco-color)),  rgb(var(--seco-color))) no-repeat left bottom;
+    background-size: 0 100%;
+    z-index: 0;
+    &:hover {
+      transform: translateY(-0.25rem) scale(1.025);
+      background-size: 100% 100%;
+      &::before {
+        background-color: rgba(var(--button-background-color), 0.9);
+      }
+      .link-avatar {
+        transform: rotate(180deg);
+      }
+    }
+    &::before {
+      content: "";
+      background-color: rgb(var(--button-background-color));
+      position: absolute;
+      border-radius: 0.5rem;
+      left: 1px;
+      top: 1px;
+      right: 1px;
+      bottom: 1px;
+      z-index: -1;
+      transition: background-color 300ms;
+    }
+    .link-avatar {
+      transition: transform 300ms ease;
+    }
+  }
+}
+.link-register-title {
+  border-color: rgb(var(--primary-color));
+}

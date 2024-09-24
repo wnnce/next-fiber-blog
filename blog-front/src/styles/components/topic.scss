@@ -1,0 +1,18 @@
+.topic-list-li-content {
+  background-color: rgb(var(--topic-backgroud-color)) !important;
+  padding: 1rem;
+  border-radius: 0.75rem;
+}
+.topic-flow-photo {
+  column-count: 3;
+  column-gap: 0.25rem;
+  > div {
+    &:first-child {
+      margin-top: 0;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+    margin: 0.25rem 0;
+  }
+}

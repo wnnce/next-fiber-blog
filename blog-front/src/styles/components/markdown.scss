@@ -1,0 +1,83 @@
+// 自定义Markdown样式
+.markdown-body {
+  background-color: transparent;
+
+  // 自定义标题样式
+  h1, h2, h3, h4, h5, h6 {
+    padding-left: 1rem;
+    border-left: 0.5rem solid  rgb(var(--seco-color));
+    position: relative;
+    &::after {
+      content: "";
+      position: absolute;
+      left: -0.2rem;
+      bottom: 0;
+      height: 60%;
+      width: 0.5rem;
+      background-color: rgb(var(--primary-color));
+      transition: height 300ms;
+    }
+    &:hover {
+      &::after {
+        height: 100%;
+      }
+    }
+  }
+  a {
+    color: rgb(var(--seco-color));
+    background: linear-gradient(to right, rgb(var(--primary-color)), rgb(var(--primary-color))) no-repeat left bottom;
+    background-size: 0 1px;
+    transition: color 300ms, background-size 300ms;
+    padding-bottom: 1px;
+    &:hover {
+      text-decoration: none;
+      color: rgb(var(--primary-color));
+      background-size: 100% 1px;
+    }
+  }
+
+  ul {
+    list-style: initial !important;
+  }
+
+  p {
+    font-size: 0.85rem;
+    line-height: 1.35rem;
+    &:has(img:nth-child(2)){
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+  }
+
+  pre {
+    background: rgb(var(--button-background-color));
+    padding: 2.25rem 0.75rem 0.75rem 0.75rem;
+    position: relative;
+    &::after {
+      content: "";
+      background: rgb(var(--border-color));
+      position: absolute;
+      left: 0;
+      width: 100%;
+      top: 0;
+      height: 1.75rem;
+    }
+    .hljs::before {
+      position: absolute;
+      top: 0.25rem;
+      left: 0.75rem;
+      z-index: 2;
+      color: rgb(var(--text-color-3));
+    }
+    $languages: (java: 'Java', go: 'Go', python: 'Python', javascript: 'JavaScript', typescript: 'TypeScript', vue: 'Vue',
+    react: 'React', 'xml': XML, 'html': HTML, css: CSS, 'yaml': Yaml, 'json': JSON, 'bash': BASH, 'properties': Properties,
+            'protobuf': Protobuf, 'rust': Rust, 'sql': SQL, 'toml': Toml, 'cmd': CMD, 'dart': Dart, 'jsx': JSX, 'tsx': TSX,
+            'shell': Shell);
+    @each $lang, $name in $languages {
+      .language-#{$lang}::before {
+        content: "#{$name}";
+      }
+    }
+  }
+}

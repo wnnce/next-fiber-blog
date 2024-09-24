@@ -1,0 +1,41 @@
+.header {
+  backdrop-filter: blur(var(--filter-blur-size));
+  background-color: rgba(var(--card-background-color), 0.7);
+  animation: header-show 700ms ease;
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  .nav-div {
+    .logo {
+      margin: auto 1.5rem auto 0;
+    }
+    ul {
+      list-style: none;
+      li {
+        margin: 0 4px;
+        &:hover {
+          color: rgb(var(--primary-color));
+        }
+        a {
+          padding: 8px;
+        }
+      }
+    }
+  }
+  .header-search {
+    margin: auto 0;
+    transition: color 300ms ease;
+    &:hover {
+      color: rgb(var(--primary-color));
+    }
+  }
+}
+
+@keyframes header-show {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}

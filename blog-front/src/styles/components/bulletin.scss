@@ -1,0 +1,21 @@
+.bulletin-swiper {
+  .bulletin-swiper-item {
+    padding: 0 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .danger-swiper-tag, .waring-swiper-tag {
+    position: absolute;
+    padding: 0.25rem 1rem;
+    font-size: 0.5rem;
+    top: 0.25rem;
+    right: -1rem;
+    transform: rotate(45deg);
+  }
+  .danger-swiper-tag {
+    background-color: rgb(var(--danger-color));
+  }
+  .waring-swiper-tag {
+    background-color: rgb(var(--warning-color));
+  }
+}

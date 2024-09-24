@@ -1,0 +1,125 @@
+.comment {
+  .comment-fade-enter {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  .comment-fade-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms, transform 300ms;
+  }
+  .comment-fade-exit {
+    opacity: 1;
+  }
+  .comment-fade-exit-active {
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 300ms, transform 300ms;
+  }
+  .username {
+    color: rgb(var(--primary-color));
+  }
+  .user-level {
+    font-size: 0.55rem;
+    background-color: rgb(var(--primary-color));
+    border-radius: 0.125rem;
+  }
+  .comment-loading {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(var(--button-background-color), 0.9);
+    z-index: 20;
+    display: flex;
+    backdrop-filter: blur(2px);
+    justify-content: center;
+    align-items: center;
+  }
+  .comment-header {
+    .comment-header-user {
+      .user-avatar {
+        border-radius: 50%;
+      }
+      ul > li {
+        font-size: 0.65rem;
+        color: rgb(var(--primary-color));
+        border: 1px solid rgb(var(--primary-color));
+        border-radius: 0.125rem;
+      }
+    }
+
+  }
+  .comment-editor {
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    position: relative;
+    margin: -0.125rem;
+    background-color: rgb(var(--input-background-color));
+    textarea {
+      padding: 0.5rem;
+      width: 100%;
+      outline: none;
+      background-color: transparent;
+      resize: none;
+      overflow: auto;
+    }
+    .markdown-body {
+      padding: 0.5rem;
+      height: 10rem;
+      overflow: auto;
+      border-top: 2px solid rgb(var(--border-color));
+    }
+    .editor-option {
+      .parent-nickname-container {
+        .parent-nickname {
+          background-color: rgb(var(--card-background-color));
+          border-radius: 0.25rem 0 0 0.25rem;
+          max-width: 8rem;
+          width: auto;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        > button {
+          border-radius: 0 0.25rem 0.25rem 0;
+          background-color: rgb(var(--card-background-color));
+          transition: background-color 300ms;
+          &:hover {
+            background-color: rgb(var(--backgroundt-color));
+            > i {
+              transform: rotate(180deg);
+            }
+          }
+          > i {
+            transition: transform 300ms;
+          }
+        }
+      }
+      button {
+        outline: none;
+        padding-top: 0.25rem;
+        border-radius: 0.35rem;
+        transition: all 300ms ease;
+        &:hover {
+          color: rgb(var(--primary-color));
+          background-color: rgb(var(--card-background-color));
+        }
+      }
+    }
+  }
+  .comment-item {
+    .body-header-tag {
+      background-color: rgb(var(--button-background-color));
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.125rem;
+    }
+    .option-button {
+      transition: all 300ms;
+      &:hover {
+        color: rgb(180, 180, 180);
+      }
+    }
+  }
+}

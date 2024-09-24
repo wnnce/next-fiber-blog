@@ -1,0 +1,133 @@
+@import "./base.css";
+@import '@unocss/reset/tailwind.css';
+@unocss all;
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  color: rgb(var(--text-color-1));
+  scroll-behavior: smooth;
+  height: 100%;
+}
+/* 自定义滚动条样式 */
+html {
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: rgb(var(--backgroundt-color));
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--primary-color));
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: white;
+  }
+}
+
+body {
+  background: linear-gradient(rgba(var(--backgroundt-color), 0.5), rgba(var(--backgroundt-color), 0.5)), url("/images/bg.webp") no-repeat center fixed;
+  background-size: cover;
+}
+
+.hover-line-text {
+  background: linear-gradient(to right, rgb(var(--primary-color)), rgb(var(--primary-color))) no-repeat left bottom;
+  background-size: 0 2px;
+  transition: all 300ms ease;
+  &:hover {
+    background-size: 100% 2px;
+  }
+}
+.a-hover-line-text-md {
+  background: linear-gradient(to right, rgb(var(--primary-color)), rgb(var(--primary-color))) no-repeat left bottom;
+  background-size: 0 2px;
+  transition: all 300ms ease;
+  padding-bottom: 2px;
+  &:hover {
+    background-size: 100% 2px;
+    color: rgb(var(--primary-color));
+  }
+}
+.a-hover-line-text-sm {
+  background: linear-gradient(to right, rgb(var(--primary-color)), rgb(var(--primary-color))) no-repeat left bottom;
+  background-size: 0 1px;
+  transition: all 300ms ease;
+  padding-bottom: 1px;
+  &:hover {
+    background-size: 100% 1px;
+    color: rgb(var(--primary-color));
+  }
+}
+
+/* 主要字体颜色 */
+.main-text {
+  color: rgb(var(--text-color-1));
+}
+/* 详情字体颜色 */
+.info-text {
+  color: rgb(var(--text-color-2));
+}
+/* 次要字体颜色 */
+.desc-text {
+  color: rgb(var(--text-color-3));
+}
+
+.dynamic-container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.drawer-menu {
+  background-color: rgb(var(--backgroundt-color));
+}
+
+@media screen and (max-width: 1280px) {
+  .dynamic-container {
+    max-width: 1000px;
+  }
+}
+@media screen and (max-width: 1024px) {
+  .dynamic-container {
+    max-width: 800px;
+  }
+}
+@media screen and (max-width: 768px) {
+  .dynamic-container {
+    max-width: 640px;
+  }
+}
+
+/* 元素默认隐藏 */
+.animate-on-scroll {
+  opacity: 0;
+  transition: opacity 500ms, transform 500ms;
+}
+/* 显示元素 */
+.animate-on-scroll.visible {
+  animation: fade-in 1s forwards;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4rem) scale(0.75);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}

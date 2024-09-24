@@ -1,0 +1,18 @@
+.card {
+  background-color: rgba(var(--card-background-color), 0.9);
+  backdrop-filter: blur(0.5rem);
+  border: 1px solid rgb(var(--border-color));
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 200ms !important;
+  overflow: hidden;
+}
+.light {
+  height: 10rem;
+  width: 10rem;
+  position: absolute;
+  filter: blur(8rem);
+  border-radius: 50%;
+  background-color: rgb(var(--primary-color));
+  z-index: -1;
+}

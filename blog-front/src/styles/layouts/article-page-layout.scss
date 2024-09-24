@@ -1,0 +1,35 @@
+.top-article-container {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  .top-article-item {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    &:hover {
+      .top-article-item-image {
+        transform: scale(1.25);
+      }
+    }
+    .top-article-item-image {
+      position: absolute;
+      height: 100% !important;
+      width: 100% !important;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: 0;
+      transition: transform 500ms ease;
+    }
+    .top-article-summary {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background-color: rgba(rgb(0, 0, 0), 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1;
+    }
+  }
+}

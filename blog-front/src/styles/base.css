@@ -1,0 +1,18 @@
+:root {
+    --max-width: 1300px;
+    --backgroundt-color: 13, 17, 23;
+    --card-background-color: 22, 27, 34;
+    --topic-backgroud-color: 42, 52, 68;
+    --border-color: 37, 43, 50;
+    --primary-color: 70, 185, 82;
+    --seco-color: 30, 144, 255;
+    --button-background-color: 32, 38, 46;
+    --danger-color: 242, 66, 65;
+    --warning-color: 253, 126, 15;
+    --shadow-color: 238, 238, 238;
+    --text-color-1: 255, 255, 255;
+    --text-color-2: 224, 224, 224;
+    --text-color-3: 141, 150, 160;
+    --input-background-color: 42, 52, 68;
+    --filter-blur-size: 0.25rem;
+}
