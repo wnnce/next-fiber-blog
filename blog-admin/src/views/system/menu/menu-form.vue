@@ -117,8 +117,8 @@ defineExpose({
           </a-input>
           <template #content>
             <div class="icon-container flex">
-              <div v-for="(item, index) in ArcoIcons" :key="index" class="pointer" @click.stop="formData.icon = item.name">
-                <component :is="ArcoIcons[item.name]"/>
+              <div v-for="(item, index) in ArcoIcons" :key="index" class="pointer" @click.stop="formData.icon = (item as any).name">
+                <component :is="item"/>
               </div>
             </div>
           </template>

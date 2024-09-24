@@ -82,8 +82,8 @@ const handleDelete = async (record: Tag) => {
   }
 }
 
-const handleUpdateStatus = async (newStatus: string | number | boolean, tagId: number) => {
-  const result = await tagApi.updateSelective({ tagId: tagId, status: Number(newStatus) });
+const handleUpdateStatus = async (newStatus: number, tagId: number) => {
+  const result = await tagApi.updateSelective({ tagId: tagId, status: newStatus });
   if (result.code === 200) {
     successMessage('更新成功');
     return true;
@@ -158,7 +158,7 @@ onMounted(() => {
           <template #cell="{ record }">
             <a-switch :checked-value="0" :unchecked-value="1"
                       v-model="record.status"
-                      :before-change="newValue => handleUpdateStatus(newValue, record.tagId)"
+                      :before-change="(newValue: number) => handleUpdateStatus(newValue, record.tagId)"
             />
           </template>
         </a-table-column>

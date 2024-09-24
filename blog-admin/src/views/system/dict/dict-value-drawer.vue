@@ -92,10 +92,8 @@ const handleDelete = async (record: DictValue) => {
   }
 }
 
-const handleQuickChange = async (newValue: number | string | boolean, id: number) => {
-  console.log(newValue, id)
-  const newStatus = Number(newValue);
-  const result = await dictApi.updateDictValueStatus({ id: id, status: newStatus })
+const handleQuickChange = async (newValue: number, id: number) => {
+  const result = await dictApi.updateDictValueStatus({ id: id, status: newValue })
   if (result.code === 200) {
     successMessage('更新成功');
     return true;
@@ -157,7 +155,7 @@ defineExpose({
             <template #cell="{ record }">
               <template v-if="record.status < 2">
                 <a-switch :checked-value="0" :unchecked-value="1" v-model="record.status"
-                          :before-change="newValue => handleQuickChange(newValue, record.dictId)"
+                          :before-change="(newValue: number) => handleQuickChange(newValue, record.dictId)"
                 />
               </template>
               <template v-else>

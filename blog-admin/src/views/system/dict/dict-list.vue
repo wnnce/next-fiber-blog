@@ -77,8 +77,8 @@ const handleDelete = async (record: Dict) => {
   }
 }
 
-const handleUpdateStatus = async (newValue: number | string | boolean, id: number) => {
-  const result = await dictApi.updateDictStatus({ dictId: id, status: Number(newValue) })
+const handleUpdateStatus = async (newValue: number, id: number) => {
+  const result = await dictApi.updateDictStatus({ dictId: id, status: newValue })
   if (result.code === 200) {
     successMessage('更新成功');
     return true;
@@ -158,7 +158,7 @@ onMounted(() => {
         <a-table-column title="状态">
           <template #cell="{ record }">
             <a-switch :checked-value="0" :unchecked-value="1" v-model="record.status"
-                      :before-change="newValue => handleUpdateStatus(newValue, record.dictId)"
+                      :before-change="(newValue: number) => handleUpdateStatus(newValue, record.dictId)"
             />
           </template>
         </a-table-column>

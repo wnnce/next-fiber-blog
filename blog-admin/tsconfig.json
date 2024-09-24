@@ -1,4 +1,8 @@
 {
+  "compilerOptions": {
+    // 允许隐式 any 类型
+    "noImplicitAny": false,
+  },
   "files": [],
   "references": [
     {
