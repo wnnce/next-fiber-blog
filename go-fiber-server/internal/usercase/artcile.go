@@ -101,7 +101,7 @@ type IArticleService interface {
 
 	Archives() ([]ArticleArchive, error)
 
-	SelectById(articleId uint64, checkStatus bool) (*ArticleVo, error)
+	SelectById(articleId uint64, isAdmin bool) (*ArticleVo, error)
 
 	DeleteArticleById(articleId uint64) error
 }

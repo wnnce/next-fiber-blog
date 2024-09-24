@@ -92,8 +92,8 @@ func (self *ArticleService) Archives() ([]usercase.ArticleArchive, error) {
 	return archives, nil
 }
 
-func (self *ArticleService) SelectById(articleId uint64, checkStatus bool) (*usercase.ArticleVo, error) {
-	article, err := self.repo.SelectById(articleId, checkStatus)
+func (self *ArticleService) SelectById(articleId uint64, isAdmin bool) (*usercase.ArticleVo, error) {
+	article, err := self.repo.SelectById(articleId, isAdmin)
 	if err != nil {
 		slog.Error("查询博客文章详情失败", "error", err.Error())
 		return nil, err

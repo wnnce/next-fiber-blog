@@ -106,7 +106,7 @@ func (self *HttpApi) Archives(ctx fiber.Ctx) error {
 
 func (self *HttpApi) ManageQueryInfo(ctx fiber.Ctx) error {
 	articleId := fiber.Params[uint64](ctx, "id")
-	article, err := self.service.SelectById(articleId, false)
+	article, err := self.service.SelectById(articleId, true)
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func (self *HttpApi) ManageQueryInfo(ctx fiber.Ctx) error {
 
 func (self *HttpApi) QueryInfo(ctx fiber.Ctx) error {
 	articleId := fiber.Params[uint64](ctx, "id")
-	article, err := self.service.SelectById(articleId, true)
+	article, err := self.service.SelectById(articleId, false)
 	if err != nil {
 		return err
 	}
