@@ -80,17 +80,15 @@ onMounted(() => {
         <a-table-column title="创建时间" data-index="createTime" align="center"/>
         <a-table-column title="热门" :width="60">
           <template #cell="{ record }">
-            <a-switch :checked-value="true" :unchecked-value="false"
-                      v-model="record.isHot"
-                      :before-change="newValue => handleUpdateStatus({ categoryId: record.categoryId, isHot: Boolean(newValue) })"
+            <a-switch v-model="record.isHot"
+                      :before-change="(newValue: boolean) => handleUpdateStatus({ categoryId: record.categoryId, isHot: newValue })"
             />
           </template>
         </a-table-column>
         <a-table-column title="置顶" :width="60">
           <template #cell="{ record }">
-            <a-switch :checked-value="true" :unchecked-value="false"
-                      v-model="record.isTop"
-                      :before-change="newValue => handleUpdateStatus({ categoryId: record.categoryId, isTop: Boolean(newValue) })"
+            <a-switch v-model="record.isTop"
+                      :before-change="(newValue: boolean) => handleUpdateStatus({ categoryId: record.categoryId, isTop: newValue })"
             />
           </template>
         </a-table-column>
@@ -98,7 +96,7 @@ onMounted(() => {
           <template #cell="{ record }">
             <a-switch :checked-value="0" :unchecked-value="1"
                       v-model="record.status"
-                      :before-change="newValue => handleUpdateStatus({ categoryId: record.categoryId, status: Number(newValue) })"
+                      :before-change="(newValue: number) => handleUpdateStatus({ categoryId: record.categoryId, status: newValue })"
             />
           </template>
         </a-table-column>

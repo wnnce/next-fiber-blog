@@ -152,18 +152,18 @@ onMounted(() => {
               <ul>
                 <li>
                   <a-switch v-model="item.isTop" unchecked-text="未置顶" checked-text="置顶"
-                            :before-change="newValue => { handleUpdateSelective({ topicId: item.topicId, isTop: Boolean(newValue) }) }"
+                            :before-change="(newValue: boolean) => { handleUpdateSelective({ topicId: item.topicId, isTop: newValue }) }"
                   />
                 </li>
                 <li>
                   <a-switch v-model="item.isHot" unchecked-text="非热门" checked-text="热门"
-                            :before-change="newValue => { handleUpdateSelective({ topicId: item.topicId, isHot: Boolean(newValue) }) }"
+                            :before-change="(newValue: boolean) => { handleUpdateSelective({ topicId: item.topicId, isHot: newValue }) }"
                   />
                 </li>
                 <li>
                   <a-switch v-model="item.status" unchecked-text="禁用" checked-text="正常"
                             :checked-value="0" :unchecked-value="1"
-                            :before-change="newValue => { handleUpdateSelective({ topicId: item.topicId, status: Number(newValue) }) }"
+                            :before-change="(newValue: number) => { handleUpdateSelective({ topicId: item.topicId, status: newValue }) }"
                   />
                 </li>
                 <li>

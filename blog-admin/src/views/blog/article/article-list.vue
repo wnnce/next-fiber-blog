@@ -230,17 +230,17 @@ onMounted(() => {
             <ul>
               <li>
                 <a-switch v-model="item.isTop" unchecked-text="未置顶" checked-text="置顶"
-                          :before-change="newValue => handleUpdateStatus({ articleId: item.articleId, isTop: Boolean(newValue) })"
+                          :before-change="(newValue: boolean) => handleUpdateStatus({ articleId: item.articleId, isTop: newValue })"
                 />
               </li>
               <li>
                 <a-switch v-model="item.isHot" unchecked-text="非热门" checked-text="热门"
-                          :before-change="newValue => handleUpdateStatus({ articleId: item.articleId, isHot: Boolean(newValue) })"
+                          :before-change="(newValue: boolean) => handleUpdateStatus({ articleId: item.articleId, isHot: newValue })"
                 />
               </li>
               <li>
                 <a-switch v-model="item.isComment" unchecked-text="评论关" checked-text="评论开"
-                          :before-change="newValue => handleUpdateStatus({ articleId: item.articleId, isComment: Boolean(newValue) })"
+                          :before-change="(newValue: boolean) => handleUpdateStatus({ articleId: item.articleId, isComment: newValue })"
                 />
               </li>
               <li>
@@ -249,7 +249,7 @@ onMounted(() => {
               <li>
                 <a-switch :unchecked-value="1" :checked-value="0" v-model="item.status"
                           unchecked-text="禁用" checked-text="正常"
-                          :before-change="newValue => handleUpdateStatus({ articleId: item.articleId, status: Number(newValue) })"
+                          :before-change="(newValue: number) => handleUpdateStatus({ articleId: item.articleId, status: newValue })"
                 />
               </li>
               <li>

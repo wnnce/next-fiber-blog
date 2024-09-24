@@ -75,8 +75,8 @@ const handleDelete = async (record: Role) => {
   }
 }
 
-const handleUpdateStatus = async (newStatus: string | number | boolean, roleId: number) => {
-  const result = await roleApi.updateSelective({ roleId: roleId, status: Number(newStatus) })
+const handleUpdateStatus = async (newStatus: number, roleId: number) => {
+  const result = await roleApi.updateSelective({ roleId: roleId, status: newStatus })
   if (result.code === 200) {
     successMessage('更新成功')
     return true;
@@ -140,7 +140,7 @@ onMounted(() => {
         <a-table-column title="状态">
           <template #cell="{ record }">
             <a-switch :checked-value="0" :unchecked-value="1" v-model="record.status"
-                      :before-change="newValue => handleUpdateStatus(newValue, record.roleId)"
+                      :before-change="(newValue: number) => handleUpdateStatus(newValue, record.roleId)"
             />
           </template>
         </a-table-column>

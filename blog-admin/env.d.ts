@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 
 declare module 'nprogress';
+declare module 'vditor/dist/method.min';
 
 interface ImportMetaEnv {
   /* 后端请求地址 */

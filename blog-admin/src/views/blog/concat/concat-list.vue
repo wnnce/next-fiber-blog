@@ -141,14 +141,14 @@ onMounted(() => {
         <a-table-column title="主要联系方式" align="center">
           <template #cell="{ record }">
             <a-switch v-model="record.isMain"
-                      :before-change="newValue => handleUpdateStatus({ concatId: record.concatId, isMain: Boolean(newValue) })"
+                      :before-change="(newValue: boolean) => handleUpdateStatus({ concatId: record.concatId, isMain: newValue })"
             />
           </template>
         </a-table-column>
         <a-table-column title="状态" :width="60">
           <template #cell="{ record }">
             <a-switch :checked-value="0" :unchecked-value="1" v-model="record.status"
-                      :before-change="newValue => handleUpdateStatus({ concatId: record.concatId, status: Number(newValue) })"
+                      :before-change="(newValue: number) => handleUpdateStatus({ concatId: record.concatId, status: newValue })"
             />
           </template>
         </a-table-column>
