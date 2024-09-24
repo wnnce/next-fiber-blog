@@ -102,6 +102,14 @@ export const articleArchives = () => {
 }
 
 /**
+ * 获取博客文章详情
+ * @param id 文章id
+ */
+export const queryArticle = (id: number) => {
+  return request<Article>(`/open/article/${id}`, 'GET');
+}
+
+/**
  * 获取友情链接列表
  */
 export const listLinks = (): Promise<Result<Link[]>> => {
