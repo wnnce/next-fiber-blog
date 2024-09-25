@@ -34,7 +34,7 @@ const TopicPage: React.FC<{
         <Timeline>
           { topicPage.records.map(topic => (
             <TimeLineItem key={topic.topicId} time={topic.createTime}>
-              <div className="topic-list-li-content markdown-body"
+              <div className="topic-list-li-content markdown-body topic-markdown"
                    dangerouslySetInnerHTML={{ __html: topicRender.render(topic.content) }}
               />
               { (topic.imageUrls && topic.imageUrls.length > 0) && (

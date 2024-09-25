@@ -90,7 +90,7 @@ const CommentItem: React.FC<{
           <span className="body-header-tag text-xs">{browser}</span>
           <span className="body-header-tag text-xs">{system}</span>
         </div>
-        <div className="item-body-content info-text markdown-body"
+        <div className="item-body-content info-text markdown-body comment-markdown"
              dangerouslySetInnerHTML={{ __html: commentContent }}
         />
         <div className="item-options flex gap-col-3 items-center">
