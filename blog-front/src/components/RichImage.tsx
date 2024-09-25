@@ -99,8 +99,8 @@ const RichImage: React.FC<Props> = ({
   return (
     <div className={ className ? `${className} rich-image` : 'rich-image' } style={{
       borderRadius: _radius,
-      height: height ? `${height}px` : 'auto',
-      width: width ? `${width}px` : 'auto',
+      height: height ? `${height}px` : '100%',
+      width: width ? `${width}px` : '100%',
       ...style,
     }}>
       {

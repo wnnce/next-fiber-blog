@@ -116,6 +116,7 @@ export interface Article {
   isComment: boolean;
   isPrivate: boolean;
   createTime: string;
+  updateTime: string;
   sort: number;
   status: number;
   // 评论数量

@@ -17,7 +17,7 @@ const About: React.FC = async () => {
     <section className="flex flex-col gap-row-4">
       <DynamicCard padding="1.5rem" title="ABOUT" icon="i-tabler:user" multiple={80}>
         <h1 className="text-center font-bold text-4xl mb-8">关于我</h1>
-        <div className="markdown-body" dangerouslySetInnerHTML={{__html: aboutHtml}} />
+        <div className="markdown-body about-markdown" dangerouslySetInnerHTML={{__html: aboutHtml}} />
       </DynamicCard>
       <StaticCard padding="1.5rem">
         <Comment type={3} />
