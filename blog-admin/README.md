@@ -1,39 +1,28 @@
-# blog-admin
+# 博客系统管理后台前端
 
-This template should help get you started developing with Vue 3 in Vite.
+技术栈`Vue3` + `Pinia` + `Typescript` + `ArcoDesign`。手动实现了大部分开源快速开发框架的后台管理功能，动态菜单、动态权限、路由缓存、角色校验、请求缓存、国际化等。
 
-## Recommended IDE Setup
+采用模块化开发的方式，管理模块和业务模块解耦分离，代码目录结构清晰、可读性较强、有完善的类型提示，部署成功之后可以快速上手！
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+`Markdown`编辑器使用开源的`Vditor`编辑器，支持所见即所得模式，除了`GFM`标准之外还支持数学公式等等等。
 
-## Type Support for `.vue` Imports in TS
+[Preview](https://fiber-blog-admin.vercel.app/) `admin@admin123456`
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## 待实现的功能
 
-## Customize configuration
+- [ ] 个人中心
+- [ ] 评论管理
+- [ ] 博客端用户管理
+- [ ] 实时日志
+- [ ] 首页数据统计
+- [ ] 一些小优化...
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+## 快速开始
 
-## Project Setup
-
-```sh
+```bash
 pnpm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-pnpm dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-pnpm build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-pnpm lint
+# dev模式
+pnpm run dev
+# 编译
+pnpm run build
 ```
