@@ -1,36 +1,24 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 博客前端工程
+技术栈`Next.js` + `Typescript` + `UnoCSS`，基于`RSS` + `SPA`混合开发，具有完善的`SEO`优化，对于搜索引擎爬虫良好。
 
-## Getting Started
+[Preview](https://fiber-blog-front-three.vercel.app/)
 
-First, run the development server:
+**还处于开发阶段，当前仅供预览使用!**
 
+## 说明
+不依赖任何`UI`库，手动实现了一些常用的`UI`组件，例如轮播、分页、时间轴等。`Markdown`解析使用[markdown-it]()库，拥有良好的性能和完善的生态系统。
+性能方面，客户端组件遵循`React`的最佳实践，使用`React.memo`和`useMemo`针对组件和数据进行缓存，减少组件重绘的性能开销。
+
+## 待开发功能
+- [ ] 文章详情页面完善
+- [ ] 页面加载loading页
+- [ ] 404以及其它错误页
+- [ ] 其它小功能...
+
+## 快速开始
+`node`版本大于等于`20`，`clone`本项目后使用`pnpm`安装依赖，而后访问[http://localhost:3000](http://localhost:3000)
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+
+pnpm run dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/layout.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
