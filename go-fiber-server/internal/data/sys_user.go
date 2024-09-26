@@ -125,7 +125,7 @@ func (self *SysUserRepo) Page(query *usercase.SysUserQueryForm) ([]*usercase.Sys
 func (self *SysUserRepo) DeleteById(userId int64) error {
 	builder := sqlbuild.NewUpdateBuilder("t_system_user").
 		Set("delete_at", time.Now().UnixMilli()).
-		Where("user_id").Eq(userId).BuildAsSelect()
+		Where("user_id").Eq(userId).BuildAsUpdate()
 	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("删除系统用户完成", "row", result.RowsAffected(), "userId", userId)
