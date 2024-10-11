@@ -48,7 +48,8 @@ export function request<T>(url: string, method: HttpMethod, params?: any, data?:
     fetch(baseUrl + url, {
       method: method,
       headers: httpHeaders,
-      body: requestBody
+      body: requestBody,
+      signal: AbortSignal.timeout(5000)
     }).then(async response => {
       const responseBody = await response.json() as Result<T>;
       const { code, message } = responseBody;
