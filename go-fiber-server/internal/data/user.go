@@ -108,3 +108,35 @@ func (self *UserRepo) UpdateUserLevel(level uint8, userId uint64, tx pgx.Tx) err
 	}
 	return err
 }
+
+func (self *UserRepo) Page(query *usercase.UserQueryForm) (*usercase.PageData[usercase.UserVo], error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_user as u").
+		Select("u.user_id", "u.nick_name", "u.summary", "u.avatar", "u.email", "u.link", "u.username", "u.labels", "u.user_type", "u.create_time", "u.status").
+		LeftJoin("t_blog_user_extend as ue").On("ue.user_id").EqRaw("u.user_id").BuildAsSelect().
+		Select("ue.level", "ue.expertise", "ue.register_ip", "ue.register_location").
+		WhereByCondition(query.Username != "", "u.username").Eq(query.Username).
+		AndByCondition(query.Nickname != "", "u.nick_name").Like("%"+query.Nickname+"%").
+		AndByCondition(query.Email != "", "u.email").Eq(query.Email).
+		AndByCondition(query.Level > 0, "ue.level").Eq(query.Level).
+		AndByCondition(query.CreateTimeBegin != nil, "u.create_time").Ge(query.CreateTimeBegin).
+		AndByCondition(query.CreateTimeEnd != nil, "u.create_time").Le(query.CreateTimeEnd).BuildAsSelect().
+		OrderByDesc("u.create_time")
+	return SelectPage[usercase.UserVo](builder, query.Page, query.Size, true, self.db)
+}
+
+func (self *UserRepo) Update(user *usercase.User) error {
+	builder := sqlbuild.NewUpdateBuilder("t_blog_user").
+		SetRaw("update_time", "now()").
+		SetByCondition(user.Nickname != "", "nick_name", user.Nickname).
+		Set("summary", user.Summary).
+		SetByCondition(user.Email != "", "email", user.Email).
+		SetByCondition(user.Link != "", "link", user.Link).
+		SetByCondition(user.Labels != nil, "labels", user.Labels).
+		Set("status", user.Status).
+		Where("user_id").Eq(user.UserId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
+	if err == nil {
+		slog.Info("修改用户信息完成", "rows", result.RowsAffected(), "userId", user.UserId)
+	}
+	return err
+}

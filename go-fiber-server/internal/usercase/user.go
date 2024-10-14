@@ -6,7 +6,8 @@ import (
 	"time"
 )
 
-// User 用户
+// User 博客端用户 需要实现 LoginUser 接口
+// 博客端和管理端是两套登录逻辑
 type User struct {
 	UserId     uint64     `json:"userId" db:"user_id"`                   // 用户Id
 	Nickname   string     `json:"nickname,omitempty" db:"nick_name"`     // 用户昵称
@@ -66,6 +67,17 @@ type ExpertiseDetail struct {
 	Remark     string     `json:"remark,omitempty" db:"remark"` // 备注
 }
 
+// UserQueryForm 用户查询表单
+type UserQueryForm struct {
+	Nickname        string     `json:"nickname"`
+	Email           string     `json:"email"`
+	Username        string     `json:"username"`
+	Level           uint8      `json:"level"`
+	CreateTimeBegin *time.Time `json:"createTimeBegin"`
+	CreateTimeEnd   *time.Time `json:"createTimeEnd"`
+	PageQueryForm
+}
+
 type IUserRepo interface {
 	// Transaction 事务
 	Transaction(ctx context.Context, fn func(tx pgx.Tx) error) error
@@ -81,6 +93,12 @@ type IUserRepo interface {
 	UpdateUserExpertise(count int64, userId uint64, tx pgx.Tx) (uint64, uint8, error)
 	// UpdateUserLevel 更新用户等级
 	UpdateUserLevel(level uint8, userId uint64, tx pgx.Tx) error
+
+	// Page 管理端分页查询用户信息
+	Page(query *UserQueryForm) (*PageData[UserVo], error)
+
+	// Update 更新用户信息
+	Update(user *User) error
 }
 
 type IUserService interface {
@@ -96,4 +114,10 @@ type IUserService interface {
 	// UpdateUserExpertise 更新用户经验值
 	// 更新经验值的同时还会保存经验值明细 如果总经验值达到了升级阈值 则会提升用户等级
 	UpdateUserExpertise(count int64, userId uint64) error
+
+	// PageUser 分页查询用户信息
+	PageUser(query *UserQueryForm) (*PageData[UserVo], error)
+
+	// UpdateUser 更新用户信息
+	UpdateUser(user *User) error
 }

@@ -162,3 +162,30 @@ func (self *UserService) UpdateUserExpertise(count int64, userId uint64) error {
 		return nil
 	})
 }
+
+func (self *UserService) PageUser(query *usercase.UserQueryForm) (*usercase.PageData[usercase.UserVo], error) {
+	page, err := self.repo.Page(query)
+	if err != nil {
+		slog.Error("分页查询博客用户信息失败", "error", err.Error())
+		return nil, tools.FiberServerError("查询失败")
+	}
+	return page, nil
+}
+
+func (self *UserService) UpdateUser(user *usercase.User) error {
+	err := self.repo.Update(user)
+	if err != nil {
+		slog.Error("更新用户信息失败", "error", err.Error())
+		return tools.FiberServerError("更新失败")
+	}
+	// 当禁用用户时 判断当前用户是否已经登录
+	// 如果登录那么需要强制退出
+	pool.Go(func() {
+		if user.Status == 1 {
+			if logoutErr := auth.RemoveClassicLoginUserById(user.UserId); err != nil {
+				slog.Error("删除博客端用户登录信息失败", "error", logoutErr)
+			}
+		}
+	})
+	return nil
+}
