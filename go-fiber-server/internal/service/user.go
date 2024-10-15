@@ -189,3 +189,12 @@ func (self *UserService) UpdateUser(user *usercase.User) error {
 	})
 	return nil
 }
+
+func (self *UserService) PageExpertise(query *usercase.ExpertiseQueryForm) (*usercase.PageData[usercase.ExpertiseDetailVo], error) {
+	page, err := self.repo.PageExpertise(query)
+	if err != nil {
+		slog.Error("查询用户经验值明细失败", "error", err.Error())
+		return nil, tools.FiberServerError("查询失败")
+	}
+	return page, nil
+}

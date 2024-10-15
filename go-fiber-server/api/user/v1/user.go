@@ -69,3 +69,15 @@ func (self *HttpApi) Update(ctx fiber.Ctx) error {
 	}
 	return ctx.JSON(res.SimpleOK())
 }
+
+func (self *HttpApi) PageExpertise(ctx fiber.Ctx) error {
+	query := &usercase.ExpertiseQueryForm{}
+	if err := ctx.Bind().JSON(query); err != nil {
+		return err
+	}
+	page, err := self.service.PageExpertise(query)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(page))
+}

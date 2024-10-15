@@ -56,6 +56,17 @@ type UserExtend struct {
 	UpdateTime       *time.Time `json:"updateTime,omitempty" db:"update_time"`             // 最后更新时间
 }
 
+// UserQueryForm 用户查询表单
+type UserQueryForm struct {
+	Nickname        string     `json:"nickname"`
+	Email           string     `json:"email"`
+	Username        string     `json:"username"`
+	Level           uint8      `json:"level"`
+	CreateTimeBegin *time.Time `json:"createTimeBegin"`
+	CreateTimeEnd   *time.Time `json:"createTimeEnd"`
+	PageQueryForm
+}
+
 // ExpertiseDetail 经验值明细
 type ExpertiseDetail struct {
 	ID         uint64     `json:"id" db:"id"`                   // 主键ID
@@ -64,15 +75,21 @@ type ExpertiseDetail struct {
 	DetailType uint8      `json:"detailType" db:"detail_type"`  // 明细类型 1：收入 2：支出
 	Source     uint8      `json:"source" db:"source"`           // 来源类型 1：点赞 2：评论
 	CreateTime *time.Time `json:"createTime" db:"create_time"`  // 创建时间
-	Remark     string     `json:"remark,omitempty" db:"remark"` // 备注
+	Remark     *string    `json:"remark,omitempty" db:"remark"` // 备注
 }
 
-// UserQueryForm 用户查询表单
-type UserQueryForm struct {
-	Nickname        string     `json:"nickname"`
-	Email           string     `json:"email"`
+// ExpertiseDetailVo 经验值明细 Vo类
+type ExpertiseDetailVo struct {
+	ExpertiseDetail
+	Username string `json:"username" db:"username"`
+	Nickname string `json:"nickname" db:"nickname"`
+}
+
+// ExpertiseQueryForm 经验值明细查询参数
+type ExpertiseQueryForm struct {
 	Username        string     `json:"username"`
-	Level           uint8      `json:"level"`
+	DetailType      uint8      `json:"detailType"`
+	Source          uint8      `json:"source"`
 	CreateTimeBegin *time.Time `json:"createTimeBegin"`
 	CreateTimeEnd   *time.Time `json:"createTimeEnd"`
 	PageQueryForm
@@ -94,11 +111,14 @@ type IUserRepo interface {
 	// UpdateUserLevel 更新用户等级
 	UpdateUserLevel(level uint8, userId uint64, tx pgx.Tx) error
 
-	// Page 管理端分页查询用户信息
+	// Page 分页查询用户信息
 	Page(query *UserQueryForm) (*PageData[UserVo], error)
 
 	// Update 更新用户信息
 	Update(user *User) error
+
+	// PageExpertise 分页查询用户经验值明细
+	PageExpertise(query *ExpertiseQueryForm) (*PageData[ExpertiseDetailVo], error)
 }
 
 type IUserService interface {
@@ -120,4 +140,7 @@ type IUserService interface {
 
 	// UpdateUser 更新用户信息
 	UpdateUser(user *User) error
+
+	// PageExpertise 分页查询用户经验值明细
+	PageExpertise(query *ExpertiseQueryForm) (*PageData[ExpertiseDetailVo], error)
 }

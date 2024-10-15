@@ -152,6 +152,8 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	classicUserRoute.Get("/logout", classicUserApi.Logout, auth.ClassicAuth)
 	// 查询用户 需要管理端权限
 	classicUserRoute.Post("/page", classicUserApi.Page, auth.ManageAuth)
+	// 查询用户经验值明细 需要管理端权限
+	classicUserRoute.Post("/expertise/page", classicUserApi.PageExpertise, auth.ManageAuth)
 	// 更新用户信息 需要管理端权限
 	classicUserRoute.Put("/", classicUserApi.Update, auth.ManageAuth)
 

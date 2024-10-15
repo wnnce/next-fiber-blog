@@ -75,7 +75,7 @@ func (self *UserRepo) SaveExpertiseDetail(detail *usercase.ExpertiseDetail, tx p
 	builder := sqlbuild.NewInsertBuilder("t_expertise_detail").
 		Fields("user_id", "detail", "detail_type", "source").
 		Values(detail.UserId, detail.Detail, detail.DetailType, detail.Source).
-		InsertByCondition("" != detail.Remark, "remark", detail.Remark).
+		InsertByCondition(detail.Remark != nil, "remark", detail.Remark).
 		Returning("id")
 	var detailId uint64
 	row := smartQueryRow(self.db, tx, context.Background(), builder.Sql(), builder.Args()...)
@@ -139,4 +139,16 @@ func (self *UserRepo) Update(user *usercase.User) error {
 		slog.Info("修改用户信息完成", "rows", result.RowsAffected(), "userId", user.UserId)
 	}
 	return err
+}
+
+func (self *UserRepo) PageExpertise(query *usercase.ExpertiseQueryForm) (*usercase.PageData[usercase.ExpertiseDetailVo], error) {
+	builder := sqlbuild.NewSelectBuilder("t_expertise_detail as ed").
+		Select("ed.*").
+		LeftJoin("t_blog_user as bu").On("ed.user_id").EqRaw("bu.user_id").BuildAsSelect().
+		Select("bu.username", "bu.nick_name").
+		WhereByCondition(query.Username != "", "bu.username").Eq(query.Username).
+		AndByCondition(query.DetailType > 0, "ed.detail_type").Eq(query.DetailType).
+		AndByCondition(query.Source > 0, "ed.source").Eq(query.Source).BuildAsSelect().
+		OrderByDesc("ed.create_time")
+	return SelectPage[usercase.ExpertiseDetailVo](builder, query.Page, query.Size, true, self.db)
 }
