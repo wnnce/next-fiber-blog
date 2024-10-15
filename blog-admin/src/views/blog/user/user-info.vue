@@ -84,6 +84,11 @@ defineExpose({
         flex-shrink: 0;
       }
     }
+    .labels {
+      display: flex;
+      column-gap: 0.5rem;
+      flex-wrap: wrap;
+    }
   }
   .info-right {
     font-size: 0.9rem;
