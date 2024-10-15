@@ -39,3 +39,25 @@ export interface UserQueryForm extends PageQuery {
   createTimeBegin?: string;
   createTimeEnd?: string;
 }
+
+// 经验值明细
+export interface ExpertiseDetail {
+  id: number;
+  userId: number;
+  username: string;
+  nickname: string;
+  detail: number;
+  detailType: number;
+  source: number;
+  createTime: string;
+  remark: string;
+}
+
+// 经验值明细查询参数
+export interface ExpertiseQueryForm extends PageQuery {
+  username?: string;
+  detailType?: number;
+  source?: number;
+  createTimeBegin?: string;
+  createTimeEnd?: string;
+}

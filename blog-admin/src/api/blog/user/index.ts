@@ -1,4 +1,4 @@
-import type { User, UserQueryForm, UserUpdateForm } from '@/api/blog/user/types'
+import type { ExpertiseDetail, ExpertiseQueryForm, User, UserQueryForm, UserUpdateForm } from '@/api/blog/user/types'
 import { sendPost, sendPut } from '@/api/request'
 import type { Page } from '@/assets/script/types'
 
@@ -19,5 +19,12 @@ export const userApi = {
    */
   updateUser: (form: UserUpdateForm) => {
     return sendPut<null>('/user', form)
+  },
+  /**
+   * 分页查询用户经验值明细
+   * @param query 查询参数
+   */
+  pageExpertise: (query: ExpertiseQueryForm) => {
+    return sendPost<Page<ExpertiseDetail>>('/user/expertise/page', query)
   }
 }

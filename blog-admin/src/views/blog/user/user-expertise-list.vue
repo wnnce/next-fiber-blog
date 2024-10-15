@@ -1,32 +1,30 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, shallowRef } from 'vue'
 import RightOperate from '@/components/RightOperate.vue'
-import type { User, UserQueryForm } from '@/api/blog/user/types'
+import type { ExpertiseDetail, ExpertiseQueryForm } from '@/api/blog/user/types'
 import { userApi } from '@/api/blog/user'
 import { constant } from '@/assets/script/constant'
-import LoadImage from '@/components/LoadImage.vue'
 import DictLabel from '@/components/DictLabel.vue'
-import UserInfo from '@/views/blog/user/user-info.vue'
-import UserForm from '@/views/blog/user/user-form.vue'
+import DictSelect from '@/components/DictSelect.vue'
 
 const tableLoading = ref<boolean>(false);
 const recordTotal = ref<number>(0);
-const tableData = shallowRef<User[]>([]);
-const defaultQueryForm: UserQueryForm = {
+const tableData = shallowRef<ExpertiseDetail[]>([]);
+const defaultQueryForm: ExpertiseQueryForm = {
   page: 1,
   size: 10,
   username: undefined,
-  nickname: undefined,
-  email: undefined,
+  source: undefined,
+  detailType: undefined,
   createTimeBegin: undefined,
   createTimeEnd: undefined
 }
 const dateRange = ref<string[]>([]);
-const queryForm = reactive<UserQueryForm>({ ...defaultQueryForm })
+const queryForm = reactive<ExpertiseQueryForm>({ ...defaultQueryForm })
 const queryTableData = async () => {
   tableLoading.value = true;
   try {
-    const result = await userApi.pageUser(queryForm);
+    const result = await userApi.pageExpertise(queryForm);
     if (result && result.code === 200) {
       const { total, records } = result.data;
       recordTotal.value = total;
@@ -69,16 +67,6 @@ const handleDateChange = () => {
   }
 }
 
-const userInfoRef = ref();
-const showUserInfo = (record: User) => {
-  userInfoRef.value.show(record);
-}
-
-const formRef = ref();
-const showForm = (record: User) => {
-  formRef.value.show(record);
-}
-
 onMounted(() => {
   queryTableData();
 })
@@ -92,12 +80,12 @@ onMounted(() => {
         <a-input v-model="queryForm.username" placeholder="请输入用户名" />
       </div>
       <div class="search-item">
-        <label>昵称</label>
-        <a-input v-model="queryForm.nickname" placeholder="请输入昵称" />
+        <label>经验类型</label>
+        <DictSelect dict-key="expertise_detail_type" v-model="queryForm.detailType" type="number" placeholder="请选择类型" width="140px" />
       </div>
       <div class="search-item">
-        <label>邮箱</label>
-        <a-input v-model="queryForm.email" placeholder="请输入邮箱" />
+        <label>来源</label>
+        <DictSelect dict-key="expertise_source" v-model="queryForm.source" type="number" placeholder="请选择来源" width="140px" />
       </div>
       <div class="search-item">
         <label>创建时间</label>
@@ -122,44 +110,26 @@ onMounted(() => {
     </div>
     <a-table :data="tableData" :loading="tableLoading" :pagination="false">
       <template #columns>
-        <a-table-column title="头像">
-          <template #cell="{ record }">
-            <LoadImage :src="record.avatar" :width="48" :height="48" radius="50%" />
-          </template>
-        </a-table-column>
+        <a-table-column title="ID" data-index="id" />
         <a-table-column title="用户名">
           <template #cell="{ record }">
             <span class="link-text" @click="showUserInfo(record)">{{ record.username }}</span>
           </template>
         </a-table-column>
         <a-table-column title="昵称" data-index="nickname" />
-        <a-table-column title="邮箱" data-index="email" />
-        <a-table-column title="链接">
+        <a-table-column title="明细" data-index="detail" />
+        <a-table-column title="类型">
           <template #cell="{ record }">
-            <a class="link-text" :href="record.link" target="_blank">{{ record.link }}</a>
+            <DictLabel dict-key="expertise_detail_type" :value="record.detailType" />
           </template>
         </a-table-column>
-        <a-table-column title="等级" data-index="level" />
+        <a-table-column title="来源">
+          <template #cell="{ record }">
+            <DictLabel dict-key="expertise_source" :value="record.source" />
+          </template>
+        </a-table-column>
         <a-table-column title="创建时间" data-index="createTime" align="center" />
-        <a-table-column title="用户类型">
-          <template #cell="{ record }">
-            <span>{{ record.userType === 1 ? '管理员' : '普通用户' }}</span>
-          </template>
-        </a-table-column>
-        <a-table-column title="状态">
-          <template #cell="{ record }">
-            <a-tag :color="record.status && record.status === 1 ? 'red' : 'green'">
-              <DictLabel dict-key="dict_status" :value="record.status || 0" />
-            </a-tag>
-          </template>
-        </a-table-column>
-        <a-table-column title="操作" align="center">
-          <template #cell="{ record }">
-            <a-button type="text" shape="circle" @click="showForm(record)">
-              <template #icon><icon-edit /></template>
-            </a-button>
-          </template>
-        </a-table-column>
+        <a-table-column title="备注" data-index="remark" />
       </template>
     </a-table>
     <div class="flex justify-end">
@@ -173,8 +143,6 @@ onMounted(() => {
                     @change="queryTableData"
       />
     </div>
-    <user-info ref="userInfoRef" />
-    <user-form ref="formRef" @reload="queryTableData" />
   </div>
 </template>
 
