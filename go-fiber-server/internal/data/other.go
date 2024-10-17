@@ -143,7 +143,58 @@ func (self *OtherRepo) SiteStats() (usercase.SiteStats, error) {
        (select count(*) from t_blog_access_log)                                                     as access_count,
        (select coalesce(sum(word_count), 0) from t_blog_article where status = 0 and delete_at = 0) as word_total`
 	row := self.db.QueryRow(context.Background(), sql)
-	stats := &usercase.SiteStats{}
+	stats := usercase.SiteStats{}
 	err := row.Scan(&stats.ArticleCount, &stats.CategoryCount, &stats.TagCount, &stats.CommentCount, &stats.VisitorCount, &stats.AccessCount, &stats.WordTotal)
-	return *stats, err
+	return stats, err
+}
+
+func (self *OtherRepo) AdminIndexStats() (usercase.AdminIndexStats, error) {
+	sql := `select (select count(*) from t_blog_access_log where date(create_time) = current_date) as current_access,
+       (select count(*)
+        from t_blog_comment
+        where date(create_time) = current_date
+          and delete_at = 0)                                                           as current_comment,
+       (select count(*) from t_blog_access_log)                                        as total_access,
+       (select count(*) from t_blog_comment where delete_at = 0)                       as total_comment,
+       (select count(*) from t_blog_topic where delete_at = 0)                         as total_topic,
+       (select count(*) from t_blog_article where delete_at = 0)                       as total_article,
+       (select count(*) from t_blog_user)                                              as total_user,
+       (select sum(view_num) from t_blog_article where delete_at = 0)                  as article_total_view;`
+	row := self.db.QueryRow(context.Background(), sql)
+	stats := usercase.AdminIndexStats{}
+	err := row.Scan(&stats.TotalAccess, &stats.ToDayComment, &stats.TotalAccess, &stats.TotalComment, &stats.TotalTopic, &stats.TotalArticle, &stats.TotalUser, &stats.ArticleTotalView)
+	return stats, err
+}
+
+func (self *OtherRepo) AccessStatsArray() ([]usercase.DayStats, error) {
+	sql := "select to_char(create_time, 'YYYY-MM-DD') as date_item, count(*) as count_item from t_blog_access_log where create_time >= current_date - interval '6 days' group by date_item"
+	return self.commonStatsArrayQuery(sql)
+}
+
+func (self *OtherRepo) CommentStatsArray() ([]usercase.DayStats, error) {
+	sql := "select to_char(create_time, 'YYYY-MM-DD') as date_item, count(*) as count_item from t_blog_comment where create_time >= current_date - interval '6 days'  and delete_at = 0 group by date_item"
+	return self.commonStatsArrayQuery(sql)
+}
+
+func (self *OtherRepo) UserStatsArray() ([]usercase.DayStats, error) {
+	sql := "select to_char(create_time, 'YYYY-MM-DD') as date_item, count(*) as count_item from t_blog_user where create_time >= current_date - interval '6 days' group by date_item"
+	return self.commonStatsArrayQuery(sql)
+}
+
+func (self *OtherRepo) ArticleStatsArray() ([]usercase.DayStats, error) {
+	sql := "select to_char(create_time, 'YYYY-MM-DD') as date_item, sum(word_count) as count_item from t_blog_article where create_time >= current_date - interval '6 days' and delete_at = 0 group by date_item"
+	return self.commonStatsArrayQuery(sql)
+}
+
+func (self *OtherRepo) commonStatsArrayQuery(querySql string) ([]usercase.DayStats, error) {
+	rows, err := self.db.Query(context.Background(), querySql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return pgx.CollectRows[usercase.DayStats](rows, func(row pgx.CollectableRow) (usercase.DayStats, error) {
+		stats := usercase.DayStats{}
+		scanErr := row.Scan(&stats.DateItem, &stats.CountItem)
+		return stats, scanErr
+	})
 }

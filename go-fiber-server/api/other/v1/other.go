@@ -79,9 +79,17 @@ func (self *HttpApi) UpdateSiteConfiguration(ctx fiber.Ctx) error {
 }
 
 func (self *HttpApi) SiteStats(ctx fiber.Ctx) error {
-	state, err := self.service.SiteStats()
+	stats, err := self.service.SiteStats()
 	if err != nil {
 		return err
 	}
-	return ctx.JSON(res.OkByData(state))
+	return ctx.JSON(res.OkByData(stats))
+}
+
+func (self *HttpApi) AdminIndexStats(ctx fiber.Ctx) error {
+	stats, err := self.service.AdminIndexStats()
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(stats))
 }
