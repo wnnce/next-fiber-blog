@@ -60,5 +60,4 @@ export interface LoginForm {
 export interface ResetPasswordForm {
   oldPassword: string;
   newPassword: string;
-  userId: number;
 }

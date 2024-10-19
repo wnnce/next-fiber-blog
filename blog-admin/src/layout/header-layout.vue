@@ -11,6 +11,7 @@ import { useI18nLanguage } from '@/i18n'
 import SettingDrawer from '@/layout/components/SettingDrawer.vue'
 import { useLocalUserStore } from '@/stores/user'
 import LogoutModal from '@/layout/components/LogoutModal.vue'
+import EditPasswordModal from '@/layout/components/EditPasswordModal.vue'
 
 const configStore = useAppConfigStore();
 const i18nLanguage = useI18nLanguage();
@@ -29,19 +30,21 @@ const handleThemeSwitch = () => {
 
 const userOption: OptionItem[] = [
   { label: '个人中心', value: 'user-info' },
-  { label: '修改密码', value: 'reset-password' },
+  { label: '修改密码', value: 'edit-password' },
   { label: '退出登录', value: 'logout' }
 ]
 const handleUserOptionSelect = (value: string | number) => {
   value = value.toString();
-  if (value === 'logout') {
-    logoutRef.value.show();
+  switch (value.toString()) {
+    case 'logout': logoutRef.value.show(); break;
+    case 'edit-password': editPasswordRef.value.show(); break;
   }
 }
 
 const logoutRef= ref();
 
 const settingRef = ref();
+const editPasswordRef= ref();
 const settingShow = () => {
   settingRef.value.show();
 }
@@ -95,6 +98,7 @@ const settingShow = () => {
     </div>
     <setting-drawer ref="settingRef" />
     <logout-modal ref="logoutRef" />
+    <edit-password-modal ref="editPasswordRef" />
   </header>
 </template>
 

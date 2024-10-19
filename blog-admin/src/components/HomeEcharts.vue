@@ -37,7 +37,6 @@ watch(props, () => {
     dateList.push(item.dateItem);
     countList.push(item.countItem);
   })
-  console.log(dateList, countList)
   updateEchartsData()
 })
 
