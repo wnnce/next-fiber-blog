@@ -221,7 +221,7 @@ func (self *OtherService) SiteStats() (usercase.SiteStats, error) {
 }
 
 func (self *OtherService) AdminIndexStats() (*usercase.AdminIndexStats, error) {
-	resultMap := make(map[string]any)
+	var resultMap sync.Map
 	var wg sync.WaitGroup
 	wg.Add(5)
 	// 异步同时查询所有数据
@@ -232,7 +232,7 @@ func (self *OtherService) AdminIndexStats() (*usercase.AdminIndexStats, error) {
 			slog.Error("查询后台首页统计数据失败", "error", err.Error())
 			return
 		}
-		resultMap["stats"] = stats
+		resultMap.Store("stats", stats)
 	})
 	pool.Go(func() {
 		defer wg.Done()
@@ -241,7 +241,7 @@ func (self *OtherService) AdminIndexStats() (*usercase.AdminIndexStats, error) {
 			slog.Error("查询访问记录数据失败", "error", err.Error())
 			return
 		}
-		resultMap["access"] = accessArray
+		resultMap.Store("access", accessArray)
 	})
 	pool.Go(func() {
 		defer wg.Done()
@@ -250,7 +250,7 @@ func (self *OtherService) AdminIndexStats() (*usercase.AdminIndexStats, error) {
 			slog.Error("查询评论统计数据失败", "error", err.Error())
 			return
 		}
-		resultMap["comment"] = commentArray
+		resultMap.Store("comment", commentArray)
 	})
 	pool.Go(func() {
 		defer wg.Done()
@@ -259,7 +259,7 @@ func (self *OtherService) AdminIndexStats() (*usercase.AdminIndexStats, error) {
 			slog.Error("查询用户统计数据失败", "error", err.Error())
 			return
 		}
-		resultMap["user"] = userArray
+		resultMap.Store("user", userArray)
 	})
 	pool.Go(func() {
 		defer wg.Done()
@@ -268,26 +268,26 @@ func (self *OtherService) AdminIndexStats() (*usercase.AdminIndexStats, error) {
 			slog.Error("查询文章统计数据失败", "error", err.Error())
 			return
 		}
-		resultMap["article"] = articleArray
+		resultMap.Store("article", articleArray)
 	})
 	// 等待所有协程执行完成
 	wg.Wait()
 	// 拼装数据
-	stats, ok := resultMap["stats"]
+	stats, ok := resultMap.Load("stats")
 	if !ok {
 		return nil, tools.FiberServerError("查询统计数据失败")
 	}
 	result := stats.(usercase.AdminIndexStats)
-	if accessArray, ok := resultMap["access"]; ok {
+	if accessArray, ok := resultMap.Load("access"); ok {
 		result.AccessArray = accessArray.([]usercase.DayStats)
 	}
-	if commentArray, ok := resultMap["comment"]; ok {
+	if commentArray, ok := resultMap.Load("comment"); ok {
 		result.CommentArray = commentArray.([]usercase.DayStats)
 	}
-	if userArray, ok := resultMap["user"]; ok {
+	if userArray, ok := resultMap.Load("user"); ok {
 		result.UserArray = userArray.([]usercase.DayStats)
 	}
-	if articleArray, ok := resultMap["article"]; ok {
+	if articleArray, ok := resultMap.Load("article"); ok {
 		result.ArticleArray = articleArray.([]usercase.DayStats)
 	}
 	return &result, nil
