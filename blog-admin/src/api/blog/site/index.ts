@@ -10,6 +10,27 @@ export interface SiteConfigurationItem {
   extend: boolean;
 }
 
+// 首页统计信息
+export interface IndexStats {
+  toDayAccess: number;
+  toDayComment: number;
+  totalAccess: number;
+  totalComment: number;
+  totalTopic: number;
+  totalArticle: number;
+  totalUser: number;
+  articleTotalView: number;
+  accessArray: DayStats[];
+  commentArray: DayStats[];
+  userArray: DayStats[];
+  articleArray: DayStats[];
+}
+
+export interface DayStats {
+  dateItem: string;
+  countItem: number;
+}
+
 export const siteConfigurationRequiredField: string[] = ['tabTitle', 'logo', 'avatar', 'title', 'summary', 'about', 'powered', 'icp', 'articleSize', 'topicSize', 'commentSize', 'primaryColor'];
 
 export const siteApi = {
@@ -25,5 +46,11 @@ export const siteApi = {
    */
   updateConfiguration: (form: Record<string, SiteConfigurationItem>) => {
     return sendPut<null>('/base/site/configuration', form)
+  },
+  /**
+   * 查询首页统计信息
+   */
+  indexStats: () => {
+    return sendGet<IndexStats>('/base/index/stats')
   }
 }
