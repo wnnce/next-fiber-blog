@@ -74,7 +74,7 @@ func (self *SysUserRepo) UpdateSelective(form *usercase.SysUserUpdateForm) error
 
 func (self *SysUserRepo) FindUserById(userId uint64) (*usercase.SysUser, error) {
 	builder := sqlbuild.NewSelectBuilder("t_system_user").
-		Select("user_id", "username", "nickname", "email", "phone", "avatar", "roles", "create_time", "remark").
+		Select("user_id", "username", "password", "nickname", "email", "phone", "avatar", "roles", "create_time", "remark").
 		Where("user_id").Eq(userId).
 		And("status").EqRaw("0").
 		And("delete_at").EqRaw("0").BuildAsSelect()
