@@ -5,7 +5,12 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/gofiber/fiber/v3"
+	"github.com/shirou/gopsutil/v4/cpu"
+	"github.com/shirou/gopsutil/v4/host"
+	"github.com/shirou/gopsutil/v4/mem"
 	"go-fiber-ent-web-layout/internal/tools/clog"
+	"go-fiber-ent-web-layout/internal/tools/res"
+	"runtime"
 	"strconv"
 	"sync"
 	"time"
@@ -66,4 +71,49 @@ func LoggerPush(c fiber.Ctx) error {
 		}
 	})
 	return nil
+}
+
+type ApplicationMonitor struct {
+	runtime.MemStats
+	Hostname          string  `json:"hostname"`
+	Platform          string  `json:"platform"`
+	PlatformVersion   string  `json:"platformVersion"`
+	CpuNumber         int     `json:"cpuNumber"`
+	CpuPercent        float64 `json:"cpuPercent"`
+	MemoryTotal       uint64  `json:"memoryTotal"`
+	MemoryUsed        uint64  `json:"memoryUsed"`
+	MemoryAvailable   uint64  `json:"memoryAvailable"`
+	MemoryUsedPercent float64 `json:"memoryUsedPercent"`
+}
+
+// Monitor 指标监控
+func Monitor(ctx fiber.Ctx) error {
+	stats := &runtime.MemStats{}
+	runtime.ReadMemStats(stats)
+
+	monitor := ApplicationMonitor{
+		MemStats: *stats,
+	}
+	// 获取系统信息
+	if hostInfo, err := host.Info(); err == nil {
+		monitor.Hostname = hostInfo.Hostname
+		monitor.Platform = hostInfo.Platform
+		monitor.PlatformVersion = hostInfo.PlatformVersion
+	}
+	// 获取内存信息
+	if memInfo, err := mem.VirtualMemory(); err == nil {
+		monitor.MemoryTotal = memInfo.Total
+		monitor.MemoryUsed = memInfo.Used
+		monitor.MemoryAvailable = memInfo.Available
+		monitor.MemoryUsedPercent = memInfo.UsedPercent
+	}
+	// 获取cpu核数
+	if cpuCount, err := cpu.Counts(true); err == nil {
+		monitor.CpuNumber = cpuCount
+	}
+	// 获取cpu使用率
+	if cpuPercent, err := cpu.Percent(time.Second, true); err == nil {
+		monitor.CpuPercent = cpuPercent[0]
+	}
+	return ctx.JSON(res.OkByData(&monitor))
 }

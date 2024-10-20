@@ -93,6 +93,8 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	baseRoute.Put("/site/configuration", oApi.UpdateSiteConfiguration)
 	// 获取首页统计数据
 	baseRoute.Get("/index/stats", oApi.AdminIndexStats)
+	// 指标监控接口
+	baseRoute.Get("/monitor", manage.Monitor)
 
 	// 标签管理接口
 	tagRoute := app.Group("/tag", auth.ManageAuth)
