@@ -2,7 +2,7 @@
 
 import { computed, onMounted, shallowReactive } from 'vue'
 import { type DayStats, type IndexStats, siteApi } from '@/api/blog/site'
-import HomeEcharts from '@/components/HomeEcharts.vue'
+import HomeEcharts from '@/components/charts/HomeEcharts.vue'
 
 const indexStats = shallowReactive<IndexStats>({
   toDayAccess: 0,

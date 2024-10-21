@@ -105,7 +105,6 @@ const initEcharts = () => {
 }
 
 const handleEchartsResize = throttle(() => {
-  console.log('resize')
   customEcharts && (customEcharts.resize());
 })
 

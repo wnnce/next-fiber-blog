@@ -1,5 +1,11 @@
-import type { AccessRecord, AccessRecordQueryForm, LoginRecord, LoginRecordQueryForm } from '@/api/system/record/types'
-import { sendPost } from '@/api/request'
+import type {
+  AccessRecord,
+  AccessRecordQueryForm,
+  ApplicationMonitor,
+  LoginRecord,
+  LoginRecordQueryForm
+} from '@/api/system/record/types'
+import { sendGet, sendPost } from '@/api/request'
 import type { Page } from '@/assets/script/types'
 
 // 日志/记录 接口
@@ -17,5 +23,11 @@ export const recordApi = {
    */
   pageAccessRecord: (query: AccessRecordQueryForm) => {
     return sendPost<Page<AccessRecord>>('/system/record/access', query)
+  },
+  /**
+   * 获取指标监控数据
+   */
+  applicationMonitor: () => {
+    return sendGet<ApplicationMonitor>('/base/monitor');
   }
 }
