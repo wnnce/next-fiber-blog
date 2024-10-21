@@ -11,16 +11,16 @@ const pushNewValue = (memoryParent?: number, cpuParent?: number) => {
   if (!memoryParent && !cpuParent) {
     return;
   }
-  if (memoryParent) {
+  if (memoryParent !== undefined) {
     memoryParents.push([new Date(), memoryParent.toFixed(2)])
   }
-  if (cpuParent) {
+  if (cpuParent !== undefined) {
     cpuParents.push([new Date(), cpuParent.toFixed(2)])
   }
-  if (memoryParents.length > 20) {
+  if (memoryParents.length > 150) {
     memoryParents.shift();
   }
-  if (cpuParents.length > 20) {
+  if (cpuParents.length > 150) {
     cpuParents.shift();
   }
   updateChart();
