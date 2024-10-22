@@ -5,6 +5,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go-fiber-ent-web-layout/internal/usercase"
 	sqlbuild "go-fiber-ent-web-layout/pkg/sql-build"
+	"log/slog"
+	"time"
 )
 
 type CommentRepo struct {
@@ -22,8 +24,8 @@ func (self *CommentRepo) Save(comment *usercase.Comment) error {
 		Fields("content", "user_id", "fid", "rid", "location", "comment_ip", "comment_ua", "comment_type").
 		Values(comment.Content, comment.UserId, comment.Fid, comment.Rid, comment.Location, comment.CommentIp,
 			comment.CommentUa, comment.CommentType).
-		InsertByCondition(comment.TopicId > 0, "topic_id", comment.TopicId).
-		InsertByCondition(comment.ArticleId > 0, "article_id", comment.ArticleId).
+		InsertByCondition(comment.TopicId != nil, "topic_id", comment.TopicId).
+		InsertByCondition(comment.ArticleId != nil, "article_id", comment.ArticleId).
 		Returning("comment_id")
 	var commentId int64
 	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
@@ -66,4 +68,48 @@ func (self *CommentRepo) TotalComment(query *usercase.CommentQueryForm) (uint64,
 	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	err := row.Scan(&total)
 	return total, err
+}
+
+func (self *CommentRepo) ManagePage(query *usercase.CommentQueryForm) (*usercase.PageData[usercase.CommentManageVo], error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_comment as bc").
+		Select("bc.*").
+		LeftJoin("t_blog_user as bu").On("bu.user_id").EqRaw("bc.user_id").BuildAsSelect().
+		Select("bu.username as username").
+		LeftJoin("t_blog_article as ba").On("ba.article_id").EqRaw("bc.article_id").BuildAsSelect().
+		Select("ba.title as article_title").
+		WhereByCondition(query.ArticleId > 0, "bc.article_id").Eq(query.ArticleId).
+		AndByCondition(query.TopicId > 0, "bc.topic_id").Eq(query.TopicId).
+		AndByCondition(query.Fid > 0, "bc.fid").Eq(query.Fid).
+		AndByCondition(query.CommentType > 0, "bc.comment_type").Eq(query.CommentType).
+		AndByCondition(query.CreateTimeBegin != "", "bc.create_time").Ge(query.CreateTimeBegin).
+		AndByCondition(query.CreateTimeEnd != "", "bc.create_time").Le(query.CreateTimeEnd).
+		And("bc.delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("bc.create_time desc", "bc.sort")
+	return SelectPage[usercase.CommentManageVo](builder, query.Page, query.Size, true, self.db)
+}
+
+func (self *CommentRepo) UpdateSelective(form *usercase.CommentUpdateForm) error {
+	builder := sqlbuild.NewUpdateBuilder("t_blog_comment").
+		SetRaw("update_time", "now()").
+		SetByCondition(form.IsHot != nil, "is_hot", form.IsHot).
+		SetByCondition(form.IsTop != nil, "is_top", form.IsTop).
+		SetByCondition(form.IsColl != nil, "is_coll", form.IsColl).
+		SetByCondition(form.Status != nil, "status", form.Status).
+		Where("comment_id").Eq(form.CommentId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
+	if err == nil {
+		slog.Info("快捷更新评论完成", "rows", result.RowsAffected(), "commentId", form.CommentId)
+	}
+	return err
+}
+
+func (self *CommentRepo) DeleteById(commentId int64) error {
+	builder := sqlbuild.NewUpdateBuilder("t_blog_comment").
+		Set("delete_at", time.Now().UnixMilli()).
+		Where("comment_id").Eq(commentId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
+	if err == nil {
+		slog.Info("删除评论成功", "rows", result.RowsAffected(), "commentId", commentId)
+	}
+	return err
 }

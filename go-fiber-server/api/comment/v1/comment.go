@@ -55,3 +55,34 @@ func (self *HttpApi) Page(ctx fiber.Ctx) error {
 	}
 	return ctx.JSON(res.OkByData(page))
 }
+
+func (self *HttpApi) UpdateSelective(ctx fiber.Ctx) error {
+	form := &usercase.CommentUpdateForm{}
+	if err := ctx.Bind().JSON(form); err != nil {
+		return err
+	}
+	if err := self.service.UpdateSelectiveComment(form); err != nil {
+		return err
+	}
+	return ctx.JSON(res.SimpleOK())
+}
+
+func (self *HttpApi) Delete(ctx fiber.Ctx) error {
+	commentId := fiber.Params[int64](ctx, "id")
+	if err := self.service.Delete(commentId); err != nil {
+		return err
+	}
+	return ctx.JSON(res.SimpleOK())
+}
+
+func (self *HttpApi) ManagePage(ctx fiber.Ctx) error {
+	query := &usercase.CommentQueryForm{}
+	if err := ctx.Bind().JSON(query); err != nil {
+		return err
+	}
+	page, err := self.service.ManagePage(query)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(page))
+}

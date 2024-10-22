@@ -166,6 +166,9 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	commentRoute.Post("/total", commentApi.Total)
 	commentRoute.Post("/page", commentApi.Page)
 	commentRoute.Post("/", commentApi.Save, auth.ClassicAuth)
+	commentRoute.Post("/manage/page", commentApi.ManagePage, auth.ManageAuth)
+	commentRoute.Put("/manage/status", commentApi.UpdateSelective, auth.ManageAuth)
+	commentRoute.Delete("/manage/:id", commentApi.Delete, auth.ManageAuth)
 
 	// 开放接口
 	openRoute := app.Group("/open")

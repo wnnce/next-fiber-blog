@@ -77,3 +77,28 @@ func (self *CommentService) TotalComment(query *usercase.CommentQueryForm) (uint
 	}
 	return total, nil
 }
+
+func (self *CommentService) ManagePage(query *usercase.CommentQueryForm) (*usercase.PageData[usercase.CommentManageVo], error) {
+	page, err := self.repo.ManagePage(query)
+	if err != nil {
+		slog.Error("管理端分页查询评论失败", "error", err)
+		return nil, tools.FiberServerError("查询失败")
+	}
+	return page, nil
+}
+
+func (self *CommentService) UpdateSelectiveComment(form *usercase.CommentUpdateForm) error {
+	if err := self.repo.UpdateSelective(form); err != nil {
+		slog.Error("快捷更新评论失败", "error", err, "commentId", form.CommentId)
+		return tools.FiberServerError("更新失败")
+	}
+	return nil
+}
+
+func (self *CommentService) Delete(commentId int64) error {
+	if err := self.repo.DeleteById(commentId); err != nil {
+		slog.Error("删除评论失败", "error", err)
+		return tools.FiberServerError("删除失败")
+	}
+	return nil
+}
