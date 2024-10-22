@@ -6,6 +6,7 @@ import type { ApplicationMonitor } from '@/api/system/record/types'
 import MemoryProcessChart from '@/components/charts/MemoryProcessChart.vue'
 import MemoryPieChart from '@/components/charts/MemoryPieChart.vue'
 import DynamicChart from '@/components/charts/DynamicChart.vue'
+import { formatDateTime } from '../../assets/script/util'
 
 const monitorStats = shallowReactive<ApplicationMonitor>({
   hostname: '',
@@ -33,10 +34,10 @@ const queryApplicationMonitor = async () => {
   if (result.code === 200) {
     const { hostname, platform, platformVersion, cpuNumber, cpuPercent, memoryTotal, memoryUsed,
       memoryAvailable, memoryUsedPercent, Sys, HeapSys, HeapInuse, HeapIdle, StackSys,
-      StackInuse, PauseTotalNs, NumGC, GCCPUFraction } = result.data;
+      StackInuse, PauseTotalNs, NumGC, GCCPUFraction, LastGC } = result.data;
     Object.assign(monitorStats, { hostname, platform, platformVersion, cpuNumber, cpuPercent,
       memoryTotal, memoryUsed, memoryAvailable, memoryUsedPercent, Sys, HeapSys, HeapInuse, HeapIdle,
-      StackSys, StackInuse, PauseTotalNs, NumGC, GCCPUFraction })
+      StackSys, StackInuse, PauseTotalNs, NumGC, GCCPUFraction, LastGC })
     dynamicChartRef.value.pushNewValue(memoryUsedPercent, cpuPercent);
     // 3s 查询一次
     setTimeout(() => {
@@ -79,16 +80,13 @@ onMounted(() => {
           />
         </div>
         <div class="monitor-card">
-          <h4 class="monitor-card-title">程序内存占用</h4>
+          <h4 class="monitor-card-title">程序内存分析</h4>
           <MemoryPieChart :sys-member="monitorStats.Sys" :heap-member="monitorStats.HeapSys"
                           :stack-member="monitorStats.StackSys"
           />
         </div>
       </div>
     </div>
-<!--    <div class="monitor-card" style="height: 20rem">-->
-<!--      <h3 class="monitor-card-title">GC</h3>-->
-<!--    </div>-->
   </div>
 </template>
 
