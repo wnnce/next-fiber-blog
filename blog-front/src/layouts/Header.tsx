@@ -27,7 +27,7 @@ const Header: React.FC<HeaderProps> = ({ navList }): React.ReactNode => {
         </div>
         <div className="nav-div flex">
           <div className="logo">
-            <Link href="#">
+            <Link href="/">
               <Image src="/images/logo.svg" alt="logo" width="100" height="60" />
             </Link>
           </div>

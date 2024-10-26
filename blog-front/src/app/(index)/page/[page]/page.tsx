@@ -44,7 +44,7 @@ const ArticlePage: React.FC<{
                       </time> &nbsp;&nbsp;&nbsp;&nbsp;WORDS <strong>{article.wordCount}</strong>
                     </p>
                     <h2 className="sm:text-xl text-lg">
-                      <Link href="#" className="a-hover-line-text-md">
+                      <Link href={`/article/${article.articleId}`} className="a-hover-line-text-md">
                         {article.title}
                       </Link>
                     </h2>

@@ -17,22 +17,21 @@ body {
   height: 100%;
 }
 /* 自定义滚动条样式 */
-html {
-  &::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-  &::-webkit-scrollbar-track {
-    background: rgb(var(--backgroundt-color));
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: rgb(var(--primary-color));
-    border-radius: 10px;
-  }
-  &::-webkit-scrollbar-thumb:hover {
-    background-color: white;
-  }
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
 }
+::-webkit-scrollbar-track {
+  background: rgb(var(--backgroundt-color));
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--primary-color));
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: white;
+}
+
 
 body {
   background: linear-gradient(rgba(var(--backgroundt-color), 0.5), rgba(var(--backgroundt-color), 0.5)), url("/images/bg.webp") no-repeat center fixed;
@@ -79,6 +78,10 @@ body {
 /* 次要字体颜色 */
 .desc-text {
   color: rgb(var(--text-color-3));
+}
+/* 强调色 */
+.primary-color {
+  color: rgb(var(--primary-color));
 }
 
 .dynamic-container {

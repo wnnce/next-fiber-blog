@@ -16,13 +16,26 @@ export const TopicLike: React.FC<{
   )
 }
 
+export const ArticleLike: React.FC<{
+  articleId: number;
+  count: number;
+}> = ({ articleId, count }) => {
+  const handleLike = (key: string | number, done: () => void) => {
+    done();
+  }
+  return (
+    <CommonLike count={count} entityKey={articleId} type="article" onLike={handleLike} hideText />
+  )
+}
+
 export const CommonLike: React.FC<{
   count: number,
   entityKey: string | number,
   type: 'topic' | 'article' | 'comment',
   onLike: (key: string | number, done: () => void) => void,
-  className?: string
-}> = ({ count, entityKey, type, onLike, className }) => {
+  className?: string,
+  hideText?: boolean,
+}> = ({ count, entityKey, type, onLike, className, hideText = false }) => {
   const [likeCount, setLikeCount] = useState<number>(count);
 
   const storageKey = useMemo<string>(() => {
@@ -60,7 +73,7 @@ export const CommonLike: React.FC<{
       ) : (
         <i className="inline-block text-sm i-tabler:thumb-up common-like-icon" />
       )}
-      <span className="text-xs ml-0.5">{likeCount}</span>
+      {!hideText && <span className="text-xs ml-0.5">{likeCount}</span>}
     </button>
   )
 }

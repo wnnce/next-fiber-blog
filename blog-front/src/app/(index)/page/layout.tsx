@@ -24,7 +24,7 @@ const ArticlePageLayout: React.FC<{
                 <RichImage className="top-article-item-image" src={article.coverUrl} fill />
                 <div className="top-article-summary p-4 flex flex-col sm:gap-row-2 gap-row-1">
                   <h2 className="sm:text-xl text-lg">
-                    <Link href="#" className="a-hover-line-text-md"
+                    <Link href={`/article/${article.articleId}`} className="a-hover-line-text-md"
                           title={article.title}
                     >
                       { article.title }

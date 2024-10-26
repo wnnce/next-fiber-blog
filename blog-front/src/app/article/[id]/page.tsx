@@ -4,15 +4,17 @@ import '@/styles/components/article-page.scss'
 import 'github-markdown-css/github-markdown-dark.css'
 import '@/styles/components/markdown.scss'
 import 'highlight.js/styles/atom-one-dark.min.css'
+import cardStyles from '@/styles/components/card.module.scss';
 import React from 'react'
 import { redirect } from 'next/navigation'
 import { queryArticle } from '@/lib/api'
-import StaticCard from '@/components/StaticCard'
-import DynamicCard from '@/components/DynamicCard'
 import RichImage from '@/components/RichImage'
 import { formatDateTime } from '@/tools/utils'
 import Link from 'next/link'
 import useMarkdownParse from '@/hooks/markdown'
+import { ArticleLike, CommonLike } from '@/components/client/CommonLike'
+import Comment from '@/components/comment/Comment'
+import StaticCard from '@/components/StaticCard'
 
 const ArticlePage: React.FC<{
   params: {
@@ -28,8 +30,10 @@ const ArticlePage: React.FC<{
     redirect('/404');
   }
 
-  const articleRender = useMarkdownParse().articleRender()
-
+  let articleTocHtml: string = '';
+  const articleRender = useMarkdownParse().articleRender((html: string) => {
+    articleTocHtml = html;
+  })
   const articleHtml = articleRender.render(article.content);
 
   const readerTime = function() {
@@ -41,7 +45,7 @@ const ArticlePage: React.FC<{
       return `${min}分钟`
     }
     const hours = Math.floor(min / 60);
-    const num = min & 60;
+    const num = min % 60;
     if (num === 0) {
       return `${hours}小时`
     }
@@ -50,19 +54,14 @@ const ArticlePage: React.FC<{
 
   return (
     <div className="dynamic-container">
-      <div className="flex gap-4 py-8 px-4">
-        <div className="article-toc hidden lg:block lg:w-80">
-          <DynamicCard padding="1.5rem">
-            112233
-          </DynamicCard>
-        </div>
-        <div className="article-content flex-1">
-          <StaticCard>
+      <div className="gap-4 py-8 px-4 flex">
+        <div className="flex-1 flex gap-row-4 flex-col">
+          <div className={`${cardStyles.card} article-content`}>
             <div className="article-header h-80 xl:h-100">
               <RichImage className="header-cover" src={article.coverUrl} fill lazy />
               <div className="header-summary flex flex-col justify-end p-6 gap-row-2">
                 <h1 className="text-9 main-text">{article.title}</h1>
-                <ul className="list-none flex flex-wrap gap-col-4 text-xs info-text">
+                <ul className="list-none flex flex-wrap gap-col-4 text-xs main-text">
                   <li className="flex gap-col-2">
                     <i className="text-sm inline-block i-tabler:clock" />
                     <time dateTime={article.createTime}>{`POSTED ${formatDateTime(article.createTime)}`}</time>
@@ -72,7 +71,7 @@ const ArticlePage: React.FC<{
                     <time dateTime={article.updateTime}>{`UPDATE ${formatDateTime(article.updateTime)}`}</time>
                   </li>
                 </ul>
-                <ul className="list-none flex flex-wrap gap-col-4 text-xs info-text">
+                <ul className="list-none flex flex-wrap gap-col-4 text-xs main-text">
                   <li className="flex gap-col-2">
                     <i className="text-sm inline-block i-tabler:file-word" />
                     <span>{`WORDS ${article.wordCount}`}</span>
@@ -86,7 +85,7 @@ const ArticlePage: React.FC<{
                     <time dateTime={article.updateTime}>{`VIEW ${article.viewNum}`}</time>
                   </li>
                 </ul>
-                <div className="flex gap-col-4 gap-row-2 text-xs info-text flex-wrap">
+                <div className="flex gap-col-4 gap-row-2 text-xs main-text flex-wrap">
                   {(article.categories && article.categories.length) > 0 && (
                     <ul className="list-none flex gap-col-2 flex-wrap">
                       <i className="inline-block i-tabler:category text-sm" />
@@ -110,8 +109,36 @@ const ArticlePage: React.FC<{
                 </div>
               </div>
             </div>
-            <div className="p-4 md:p-6 markdown-body article-markdown" dangerouslySetInnerHTML={{ __html: articleHtml }}></div>
+            <div className="p-4 md:p-6 markdown-body article-markdown"
+                 dangerouslySetInnerHTML={{ __html: articleHtml }}></div>
+            <div className="article-footer flex flex-col desc-text">
+              <div className="flex footer-options">
+                <div><ArticleLike articleId={article.articleId} count={article.voteUp} /></div>
+                <div><i className="inline-block i-tabler:qrcode"></i></div>
+              </div>
+              <p style={{ fontSize: '0.85rem' }}>{ `本文使用 ${article.protocol || 'CC BY-NC-SA 4.0'} 许可协议，转载请注明出处` }</p>
+              { article.tips && <p>{ `TOPS: ${article.tips}` }</p> }
+            </div>
+          </div>
+          <div className="related-article">
+            <h2 className="mb-4">关联文章</h2>
+            <div className="related-article-list flex gap-col-4">
+              <Link href={`/article/${article.articleId}`}>
+                <div className="related-article-item">
+                  <RichImage className="item-cover" src={article.coverUrl} fill lazy />
+                  <div className="item-content">
+                    <h3>{ article.title }</h3>
+                  </div>
+                </div>
+              </Link>
+            </div>
+          </div>
+          <StaticCard padding="1.5rem">
+            <Comment type={1} articleId={article.articleId} />
           </StaticCard>
+        </div>
+        <div className="article-toc animate-on-scroll hidden lg:block lg:w-80">
+          <div className="toc-nav-list" dangerouslySetInnerHTML={{ __html: articleTocHtml }} />
         </div>
       </div>
     </div>
