@@ -2,13 +2,27 @@
 
 import '@/styles/components/client-components.scss'
 import React, { useMemo, useState } from 'react'
+import useMessage from '@/components/message'
+import { topicVoteUp } from '@/lib/client-api'
 
 export const TopicLike: React.FC<{
   topicId: number;
   count: number;
 }> = ({ topicId, count }) => {
-  const handleLike = (key: string | number, done: () => void) => {
-    done();
+
+  const message = useMessage();
+
+  const handleLike = async (key: string | number, done: () => void) => {
+    const loadingMessage = message.showLoading('处理中...');
+    try {
+      const result = await topicVoteUp(topicId);
+      if (result.code === 200) {
+        message.showSuccess('点赞成功');
+        done();
+      }
+    } finally {
+      loadingMessage.close();
+    }
   }
 
   return (

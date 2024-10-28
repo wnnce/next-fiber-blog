@@ -68,3 +68,11 @@ export const commentVoteUp = (commentId: number) => {
 export const totalComment = (data: Record<string, any>) => {
   return baseClientRequest<number>('/comment/total', 'POST', undefined, data);
 }
+
+/**
+ * 动态点赞
+ * @param topicId 点赞的动态id
+ */
+export const topicVoteUp = (topicId: number) => {
+  return baseClientRequest<null>(`/open/topic/vote-up/${topicId}`, 'POST')
+}
