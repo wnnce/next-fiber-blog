@@ -128,6 +128,14 @@ export interface Article {
 }
 
 /**
+ * 热门文章
+ */
+export interface HotArticle {
+  articleId: number;
+  title: string;
+}
+
+/**
  * 文章归档信息
  */
 export interface ArticleArchive {
