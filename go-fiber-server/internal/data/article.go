@@ -232,8 +232,6 @@ func (self *ArticleRepo) SelectById(articleId uint64, isAdmin bool) (*usercase.A
 	}
 	builder := sqlbuild.NewSelectBuilder("t_blog_article as ba").
 		Select(selectFields...).
-		LeftJoin("t_blog_comment as bc").On("bc.article_id").EqRaw("ba.article_id").And("bc.status").EqRaw("0").And("bc.delete_at").EqRaw("0").BuildAsSelect().
-		Select("count(DISTINCT bc.comment_id) as comment_num").
 		LeftJoin("t_blog_category as ct").On("ct.category_id").EqRaw("ANY(ba.category_ids)").And("ct.status").EqRaw("0").And("ct.delete_at").EqRaw("0").BuildAsSelect().
 		Select("jsonb_agg(DISTINCT jsonb_build_object('categoryId', ct.category_id, 'categoryName', ct.category_name)) AS categories").
 		LeftJoin("t_blog_tag as bt").On("bt.tag_id").EqRaw("ANY(ba.tag_ids)").And("bt.status").EqRaw("0").And("bt.delete_at").EqRaw("0").BuildAsSelect().

@@ -77,7 +77,7 @@ func (self *CategoryService) TreeCategory() ([]*usercase.CategoryVo, error) {
 	}
 	categoryTree = tools.BuilderTree[uint](categorys)
 	pool.Go(func() {
-		if setErr := self.redisTemplate.Set(context.Background(), categoryTreeListCacheKey, categoryTree, math.MaxInt64); err != nil {
+		if setErr := self.redisTemplate.Set(context.Background(), categoryTreeListCacheKey, categoryTree, math.MaxInt64); setErr != nil {
 			slog.Error("分类树形列表添加redis缓存失败", "error", setErr.Error())
 		}
 	})
