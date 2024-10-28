@@ -1,12 +1,19 @@
 package service
 
 import (
+	"context"
 	"github.com/gofiber/fiber/v3"
 	"go-fiber-ent-web-layout/internal/data"
 	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/usercase"
+	"go-fiber-ent-web-layout/pkg/pool"
 	"log/slog"
 	"strings"
+	"time"
+)
+
+const (
+	hotArticleCacheKey = "BLOG:article:list:hot"
 )
 
 type ArticleService struct {
@@ -72,6 +79,21 @@ func (self *ArticleService) ListTopArticle() ([]*usercase.Article, error) {
 		return nil, tools.FiberServerError("查询置顶文章失败")
 	}
 	return topList, nil
+}
+
+func (self *ArticleService) ListHotArticle() ([]usercase.HotArticleVo, error) {
+	hots, err := self.repo.ListHotArticle()
+	if err != nil {
+		slog.Error("查询热门文章失败", "error", err)
+		return nil, tools.FiberServerError("查询热门文章失败")
+	}
+	pool.Go(func() {
+		if setErr := self.redisTemplate.Set(context.Background(), hotArticleCacheKey, hots, 10*time.Minute); setErr != nil {
+			slog.Error("添加热门文章缓存失败", "error", setErr)
+		}
+	})
+
+	return hots, nil
 }
 
 func (self *ArticleService) PageByLabel(query *usercase.ArticleQueryForm) (*usercase.PageData[usercase.Article], error) {

@@ -96,6 +96,14 @@ func (self *HttpApi) ListTop(ctx fiber.Ctx) error {
 	return ctx.JSON(res.OkByData(list))
 }
 
+func (self *HttpApi) ListHot(ctx fiber.Ctx) error {
+	list, err := self.service.ListHotArticle()
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(list))
+}
+
 func (self *HttpApi) Archives(ctx fiber.Ctx) error {
 	archives, err := self.service.Archives()
 	if err != nil {

@@ -23,6 +23,11 @@ type Article struct {
 	BaseEntity
 }
 
+type HotArticleVo struct {
+	ArticleId uint64 `json:"articleId" db:"article_id"`
+	Title     string `json:"title" db:"title"`
+}
+
 // ArticleVo 博客文章Vo类
 type ArticleVo struct {
 	Article
@@ -69,6 +74,8 @@ type IArticleRepo interface {
 
 	ListTopArticle() ([]*Article, error)
 
+	ListHotArticle() ([]HotArticleVo, error)
+
 	PageByLabel(query *ArticleQueryForm) ([]*Article, int64, error)
 
 	Archives() ([]ArticleArchive, error)
@@ -98,6 +105,8 @@ type IArticleService interface {
 	PageByLabel(query *ArticleQueryForm) (*PageData[Article], error)
 
 	ListTopArticle() ([]*Article, error)
+
+	ListHotArticle() ([]HotArticleVo, error)
 
 	Archives() ([]ArticleArchive, error)
 

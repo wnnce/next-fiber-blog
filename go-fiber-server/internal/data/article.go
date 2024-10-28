@@ -158,6 +158,25 @@ func (self *ArticleRepo) ListTopArticle() ([]*usercase.Article, error) {
 	})
 }
 
+func (self *ArticleRepo) ListHotArticle() ([]usercase.HotArticleVo, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_article").
+		Select("article_id", "title").
+		Where("status").EqRaw("0").And("delete_at").EqRaw("0").BuildAsSelect().
+		OrderByDesc("is_hot", "vote_up", "sort").
+		Limit(8)
+	rows, err := self.db.Query(context.Background(), builder.Sql())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (usercase.HotArticleVo, error) {
+		vo := usercase.HotArticleVo{}
+		scanErr := row.Scan(&vo.ArticleId, &vo.Title)
+		return vo, scanErr
+	})
+
+}
+
 func (self *ArticleRepo) PageByLabel(query *usercase.ArticleQueryForm) ([]*usercase.Article, int64, error) {
 	builder := sqlbuild.NewSelectBuilder("t_blog_article").
 		Select("article_id", "title", "summary", "cover_url", "view_num", "share_num", "vote_up", "is_hot", "is_top", "create_time").
@@ -264,7 +283,7 @@ func (self *ArticleRepo) CountByTitle(title string, articleId uint64) (uint8, er
 	return total, err
 }
 
-func (self ArticleRepo) DeleteById(articleId uint64) error {
+func (self *ArticleRepo) DeleteById(articleId uint64) error {
 	builder := sqlbuild.NewUpdateBuilder("t_blog_article").
 		Set("delete_at", time.Now().UnixMilli()).
 		Where("article_id").Eq(articleId).BuildAsUpdate()
