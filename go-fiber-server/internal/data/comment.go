@@ -6,6 +6,7 @@ import (
 	"go-fiber-ent-web-layout/internal/usercase"
 	sqlbuild "go-fiber-ent-web-layout/pkg/sql-build"
 	"log/slog"
+	"strconv"
 	"time"
 )
 
@@ -110,6 +111,18 @@ func (self *CommentRepo) DeleteById(commentId int64) error {
 	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("删除评论成功", "rows", result.RowsAffected(), "commentId", commentId)
+	}
+	return err
+}
+
+func (self *CommentRepo) CommentVoteUp(commentId int64, num int) error {
+	builder := sqlbuild.NewUpdateBuilder("t_blog_comment").
+		SetRaw("update_time", "now()").
+		SetRaw("vote_up", "vote_up + "+strconv.Itoa(num)).
+		Where("comment_id").Eq(commentId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
+	if err == nil {
+		slog.Info("更新评论点赞数成功", "rows", result.RowsAffected(), "commentId", commentId)
 	}
 	return err
 }

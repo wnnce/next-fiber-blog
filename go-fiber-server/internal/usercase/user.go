@@ -133,7 +133,7 @@ type IUserService interface {
 
 	// UpdateUserExpertise 更新用户经验值
 	// 更新经验值的同时还会保存经验值明细 如果总经验值达到了升级阈值 则会提升用户等级
-	UpdateUserExpertise(count int64, userId uint64) error
+	UpdateUserExpertise(count int64, userId uint64, source uint8) error
 
 	// PageUser 分页查询用户信息
 	PageUser(query *UserQueryForm) (*PageData[UserVo], error)

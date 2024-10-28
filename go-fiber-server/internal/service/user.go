@@ -134,13 +134,13 @@ func (self *UserService) Logout(userId uint64) error {
 // UpdateUserExpertise 更新用户经验值
 // 在更新用户经验值时 判断当前经验值是否达到了这个等级的经验上限
 // 如果达到 那么就将用户升级
-func (self *UserService) UpdateUserExpertise(count int64, userId uint64) error {
+func (self *UserService) UpdateUserExpertise(count int64, userId uint64, source uint8) error {
 	return self.repo.Transaction(context.Background(), func(tx pgx.Tx) error {
 		if err := self.repo.SaveExpertiseDetail(&usercase.ExpertiseDetail{
 			UserId:     userId,
 			Detail:     count,
 			DetailType: 1,
-			Source:     2,
+			Source:     source,
 		}, tx); err != nil {
 			slog.Error("保存经验值变更明细失败", "err", err.Error())
 			return err
@@ -159,6 +159,7 @@ func (self *UserService) UpdateUserExpertise(count int64, userId uint64) error {
 				return upgradeErr
 			}
 		}
+		slog.Info("更新用户经验和等级成功", "detail", count, "userId", userId, "source", source)
 		return nil
 	})
 }

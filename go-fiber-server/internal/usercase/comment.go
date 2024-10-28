@@ -77,6 +77,9 @@ type ICommentRepo interface {
 	UpdateSelective(form *CommentUpdateForm) error
 
 	DeleteById(commentId int64) error
+
+	// CommentVoteUp 评论点赞
+	CommentVoteUp(commentId int64, num int) error
 }
 
 type ICommentService interface {
@@ -92,4 +95,6 @@ type ICommentService interface {
 	Delete(commentId int64) error
 
 	ManagePage(query *CommentQueryForm) (*PageData[CommentManageVo], error)
+
+	CommentVoteUp(commentId int64, userId uint64) error
 }

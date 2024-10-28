@@ -99,7 +99,7 @@ func (self *UserRepo) UpdateUserExpertise(count int64, userId uint64, tx pgx.Tx)
 }
 
 func (self *UserRepo) UpdateUserLevel(level uint8, userId uint64, tx pgx.Tx) error {
-	builder := sqlbuild.NewUpdateBuilder("t_user_extend").
+	builder := sqlbuild.NewUpdateBuilder("t_blog_user_extend").
 		Set("level", level).
 		Where("user_id").Eq(userId).BuildAsUpdate()
 	result, err := smartExec(self.db, tx, context.Background(), builder.Sql(), builder.Args()...)

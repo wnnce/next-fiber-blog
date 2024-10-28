@@ -3,6 +3,7 @@ package comment
 import (
 	"github.com/gofiber/fiber/v3"
 	"go-fiber-ent-web-layout/internal/middleware/auth"
+	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/tools/res"
 	"go-fiber-ent-web-layout/internal/usercase"
 )
@@ -85,4 +86,16 @@ func (self *HttpApi) ManagePage(ctx fiber.Ctx) error {
 		return err
 	}
 	return ctx.JSON(res.OkByData(page))
+}
+
+func (self *HttpApi) VoteUp(ctx fiber.Ctx) error {
+	loginUser := fiber.Locals[auth.ClassicLoginUser](ctx, "classicUser")
+	commentId := fiber.Params[int64](ctx, "id")
+	if commentId <= 0 {
+		return tools.FiberRequestError("参数错误")
+	}
+	if err := self.service.CommentVoteUp(commentId, loginUser.GetUserId()); err != nil {
+		return err
+	}
+	return ctx.JSON(res.SimpleOK())
 }
