@@ -54,6 +54,14 @@ export const saveComment = (data: Record<string, any>) => {
 }
 
 /**
+ * 评论点赞接口
+ * @param commentId 点赞的评论Id
+ */
+export const commentVoteUp = (commentId: number) => {
+  return baseClientRequest<null>(`/comment/vote-up/${commentId}`, 'POST')
+}
+
+/**
  * 查询评论数量
  * @param data 查询参数
  */
