@@ -5,6 +5,7 @@ import React from 'react'
 import Header from '@/layouts/Header'
 import Footer from '@/layouts/Footer'
 import ScrollVisible from '@/components/ScrollVisible'
+import GlobalProgressBar from '@/components/GlobalProgressBar'
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,6 +36,7 @@ const RootLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <html lang="zh-cn">
       <body className={inter.className}>
         <ScrollVisible />
+        <GlobalProgressBar />
         <Header navList={navList} />
         <main>
           {children}
