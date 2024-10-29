@@ -49,6 +49,14 @@ func (self *TopicService) PageTopic(query *usercase.TopicQueryForm) (*usercase.P
 	return usercase.NewPageData[usercase.Topic](topics, total, query.Page, query.Size), nil
 }
 
+func (self *TopicService) TopicVoteUp(topicId uint64) error {
+	if err := self.repo.VoteUp(topicId, 1); err != nil {
+		slog.Error("更新动态点赞数失败", "error", err)
+		return tools.FiberServerError("点赞失败")
+	}
+	return nil
+}
+
 func (self *TopicService) DeleteTopicById(topicId int64) error {
 	if err := self.repo.DeleteById(topicId); err != nil {
 		slog.Error("删除博客动态失败", "error", err.Error())

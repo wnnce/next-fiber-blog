@@ -41,6 +41,8 @@ type ITopicRepo interface {
 
 	Page(query *TopicQueryForm) ([]*Topic, int64, error)
 
+	VoteUp(topicId uint64, num int) error
+
 	DeleteById(topicId int64) error
 }
 
@@ -53,6 +55,8 @@ type ITopicService interface {
 	UpdateSelectiveTopic(form *TopicUpdateForm) error
 
 	PageTopic(query *TopicQueryForm) (*PageData[Topic], error)
+
+	TopicVoteUp(topicId uint64) error
 
 	DeleteTopicById(topicId int64) error
 }
