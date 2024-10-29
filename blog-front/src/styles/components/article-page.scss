@@ -127,12 +127,10 @@
   .article-footer {
     margin: 1rem;
     border-top: 1px solid rgb(var(--border-color));
-    padding: 1rem;
-    row-gap: 1rem;
     .footer-options {
       column-gap: 2rem;
       flex-wrap: wrap;
-      > div {
+      > li {
         font-size: 2rem;
         border-radius: 50%;
         border: 1px solid rgb(var(--border-color));

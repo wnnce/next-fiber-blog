@@ -119,13 +119,13 @@ const ArticlePage: React.FC<{
             </div>
             <div className="p-4 md:p-6 markdown-body article-markdown"
                  dangerouslySetInnerHTML={{ __html: articleHtml }}></div>
-            <div className="article-footer flex flex-col desc-text">
-              <div className="flex footer-options">
-                <div><ArticleLike articleId={article.articleId} count={article.voteUp} /></div>
-                <div><i className="inline-block i-tabler:qrcode"></i></div>
-              </div>
-              <p style={{ fontSize: '0.85rem' }}>{ `本文使用 ${article.protocol || 'CC BY-NC-SA 4.0'} 许可协议，转载请注明出处` }</p>
-              { article.tips && <p>{ `TOPS: ${article.tips}` }</p> }
+            <div className="article-footer sm:gap-row-3 gap-row-1.5 sm:p-2 p-1 flex flex-col desc-text">
+              <ul className="flex footer-options py-2 list-none">
+                <li><ArticleLike articleId={article.articleId} count={article.voteUp} /></li>
+                <li><i className="inline-block i-tabler:qrcode"></i></li>
+              </ul>
+              <p className="sm:text-sm text-3">{ `本文使用 ${article.protocol || 'CC BY-NC-SA 4.0'} 许可协议，转载请注明出处` }</p>
+              { article.tips && <p className="sm:text-sm text-3">{ `TIPS: ${article.tips}` }</p> }
             </div>
           </div>
           <div className="related-article sm:px-0 px-2">
