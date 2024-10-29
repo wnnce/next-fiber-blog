@@ -9,9 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@mdit/plugin-alert": "^0.13.1",
-    "@mdit/plugin-img-lazyload": "^0.13.1",
-    "@mdit/plugin-tasklist": "^0.13.1",
+    "@vscode/markdown-it-katex": "^1.1.0",
     "TagCloud": "^2.5.0",
     "github-markdown-css": "^5.6.1",
     "highlight.js": "^11.10.0",
@@ -27,6 +25,9 @@
   },
   "devDependencies": {
     "@iconify-json/tabler": "^1.1.120",
+    "@mdit/plugin-alert": "^0.13.1",
+    "@mdit/plugin-img-lazyload": "^0.13.1",
+    "@mdit/plugin-tasklist": "^0.13.1",
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^20",
     "@types/react": "^18",

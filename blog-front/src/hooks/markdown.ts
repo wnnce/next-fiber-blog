@@ -1,6 +1,7 @@
 import markdownit from 'markdown-it';
 import hljs from 'highlight.js';
 import type MarkdownIt from 'markdown-it'
+import katex from '@vscode/markdown-it-katex'
 import { alert } from "@mdit/plugin-alert"
 import { imgLazyload } from "@mdit/plugin-img-lazyload"
 import { tasklist } from "@mdit/plugin-tasklist"
@@ -23,7 +24,7 @@ const useMarkdownParse = () => {
           }
           return `<pre><code class="hljs ${lang && `language-${lang}`}">${resultValue}</code></pre>`
         }
-      }).use(alert).use(imgLazyload).use(tasklist).use(anchor).use(toc, {
+      }).use(katex).use(alert).use(imgLazyload).use(tasklist).use(anchor).use(toc, {
         callback: !tocRenderCallback ? undefined : (html: string, _: object) => {
           tocRenderCallback(html);
         }
