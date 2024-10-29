@@ -1,7 +1,7 @@
 'use client'
 
 import '@/styles/components/client-components.scss'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import useMessage from '@/components/message'
 import { topicVoteUp } from '@/lib/client-api'
 
@@ -51,6 +51,7 @@ export const CommonLike: React.FC<{
   hideText?: boolean,
 }> = ({ count, entityKey, type, onLike, className, hideText = false }) => {
   const [likeCount, setLikeCount] = useState<number>(count);
+  const [likeKeys, setLikeKeys] = useState<Record<string | number, null>>({});
 
   const storageKey = useMemo<string>(() => {
     if (type === 'topic') {
@@ -62,19 +63,23 @@ export const CommonLike: React.FC<{
     }
   }, [type])
 
-  const likeKeys = useMemo<Record<string | number, null>>(() => {
-    const stringValue = localStorage.getItem(storageKey)
-    if (stringValue && stringValue.length > 0) {
-      return JSON.parse(stringValue) as Record<string | number, null>;
-    }
-    return {};
-  }, [storageKey])
-
   const handleLike = () => {
-    likeKeys[entityKey] = null;
+    setLikeKeys(prevState => {
+      return {
+        ...prevState,
+        entityKey: null,
+      }
+    })
     localStorage.setItem(storageKey, JSON.stringify(likeKeys));
     setLikeCount(next => next + 1);
   }
+
+  useEffect(() => {
+    const stringValue = localStorage.getItem(storageKey)
+    if (stringValue && stringValue.length > 0) {
+      setLikeKeys(JSON.parse(stringValue) as Record<string | number, null>)
+    }
+  }, [storageKey])
   return (
     <button className={`desc-text flex items-start common-like-button ${className || ''}`}
             disabled={likeKeys[entityKey] === null}
