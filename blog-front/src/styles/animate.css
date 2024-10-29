@@ -13,6 +13,22 @@
   transition: transform 300ms ease-out;
 }
 
+.drawer-right-fade-enter {
+  transform: translateX(100%);
+}
+.drawer-right-fade-enter-active {
+  transform: translateX(0);
+  transition: transform 300ms ease-in-out;
+}
+.drawer-right-fade-exit {
+  transform: translateX(0);
+}
+.drawer-right-fade-exit-active {
+  transform: translateX(100%);
+  transition: transform 300ms ease-out;
+}
+
+
 .search-fade-enter {
   opacity: 0;
   transform: translateY(-100%);

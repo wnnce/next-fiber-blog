@@ -12,9 +12,11 @@ import RichImage from '@/components/RichImage'
 import { formatDateTime } from '@/tools/utils'
 import Link from 'next/link'
 import useMarkdownParse from '@/hooks/markdown'
-import { ArticleLike, CommonLike } from '@/components/client/CommonLike'
+import { ArticleLike } from '@/components/client/CommonLike'
 import Comment from '@/components/comment/Comment'
 import StaticCard from '@/components/StaticCard'
+import ArticleDynamicScrollTop from '@/components/client/ArticleDynamicScrollTop'
+import ArticleDrawerToc from '@/components/client/ArticleDrawerToc'
 
 const ArticlePage: React.FC<{
   params: {
@@ -54,7 +56,13 @@ const ArticlePage: React.FC<{
 
   return (
     <div className="dynamic-container">
-      <div className="gap-4 py-8 px-4 flex">
+      <div className="sm:py-8 py-4 sm:px-4 block lg:gap-4 lg:flex">
+        <div className="article-slide-option text-xl flex flex-col gap-row-1">
+          <div className="toc-button lg:hidden">
+            <ArticleDrawerToc tocHtml={articleTocHtml} />
+          </div>
+          <ArticleDynamicScrollTop />
+        </div>
         <div className="flex-1 flex gap-row-4 flex-col">
           <div className={`${cardStyles.card} article-content`}>
             <div className="article-header h-80 xl:h-100">
@@ -120,7 +128,7 @@ const ArticlePage: React.FC<{
               { article.tips && <p>{ `TOPS: ${article.tips}` }</p> }
             </div>
           </div>
-          <div className="related-article">
+          <div className="related-article sm:px-0 px-2">
             <h2 className="mb-4">关联文章</h2>
             <div className="related-article-list flex gap-col-4">
               <Link href={`/article/${article.articleId}`}>

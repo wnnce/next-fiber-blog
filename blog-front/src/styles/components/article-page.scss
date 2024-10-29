@@ -1,3 +1,14 @@
+.article-slide-option {
+  position: fixed;
+  bottom: 5rem;
+  right: 0;
+  z-index: 30;
+  .toc-button {
+    padding: 0.25rem 0.25rem 0 0.25rem;
+    background-color: rgb(var(--primary-color));
+  }
+}
+
 .article-page-item {
   &:hover {
     .article-item-cover {
@@ -22,58 +33,65 @@
     height: auto;
     max-height: 36rem;
     overflow-y: auto;
-    nav {
-      font-size: 0.85rem;
-      .toc-item-active {
-        font-weight: bold;
+  }
+}
+.drawer-toc-nav-list {
+  width: 16rem;
+  overflow-x: auto;
+  height: 100%;
+}
+.toc-nav-list, .drawer-toc-nav-list {
+  nav {
+    font-size: 0.85rem;
+    .toc-item-active {
+      font-weight: bold;
+    }
+    ol {
+      display: flex;
+      flex-direction: column;
+    }
+    a {
+      display: inline-block;
+      white-space: pre-wrap;
+      text-wrap: wrap;
+      width: 100%;
+      padding: 0.35rem 0;
+      border-radius: 0.5rem;
+      transition: background-color 300ms, color 300ms;
+      &:hover {
+        color: rgb(var(--primary-color));
+        background-color: rgb(var(--button-background-color));
       }
-      ol {
-        display: flex;
-        flex-direction: column;
+    }
+    // 一级标题
+    > ol > li {
+      > a {
+        padding-left: 1rem;
       }
-      a {
-        display: inline-block;
-        white-space: pre-wrap;
-        text-wrap: wrap;
-        width: 100%;
-        padding: 0.35rem 0;
-        border-radius: 0.5rem;
-        transition: background-color 300ms, color 300ms;
-        &:hover {
-          color: rgb(var(--primary-color));
-          background-color: rgb(var(--button-background-color));
-        }
-      }
-      // 一级标题
+      // 二级标题
       > ol > li {
         > a {
-          padding-left: 1rem;
+          padding-left: 2rem;
         }
-        // 二级标题
+        // 三级标题
         > ol > li {
           > a {
-            padding-left: 2rem;
+            padding-left: 3rem;
           }
-          // 三级标题
+          // 四级标题
           > ol > li {
             > a {
-              padding-left: 3rem;
+              padding-left: 4rem;
             }
-            // 四级标题
+            // 五级标题
             > ol > li {
               > a {
-                padding-left: 4rem;
+                padding-left: 5rem;
               }
-              // 五级标题
+              // 六级标题
               > ol > li {
                 > a {
-                  padding-left: 5rem;
-                }
-                // 六级标题
-                > ol > li {
-                  > a {
-                    padding-left: 6rem;
-                  }
+                  padding-left: 6rem;
                 }
               }
             }
@@ -103,6 +121,7 @@
       top: 0;
       bottom: 0;
       background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
     }
   }
   .article-footer {
