@@ -141,7 +141,7 @@ const ArticlePage: React.FC<{
               </Link>
             </div>
           </div>
-          <StaticCard padding="1.5rem">
+          <StaticCard>
             <Comment type={1} articleId={article.articleId} />
           </StaticCard>
         </div>

@@ -7,7 +7,7 @@ import Link from 'next/link'
 const HotArticles: React.FC = async () => {
   const { data: hotArticles } = await listHotArticle();
   return (
-    <DynamicCard padding="1.5rem" title="HOTS" icon="i-tabler:flame">
+    <DynamicCard title="HOTS" icon="i-tabler:flame">
       <section className="mt-2">
         <ol className="list-none flex flex-col gap-row-4 text-sm">
           { hotArticles.map(article => (

@@ -57,7 +57,7 @@ export const WordCloud: React.FC<{
     }
   }, [children])
   return (
-    <DynamicCard padding="1.5rem" title="TAGS" icon="i-tabler:tags">
+    <DynamicCard title="TAGS" icon="i-tabler:tags">
       <div className="tags-word-cloud"></div>
       <ul className="hidden-word-cloud-list hidden">
         { children }

@@ -20,7 +20,7 @@ const ArticlePage: React.FC<{
   const { data: articlePage } = await pageArticle({ page: numberPage,  size: 5})
   if (articlePage.records.length === 0) {
     return (
-      <DynamicCard padding="1.5rem">
+      <DynamicCard>
         <Empty textClassName="text-sm" text="还没有非置顶文章哦..." iconSize="6rem" />
       </DynamicCard>
     )
@@ -32,12 +32,12 @@ const ArticlePage: React.FC<{
           articlePage.records.map(article => (
             <li key={article.articleId} className="article-page-item">
               <article>
-                <DynamicCard multiple={40}>
+                <DynamicCard multiple={40} useDefaultPadding={false}>
                   <div className="overflow-hidden" style={{ width: '100%', aspectRatio: '16 / 6' }}>
                     <RichImage className="article-item-cover" src={article.coverUrl} fill
                                style={{ width: '100%', height: '100%' }} />
                   </div>
-                  <div className="p-4 flex flex-col gap-row-2">
+                  <div className="p-4 flex flex-col sm:gap-row-2 gap-row-1">
                     <p className="desc-text text-xs">
                       POSTED <time dateTime={article.createTime}>
                         {formatDateTime(article.createTime)}

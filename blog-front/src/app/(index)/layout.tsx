@@ -13,7 +13,7 @@ const IndexLayout: React.FC<{
 }> = ({ children }) => {
   return (
     <div className="dynamic-container min-h-screen">
-      <div className="layout-container py-8 px-4">
+      <div className="layout-container py-4 px-2 sm:py-8 sm:px-4">
         <div className="layout-left flex flex-col gap-row-4">
           <AuthorConcat />
           <Bulletin />

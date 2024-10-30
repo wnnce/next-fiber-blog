@@ -52,7 +52,7 @@ const AuthorConcat: React.FC = async () => {
     useSiteConfiguration().queryConfigs('avatar', 'title', 'summary')
   ])
   return (
-    <DynamicCard padding="1.5rem">
+    <DynamicCard>
       <section>
         <div className="flex justify-center">
           <RichImage className="author-avatar" src={avatar.value.toString()} width={112} height={112} fill

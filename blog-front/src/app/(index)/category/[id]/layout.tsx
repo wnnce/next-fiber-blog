@@ -17,7 +17,7 @@ const CategoryInfo: React.FC<{
   const categoryId = parseInt(params.id);
   if (!categoryId || isNaN(categoryId) || categoryId <= 0) {
     return (
-      <StaticCard padding="1.5rem">
+      <StaticCard>
         <Empty text="分类参数错误" icon="i-tabler:exclamation-circle" iconClassName="text-24 text-red-4" />
       </StaticCard>
     )
@@ -25,7 +25,7 @@ const CategoryInfo: React.FC<{
   const { data: category } = await queryCategory(categoryId);
   if (!category) {
     return (
-      <StaticCard padding="1.5rem">
+      <StaticCard>
         <Empty text="当前分类不存在" icon="i-tabler:error-404" iconClassName="text-24" />
       </StaticCard>
     )

@@ -19,7 +19,7 @@ const CategoryArticlePage: React.FC<{
   }
   if (!articlePage || isNaN(articlePage) || articlePage < 1) {
     return (
-      <DynamicCard padding="1.5rem" title="POSTS" icon="i-tabler:news">
+      <DynamicCard title="POSTS" icon="i-tabler:news">
         <Empty text="文章页码不存在" icon="i-tabler:exclamation-circle" iconClassName="text-24 text-red-4" />
       </DynamicCard>
     )
@@ -27,14 +27,14 @@ const CategoryArticlePage: React.FC<{
   const { data: pageData } = await pageLabelArticle({ categoryId, page: articlePage, size: 20 });
   if ( !pageData || pageData.records.length === 0) {
     return (
-      <DynamicCard padding="1.5rem" title="POSTS" icon="i-tabler:news">
+      <DynamicCard title="POSTS" icon="i-tabler:news">
         <Empty text="还没有关联文章哦..." icon="i-tabler:template" iconClassName="text-24 desc-text" textClassName="desc-text" />
       </DynamicCard>
     )
   }
   return (
     <>
-      <DynamicCard padding="1.5rem" title="POSTS" icon="i-tabler:news">
+      <DynamicCard title="POSTS" icon="i-tabler:news">
         <LabelArticleList articles={pageData.records} />
       </DynamicCard>
       <ServerPagination current={pageData.current}

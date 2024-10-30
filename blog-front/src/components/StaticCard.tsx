@@ -7,6 +7,7 @@ import { CardProps } from '@/components/DynamicCard'
  * @param children 子元素
  * @param padding 内边距
  * @param radius 圆角
+ * @param useDefaultPadding 是否使用默认的内边距
  * @param title 标题
  * @param icon 图标
  * @constructor
@@ -15,17 +16,18 @@ const StaticCard: React.FC<CardProps> = ({
   children,
   padding = 0,
   radius = 12,
+  useDefaultPadding = false,
   title,
   icon
 }):React.ReactNode => {
 
   const cardStyle = useMemo((): Record<string, string> => ({
-    padding: typeof padding === 'number' ? `${padding}px` : padding,
+    padding: useDefaultPadding ? '' : typeof padding === 'number' ? `${padding}px` : padding,
     borderRadius: typeof radius === 'number' ? `${radius}px` : radius
-  }), [padding, radius])
+  }), [useDefaultPadding, padding, radius])
 
   return (
-    <div className={`${styles.card} animate-on-scroll w-full`}
+    <div className={`${styles.card} animate-on-scroll w-full ${useDefaultPadding && 'sm:p-6 p-4'}`}
          style={cardStyle}
     >
       { (icon || title) && <div className="pb-2 flex gap-col-1.5 desc-text">

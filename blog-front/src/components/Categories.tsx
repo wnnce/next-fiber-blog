@@ -11,7 +11,7 @@ import Link from 'next/link'
 const Categories: React.FC = async () => {
   const { data: categories } = await listCategory();
   return (
-    <DynamicCard padding="1.5rem" title="CATEGORIES" icon="i-tabler:category" >
+    <DynamicCard title="CATEGORIES" icon="i-tabler:category" >
       <section>
         <ul className="list-none text-sm mt-2">
           { categories.map(category => (
