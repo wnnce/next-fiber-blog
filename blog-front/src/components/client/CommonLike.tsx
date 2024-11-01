@@ -1,9 +1,9 @@
 'use client'
 
 import '@/styles/components/client-components.scss'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import useMessage from '@/components/message'
-import { topicVoteUp } from '@/lib/client-api'
+import { articleVoteUp, topicVoteUp } from '@/lib/client-api'
 
 export const TopicLike: React.FC<{
   topicId: number;
@@ -51,7 +51,7 @@ export const CommonLike: React.FC<{
   hideText?: boolean,
 }> = ({ count, entityKey, type, onLike, className, hideText = false }) => {
   const [likeCount, setLikeCount] = useState<number>(count);
-  const [likeKeys, setLikeKeys] = useState<Record<string | number, null>>({});
+  const [isLike, setIsLike] = useState<boolean>(false);
 
   const storageKey = useMemo<string>(() => {
     if (type === 'topic') {
@@ -64,30 +64,51 @@ export const CommonLike: React.FC<{
   }, [type])
 
   const handleLike = () => {
-    setLikeKeys(prevState => {
-      return {
-        ...prevState,
-        entityKey: null,
-      }
-    })
-    localStorage.setItem(storageKey, JSON.stringify(likeKeys));
-    setLikeCount(next => next + 1);
+    const stringValue = localStorage.getItem(storageKey)
+    let newLikeKeys: Record<string | number, null> = {}
+    if (stringValue && stringValue.length > 0) {
+      newLikeKeys = JSON.parse(stringValue) as Record<string | number, null>
+    }
+    newLikeKeys[entityKey] = null
+    localStorage.setItem(storageKey, JSON.stringify(newLikeKeys));
+    setLikeCount(prev => prev + 1);
+    setIsLike(true);
   }
+
+  const handleLocalStoreChange = useCallback((event: StorageEvent) => {
+    if (!event.key || event.key != storageKey) {
+      return
+    }
+    const stringValue = localStorage.getItem(storageKey)
+    if (stringValue && stringValue.length > 0) {
+      const likeKeys = (JSON.parse(stringValue) as Record<string | number, null>)
+      if (likeKeys[entityKey] === null && !isLike) {
+        setLikeCount(prev => prev + 1)
+        setIsLike(true)
+      }
+    }
+  }, [storageKey, entityKey, isLike])
 
   useEffect(() => {
     const stringValue = localStorage.getItem(storageKey)
     if (stringValue && stringValue.length > 0) {
-      setLikeKeys(JSON.parse(stringValue) as Record<string | number, null>)
+      const likeKeys = (JSON.parse(stringValue) as Record<string | number, null>)
+      likeKeys[entityKey] === null && setIsLike(true)
     }
-  }, [storageKey])
+    window.addEventListener('storage', handleLocalStoreChange)
+    return () => {
+      window.removeEventListener('storage', handleLocalStoreChange)
+    }
+  }, [storageKey, entityKey, handleLocalStoreChange])
+
   return (
     <button className={`desc-text flex items-start common-like-button ${className || ''}`}
-            disabled={likeKeys[entityKey] === null}
-            onClick={likeKeys[entityKey] === undefined ? () => {
+            disabled={isLike}
+            onClick={!isLike ? () => {
               onLike(entityKey, handleLike)
             } : undefined}
     >
-      {likeKeys[entityKey] === null ? (
+      {isLike ? (
         <i className="inline-block text-sm text-red-5 i-tabler:thumb-up-filled" />
       ) : (
         <i className="inline-block text-sm i-tabler:thumb-up common-like-icon" />
