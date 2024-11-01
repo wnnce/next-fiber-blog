@@ -76,3 +76,11 @@ export const totalComment = (data: Record<string, any>) => {
 export const topicVoteUp = (topicId: number) => {
   return baseClientRequest<null>(`/open/topic/vote-up/${topicId}`, 'POST')
 }
+
+/**
+ * 文章点赞
+ * @param articleId 点赞的文章id
+ */
+export const articleVoteUp = (articleId: number) => {
+  return baseClientRequest<null>(`/open/article/vote-up/${articleId}`, 'POST')
+}

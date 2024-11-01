@@ -34,8 +34,20 @@ export const ArticleLike: React.FC<{
   articleId: number;
   count: number;
 }> = ({ articleId, count }) => {
-  const handleLike = (key: string | number, done: () => void) => {
-    done();
+
+  const message = useMessage();
+
+  const handleLike = async (key: string | number, done: () => void) => {
+    const loadingMessage = message.showLoading('处理中...');
+    try {
+      const result = await articleVoteUp(articleId);
+      if (result.code === 200) {
+        message.showSuccess('点赞成功');
+        done();
+      }
+    } finally {
+      loadingMessage.close();
+    }
   }
   return (
     <CommonLike count={count} entityKey={articleId} type="article" onLike={handleLike} hideText />
