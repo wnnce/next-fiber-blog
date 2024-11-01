@@ -2,6 +2,7 @@ package article
 
 import (
 	"github.com/gofiber/fiber/v3"
+	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/tools/res"
 	"go-fiber-ent-web-layout/internal/usercase"
 )
@@ -133,6 +134,17 @@ func (self *HttpApi) QueryInfo(ctx fiber.Ctx) error {
 func (self *HttpApi) Delete(ctx fiber.Ctx) error {
 	articleId := fiber.Params[uint64](ctx, "id")
 	if err := self.service.DeleteArticleById(articleId); err != nil {
+		return err
+	}
+	return ctx.JSON(res.SimpleOK())
+}
+
+func (self *HttpApi) VoteUp(ctx fiber.Ctx) error {
+	articleId := fiber.Params[uint64](ctx, "id")
+	if articleId == 0 {
+		return tools.FiberRequestError("参数错误")
+	}
+	if err := self.service.ArticleVoteUp(articleId); err != nil {
 		return err
 	}
 	return ctx.JSON(res.SimpleOK())

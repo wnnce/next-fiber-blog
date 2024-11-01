@@ -90,6 +90,9 @@ type IArticleRepo interface {
 
 	CountByTitle(title string, articleId uint64) (uint8, error)
 
+	// VoteUp 文章点赞
+	VoteUp(articleId uint64, num int) error
+
 	DeleteById(articleId uint64) error
 }
 
@@ -113,4 +116,6 @@ type IArticleService interface {
 	SelectById(articleId uint64, isAdmin bool) (*ArticleVo, error)
 
 	DeleteArticleById(articleId uint64) error
+
+	ArticleVoteUp(articleId uint64) error
 }

@@ -215,6 +215,8 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	openRoute.Get("/article/archives", articleApi.Archives)
 	// 博客端获取文章详情
 	openRoute.Get("/article/:id", articleApi.QueryInfo)
+	// 博客文章点赞
+	openRoute.Post("/article/vote-up/:id", articleApi.VoteUp)
 	// 分页查询动态列表
 	openRoute.Post("/topic/page", topicApi.Page)
 	// 动态点赞接口

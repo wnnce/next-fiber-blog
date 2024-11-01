@@ -180,6 +180,14 @@ func (self *ArticleService) DeleteArticleById(articleId uint64) error {
 	return nil
 }
 
+func (self *ArticleService) ArticleVoteUp(articleId uint64) error {
+	if err := self.repo.VoteUp(articleId, 1); err != nil {
+		slog.Error("更新文章点赞数失败", "error", err)
+		return tools.FiberServerError("点赞失败")
+	}
+	return nil
+}
+
 func (self *ArticleService) getArticleInfoCacheKey(articleId uint64) string {
 	return articleInfoCacheKeyPrefix + strconv.FormatUint(articleId, 10)
 }

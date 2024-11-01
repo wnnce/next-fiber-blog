@@ -291,3 +291,15 @@ func (self *ArticleRepo) DeleteById(articleId uint64) error {
 	}
 	return err
 }
+
+func (self *ArticleRepo) VoteUp(articleId uint64, num int) error {
+	builder := sqlbuild.NewUpdateBuilder("t_blog_article").
+		SetRaw("update_time", "now()").
+		SetRaw("vote_up", "vote_up + "+strconv.Itoa(num)).
+		Where("article_id").Eq(articleId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
+	if err == nil {
+		slog.Info("更新文章点赞数完成", "rows", result.RowsAffected(), "articleId", articleId)
+	}
+	return err
+}
