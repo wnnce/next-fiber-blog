@@ -27,8 +27,8 @@ const TopicPage: React.FC<{
 
   return (
     <>
-      <StaticCard padding="1.5rem" title="TOPICS" icon="i-tabler:world" multiple={40}>
-        <h1 className="text-center font-bold text-4xl mb-8">
+      <StaticCard useDefaultPadding title="TOPICS" icon="i-tabler:world" multiple={40}>
+        <h1 className="text-center font-bold sm:text-4xl text-2xl mb-8">
           我的动态
         </h1>
         <Timeline>
