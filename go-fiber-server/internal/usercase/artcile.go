@@ -23,9 +23,10 @@ type Article struct {
 	BaseEntity
 }
 
-type HotArticleVo struct {
+type SimpleArticleVo struct {
 	ArticleId uint64 `json:"articleId" db:"article_id"`
 	Title     string `json:"title" db:"title"`
+	Summary   string `json:"summary" db:"summary"`
 }
 
 // ArticleVo 博客文章Vo类
@@ -74,7 +75,7 @@ type IArticleRepo interface {
 
 	ListTopArticle() ([]*Article, error)
 
-	ListHotArticle() ([]HotArticleVo, error)
+	ListHotArticle() ([]SimpleArticleVo, error)
 
 	PageByLabel(query *ArticleQueryForm) ([]*Article, int64, error)
 
@@ -94,6 +95,8 @@ type IArticleRepo interface {
 	VoteUp(articleId uint64, num int) error
 
 	DeleteById(articleId uint64) error
+
+	Search(keyword string, limit int) ([]SimpleArticleVo, error)
 }
 
 type IArticleService interface {
@@ -109,7 +112,7 @@ type IArticleService interface {
 
 	ListTopArticle() ([]*Article, error)
 
-	ListHotArticle() ([]HotArticleVo, error)
+	ListHotArticle() ([]SimpleArticleVo, error)
 
 	Archives() ([]ArticleArchive, error)
 
@@ -118,4 +121,6 @@ type IArticleService interface {
 	DeleteArticleById(articleId uint64) error
 
 	ArticleVoteUp(articleId uint64) error
+
+	SearchArticle(keyword string) ([]SimpleArticleVo, error)
 }

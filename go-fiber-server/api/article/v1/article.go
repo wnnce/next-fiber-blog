@@ -149,3 +149,15 @@ func (self *HttpApi) VoteUp(ctx fiber.Ctx) error {
 	}
 	return ctx.JSON(res.SimpleOK())
 }
+
+func (self *HttpApi) Search(ctx fiber.Ctx) error {
+	keyword := fiber.Query[string](ctx, "keyword")
+	if keyword == "" {
+		return tools.FiberRequestError("搜索关键字不能为空")
+	}
+	result, err := self.service.SearchArticle(keyword)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(result))
+}

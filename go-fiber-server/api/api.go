@@ -221,4 +221,6 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	openRoute.Post("/topic/page", topicApi.Page)
 	// 动态点赞接口
 	openRoute.Post("/topic/vote-up/:id", topicApi.VoteUp)
+	// 文章搜索接口
+	openRoute.Get("/search/article", articleApi.Search)
 }

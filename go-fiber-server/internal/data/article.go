@@ -158,7 +158,7 @@ func (self *ArticleRepo) ListTopArticle() ([]*usercase.Article, error) {
 	})
 }
 
-func (self *ArticleRepo) ListHotArticle() ([]usercase.HotArticleVo, error) {
+func (self *ArticleRepo) ListHotArticle() ([]usercase.SimpleArticleVo, error) {
 	builder := sqlbuild.NewSelectBuilder("t_blog_article").
 		Select("article_id", "title").
 		Where("status").EqRaw("0").And("delete_at").EqRaw("0").BuildAsSelect().
@@ -169,8 +169,8 @@ func (self *ArticleRepo) ListHotArticle() ([]usercase.HotArticleVo, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (usercase.HotArticleVo, error) {
-		vo := usercase.HotArticleVo{}
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (usercase.SimpleArticleVo, error) {
+		vo := usercase.SimpleArticleVo{}
 		scanErr := row.Scan(&vo.ArticleId, &vo.Title)
 		return vo, scanErr
 	})
@@ -302,4 +302,18 @@ func (self *ArticleRepo) VoteUp(articleId uint64, num int) error {
 		slog.Info("更新文章点赞数完成", "rows", result.RowsAffected(), "articleId", articleId)
 	}
 	return err
+}
+
+func (self *ArticleRepo) Search(keyword string, limit int) ([]usercase.SimpleArticleVo, error) {
+	sql := "select article_id, title, summary from t_blog_article where (title like '%" + keyword + "%' or summary like '%" + keyword + "%') and status = 0 and delete_at = 0 order by sort, view_num desc, create_time desc limit " + strconv.Itoa(limit)
+	rows, err := self.db.Query(context.Background(), sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (usercase.SimpleArticleVo, error) {
+		articleVo := usercase.SimpleArticleVo{}
+		scanErr := row.Scan(&articleVo.ArticleId, &articleVo.Title, &articleVo.Summary)
+		return articleVo, scanErr
+	})
 }

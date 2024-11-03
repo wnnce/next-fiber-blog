@@ -114,8 +114,8 @@ func (self *ArticleService) ListTopArticle() ([]*usercase.Article, error) {
 	return topList, nil
 }
 
-func (self *ArticleService) ListHotArticle() ([]usercase.HotArticleVo, error) {
-	hots, err := data.RedisGetSlice[usercase.HotArticleVo](context.Background(), hotArticleCacheKey)
+func (self *ArticleService) ListHotArticle() ([]usercase.SimpleArticleVo, error) {
+	hots, err := data.RedisGetSlice[usercase.SimpleArticleVo](context.Background(), hotArticleCacheKey)
 	if err == nil && len(hots) > 0 {
 		return hots, nil
 	}
@@ -186,6 +186,24 @@ func (self *ArticleService) ArticleVoteUp(articleId uint64) error {
 		return tools.FiberServerError("点赞失败")
 	}
 	return nil
+}
+
+func (self *ArticleService) SearchArticle(keyword string) ([]usercase.SimpleArticleVo, error) {
+	result, err := self.repo.Search(keyword, 10)
+	if err != nil {
+		slog.Error("搜索文章错误", "error", err, "keyword", keyword)
+		return nil, tools.FiberServerError("搜索异常")
+	}
+	for i := 0; i < len(result); i++ {
+		item := &result[i]
+		if index := strings.Index(item.Title, keyword); index >= 0 {
+			item.Title = strings.ReplaceAll(item.Title, keyword, "<span>"+keyword+"</span>")
+		}
+		if index := strings.Index(item.Summary, keyword); index >= 0 {
+			item.Summary = strings.ReplaceAll(item.Summary, keyword, "<span>"+keyword+"</span>")
+		}
+	}
+	return result, nil
 }
 
 func (self *ArticleService) getArticleInfoCacheKey(articleId uint64) string {
