@@ -114,12 +114,16 @@ const CommentItem: React.FC<{
                       type="comment"
                       onLike={(_, done) => handleCommentLike(comment.commentId, done)}
           />
-          <button className="desc-text option-button text-xs" onClick={() => {
+          { !comment.isColl && (
+            <button className="desc-text option-button text-xs" onClick={() => {
               setIsReply(true)
             }}
-          >
-            回复
-          </button>
+            >
+              回复
+            </button>
+          )}
+          {comment.isTop && <i className="inline-block i-tabler:pin-filled primary-color" title="置顶" />}
+          {comment.isHot && <i className="inline-block i-tabler:flame text-orange-5" title="热门" />}
         </div>
         <CSSTransition timeout={300} unmountOnExit in={isReply} classNames="comment-fade">
           <CommentEditor
@@ -131,7 +135,7 @@ const CommentItem: React.FC<{
             }}
           />
         </CSSTransition>
-        {(comment.children && comment.children.records.length > 0) && (
+        {(!comment.isColl && comment.children && comment.children.records.length > 0) && (
           <LevelContext.Provider value={level + 1}>
             <CommentList
               page={comment.children}
