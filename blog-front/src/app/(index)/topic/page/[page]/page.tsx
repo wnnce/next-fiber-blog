@@ -60,6 +60,16 @@ const TopicPage: React.FC<{
                   <i className="inline-block i-tabler:message-chatbot" />
                   <span className="font-mono ml-1">0</span>
                 </li>
+                { topic.isTop && (
+                  <li className="flex items-center">
+                    <i className="i-tabler:pin-filled inline-block primary-color" title="置顶" />
+                  </li>
+                )}
+                { topic.isHot && (
+                  <li className="flex items-center">
+                    <i className="i-tabler:flame inline-block text-orange-5" title="热门" />
+                  </li>
+                )}
                 <li className="flex items-center absolute right-0 bottom-0">
                   <i className="inline-block text-sm i-tabler:location" />
                   <span className="ml-1 text-xs">中国-重庆</span>
