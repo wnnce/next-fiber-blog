@@ -128,11 +128,12 @@ export interface Article {
 }
 
 /**
- * 热门文章
+ * 最小文章数据
  */
-export interface HotArticle {
+export interface SimpleArticle {
   articleId: number;
   title: string;
+  summary: string
 }
 
 /**

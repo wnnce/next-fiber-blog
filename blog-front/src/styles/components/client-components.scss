@@ -35,5 +35,15 @@
     background: rgb(var(--input-background-color));
     border-radius: 0.25rem;
   }
+  .search-result {
+    max-height: 20rem;
+    height: auto;
+    overflow-y: auto;
+    > ul > li {
+      span {
+        color: rgb(var(--primary-color));
+      }
+    }
+  }
 }
 

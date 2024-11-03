@@ -1,5 +1,5 @@
 import { HttpMethod, request } from '@/lib/request'
-import { Comment, Page, Result, User } from '@/lib/types'
+import { Comment, Page, Result, SimpleArticle, User } from '@/lib/types'
 
 export const clientAuthTokenKey = "client-auth-token";
 
@@ -83,4 +83,12 @@ export const topicVoteUp = (topicId: number) => {
  */
 export const articleVoteUp = (articleId: number) => {
   return baseClientRequest<null>(`/open/article/vote-up/${articleId}`, 'POST')
+}
+
+/**
+ * 搜索文章
+ * @param keyword 搜索关键字
+ */
+export const searchArticle = (keyword: string) => {
+  return baseClientRequest<SimpleArticle[]>('/open/search/article', 'GET', { keyword })
 }
