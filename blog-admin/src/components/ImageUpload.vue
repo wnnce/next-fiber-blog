@@ -148,6 +148,7 @@ const handleDeleteUploadFile = (uid: string) => {
   if (findIndex < 0) {
     return;
   }
+  console.log(findIndex, uid, fileList.value)
   const { status, url } = fileList.value[findIndex];
   if (status === 'uploading') {
     errorMessage('文件上传中无法删除');
