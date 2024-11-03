@@ -117,7 +117,7 @@ onMounted(() => {
         </a-button>
       </div>
     </div>
-    <MarkdownEditor ref="editorRef" :min-height="700" />
+    <MarkdownEditor ref="editorRef" :height="700" hide-code-preview />
     <article-form ref="formRef" @reload="handleClear" />
     <a-modal title="提示" message-type="info" width="300px" v-model:visible="draftModelShow">
       读取到还有未编辑完成的草稿，是否继续编辑？

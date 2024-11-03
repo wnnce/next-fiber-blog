@@ -10,7 +10,7 @@ interface Props {
   mode?: 'wysiwyg' | 'ir' | 'sv',
   defaultValue?: string,
   fixedToolbar?: boolean,
-  minHeight?: number,
+  height?: number,
   hideCodePreview?: boolean,
 }
 
@@ -103,14 +103,14 @@ onMounted(() => {
         lineNumber: true,
       },
       markdown: {
-        codeBlockPreview: !props.hideCodePreview
+        codeBlockPreview: !props.hideCodePreview,
       }
     },
     theme: useAppConfigStore().state.pageTheme === 'light' ? 'classic' : 'dark',
     toolbarConfig: {
       pin: props.fixedToolbar
     },
-    minHeight: props.minHeight,
+    height: props.height,
     mode: props.mode,
     cache: {
       enable: false
@@ -140,6 +140,10 @@ onMounted(() => {
 }
 :deep(.vditor-reset) {
   color: var(--text-color) !important;
+}
+:deep(.vditor-content) {
+  max-height: 100%;
+  overflow-y: auto;
 }
 .vditor {
   --border-color: var(--color-border-2);

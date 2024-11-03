@@ -6,7 +6,6 @@ import type { ApplicationMonitor } from '@/api/system/record/types'
 import MemoryProcessChart from '@/components/charts/MemoryProcessChart.vue'
 import MemoryPieChart from '@/components/charts/MemoryPieChart.vue'
 import DynamicChart from '@/components/charts/DynamicChart.vue'
-import { formatDateTime } from '../../assets/script/util'
 
 const monitorStats = shallowReactive<ApplicationMonitor>({
   hostname: '',
