@@ -25,7 +25,7 @@ func (self *OtherRepo) SaveFileRecord(file *usercase.UploadFile) {
 		Fields("file_md5", "origin_name", "file_name", "file_path", "file_size", "file_type").
 		Values(file.FileMd5, file.OriginName, file.FileName, file.FilePath, file.FileSize, file.FileType).
 		Returning("id")
-	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args())
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var fileId int64
 	if err := row.Scan(&fileId); err != nil {
 		slog.Error("保存文件上传记录信息失败", "err", err.Error())

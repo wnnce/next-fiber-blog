@@ -15,6 +15,8 @@ require (
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20240510055607-89e20ab7b6c6
 	github.com/redis/go-redis/v9 v9.5.1
+	github.com/shirou/gopsutil/v4 v4.24.9
+	github.com/valyala/fasthttp v1.52.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -40,12 +42,10 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/rogpeppe/go-internal v1.6.1 // indirect
-	github.com/shirou/gopsutil/v4 v4.24.9 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.52.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/arch v0.7.0 // indirect
