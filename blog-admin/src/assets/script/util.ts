@@ -76,3 +76,18 @@ export const throttleTimer = (func: () => void, delay: number, callback?: () => 
     }, delay)
   }
 }
+
+/**
+ * 格式化化时间显示
+ * @param datetime 待格式化的时间字符串或时间戳
+ */
+export const formatDateTime = (datetime: string) => {
+  const date = new Date(datetime);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
