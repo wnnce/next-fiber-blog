@@ -68,7 +68,6 @@ export const MessageContainer: React.FC = () => {
 let messageContainerInit = false
 const initMessageContainer = () => {
   let container = document.getElementById(messageContainerFlag);
-  console.log(container, messageContainerInit)
   if (!container) {
     container = document.createElement('div')
     container.className = messageContainerFlag

@@ -14,7 +14,6 @@ import useMessage from '@/components/message'
 import { CommentState, StateContext, StateContextProps } from '@/components/comment/context/StateContext'
 import Image from 'next/image'
 import useMarkdownParse from '@/hooks/markdown'
-import { CSSTransition } from 'react-transition-group'
 
 export interface CommentProps {
   type: number;

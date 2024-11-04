@@ -22,9 +22,14 @@
   }
 }
 .article-markdown {
-
+  p, li {
+    font-size: 0.9rem;
+    line-height: 150%;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    scroll-margin-top: 15rem;
+  }
 }
-
 
 // 自定义Markdown样式
 .markdown-body {
@@ -68,11 +73,17 @@
     list-style: initial !important;
   }
 
+  // 不显示数学公式的原始html
+  .katex-html {
+    display: none;
+  }
+
   pre {
     background: rgb(var(--button-background-color));
     padding: 2.25rem 0.75rem 0.75rem 0.75rem;
     position: relative;
     overflow-x: auto;
+    width: 100%;
     &::after {
       content: "";
       background: rgb(var(--border-color));
@@ -88,6 +99,10 @@
       left: 0.75rem;
       z-index: 2;
       color: rgb(var(--text-color-3));
+    }
+    .code {
+      word-break: break-word;
+      text-wrap: wrap;
     }
     $languages: (java: 'Java', go: 'Go', python: 'Python', javascript: 'JavaScript', typescript: 'TypeScript', vue: 'Vue',
     react: 'React', 'xml': XML, 'html': HTML, css: CSS, 'yaml': Yaml, 'json': JSON, 'bash': BASH, 'properties': Properties,

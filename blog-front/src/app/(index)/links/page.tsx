@@ -23,7 +23,7 @@ const Links: React.FC = async () => {
           <Empty text="还没有友情链接..." iconClassName="text-24" />
         ) : (
           <section>
-            <ul className="list-none flex flex-wrap gap-4 link-list-ul">
+            <ul className="list-none gap-4 grid sm:grid-cols-2 link-list-ul">
               { links.map(link => (
                 <li key={link.linkId} className="p-3 flex block flex-col gap-row-2 link-list-li">
                   <div className="flex justify-between gap-col-2 items-center">
@@ -37,12 +37,12 @@ const Links: React.FC = async () => {
             <h2 className="mt-8 font-bold pl-2 border-l-4 link-register-title">
               申请格式
             </h2>
-            <p className="info-text mt-4">[ 博客名称 + 博客地址 + Logo地址 + 博客简介 ]</p>
+            <p className="info-text text-sm sm:text-4 mt-4">[ 博客名称 + 博客地址 + Logo地址 + 博客简介 ]</p>
             <p className="desc-text text-xs mt-2">请在下方留言板留下你的信息...</p>
           </section>
         )}
       </DynamicCard>
-      <StaticCard padding="1.5rem">
+      <StaticCard useDefaultPadding>
         <Comment type={4} />
       </StaticCard>
     </section>

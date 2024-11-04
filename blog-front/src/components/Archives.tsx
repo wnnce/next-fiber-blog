@@ -5,7 +5,7 @@ import DynamicCard from '@/components/DynamicCard'
 const Archives: React.FC = async () => {
   const result = await articleArchives();
   return (
-    <DynamicCard padding="1.5rem" title="ARCHIVES" icon="i-tabler:archive">
+    <DynamicCard title="ARCHIVES" icon="i-tabler:archive">
       <ul className="list-none text-sm">
         { result.data.map(item => (
           <li key={item.month} className="flex justify-between">

@@ -15,7 +15,7 @@ const TagInfo: React.FC<{
   const tagId = parseInt(params.id);
   if (!tagId || isNaN(tagId) || tagId <= 0) {
     return (
-      <StaticCard padding="1.5rem">
+      <StaticCard>
         <Empty text="标签参数错误" icon="i-tabler:exclamation-circle" iconClassName="text-24 text-red-4" />
       </StaticCard>
     )
@@ -23,7 +23,7 @@ const TagInfo: React.FC<{
   const { data: tag } = await queryTag(tagId)
   if (!tag) {
     return (
-      <StaticCard padding="1.5rem">
+      <StaticCard>
         <Empty text="当前标签不存在" icon="i-tabler:error-404" iconClassName="text-24" />
       </StaticCard>
     )

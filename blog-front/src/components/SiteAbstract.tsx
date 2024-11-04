@@ -6,7 +6,7 @@ import { formatWordCount } from '@/tools/utils'
 const SiteAbstract: React.FC = async () => {
   const { data: stats } = await querySiteStats();
   return (
-    <DynamicCard padding="1.5rem" title="ABSTRACT" icon="i-tabler:presentation">
+    <DynamicCard title="ABSTRACT" icon="i-tabler:presentation">
       <div className="flex gap-row-2 flex-col text-sm info-text">
         <p className="flex justify-between">
           <span>已运行时间:</span>

@@ -1,5 +1,5 @@
 import { HttpMethod, request } from '@/lib/request'
-import { Comment, Page, Result, User } from '@/lib/types'
+import { Comment, Page, Result, SimpleArticle, User } from '@/lib/types'
 
 export const clientAuthTokenKey = "client-auth-token";
 
@@ -54,9 +54,41 @@ export const saveComment = (data: Record<string, any>) => {
 }
 
 /**
+ * 评论点赞接口
+ * @param commentId 点赞的评论Id
+ */
+export const commentVoteUp = (commentId: number) => {
+  return baseClientRequest<null>(`/comment/vote-up/${commentId}`, 'POST')
+}
+
+/**
  * 查询评论数量
  * @param data 查询参数
  */
 export const totalComment = (data: Record<string, any>) => {
   return baseClientRequest<number>('/comment/total', 'POST', undefined, data);
+}
+
+/**
+ * 动态点赞
+ * @param topicId 点赞的动态id
+ */
+export const topicVoteUp = (topicId: number) => {
+  return baseClientRequest<null>(`/open/topic/vote-up/${topicId}`, 'POST')
+}
+
+/**
+ * 文章点赞
+ * @param articleId 点赞的文章id
+ */
+export const articleVoteUp = (articleId: number) => {
+  return baseClientRequest<null>(`/open/article/vote-up/${articleId}`, 'POST')
+}
+
+/**
+ * 搜索文章
+ * @param keyword 搜索关键字
+ */
+export const searchArticle = (keyword: string) => {
+  return baseClientRequest<SimpleArticle[]>('/open/search/article', 'GET', { keyword })
 }

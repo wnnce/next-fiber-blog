@@ -12,6 +12,8 @@ import { LevelContext } from '@/components/comment/context/LevelContext'
 import { CommentEditor } from '@/components/comment/Comment'
 import useMarkdownParse from '@/hooks/markdown'
 import { CSSTransition } from 'react-transition-group'
+import useMessage from '@/components/message'
+import { commentVoteUp } from '@/lib/client-api'
 
 const CommentItem: React.FC<{
   comment: Comment;
@@ -21,6 +23,7 @@ const CommentItem: React.FC<{
   const level = useContext<number>(LevelContext);
   const [ isReply, setIsReply ] = useState<boolean>(false);
   const commentRender = useMarkdownParse().commentRender();
+  const message = useMessage();
 
   const commentContent = useMemo<string>(() => {
     return commentRender.render(comment.content);
@@ -51,6 +54,19 @@ const CommentItem: React.FC<{
     const index = version.indexOf('.')
     return name + ' ' +  (index > 0 ? version.substring(0, index): version);
   }, [result.os])
+
+  const handleCommentLike = async (commentId: number, done: () => void) => {
+    const loadingResult = message.showLoading("处理中...")
+    try {
+      const result = await commentVoteUp(commentId)
+      if (result.code === 200) {
+        message.showSuccess("点赞成功")
+        done();
+      }
+    } finally {
+      loadingResult.close();
+    }
+  }
 
   return (
     <div className="comment-item flex gap-col-3">
@@ -96,16 +112,18 @@ const CommentItem: React.FC<{
         <div className="item-options flex gap-col-3 items-center">
           <CommonLike className="option-button" count={comment.voteUp} entityKey={comment.commentId}
                       type="comment"
-                      onLike={(key, done) => {
-                        done()
-                      }}
+                      onLike={(_, done) => handleCommentLike(comment.commentId, done)}
           />
-          <button className="desc-text option-button text-xs" onClick={() => {
+          { !comment.isColl && (
+            <button className="desc-text option-button text-xs" onClick={() => {
               setIsReply(true)
             }}
-          >
-            回复
-          </button>
+            >
+              回复
+            </button>
+          )}
+          {comment.isTop && <i className="inline-block i-tabler:pin-filled primary-color" title="置顶" />}
+          {comment.isHot && <i className="inline-block i-tabler:flame text-orange-5" title="热门" />}
         </div>
         <CSSTransition timeout={300} unmountOnExit in={isReply} classNames="comment-fade">
           <CommentEditor
@@ -117,7 +135,7 @@ const CommentItem: React.FC<{
             }}
           />
         </CSSTransition>
-        {(comment.children && comment.children.records.length > 0) && (
+        {(!comment.isColl && comment.children && comment.children.records.length > 0) && (
           <LevelContext.Provider value={level + 1}>
             <CommentList
               page={comment.children}

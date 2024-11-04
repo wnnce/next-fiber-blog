@@ -9,6 +9,8 @@ export interface CardProps {
   children: React.ReactNode;
   color?: string;
   padding?: number | string;
+  // 是否使用默认内边距
+  useDefaultPadding?: boolean;
   radius?: number | string;
   // 标题
   title?: number | string | boolean;
@@ -24,6 +26,7 @@ export interface CardProps {
  * @param color 背景动效颜色
  * @param padding 内边距
  * @param radius 圆角
+ * @param useDefaultPadding 是否使用默认内边距
  * @param title 卡片标题
  * @param icon 卡片图标
  * @param multiple 图片晃动除以的阈值 越大晃动幅度越小
@@ -35,6 +38,7 @@ const DynamicCard: React.FC<CardProps> = (
     color = 'rgb(70, 185, 82)',
     padding = 0,
     radius = 12,
+    useDefaultPadding = true,
     title,
     icon,
     multiple = 20
@@ -45,9 +49,9 @@ const DynamicCard: React.FC<CardProps> = (
 
   // 外层卡片样式
   const cardStyle = useMemo((): Record<string, string> => ({
-    padding: typeof padding === 'number' ? `${padding}px` : padding,
+    padding: useDefaultPadding ? '' : typeof padding === 'number' ? `${padding}px` : padding,
     borderRadius: typeof radius === 'number' ? `${radius}px` : radius,
-  }), [padding, radius])
+  }), [useDefaultPadding, padding, radius])
 
   // 下层光源样式
   const lightStyle = useMemo((): Record<string, string> => ({
@@ -86,7 +90,7 @@ const DynamicCard: React.FC<CardProps> = (
   }
   return (
     <div className="animate-on-scroll">
-      <div ref={cardRef} className={`${styles.card} w-full h-full`}
+      <div ref={cardRef} className={`${styles.card} w-full h-full ${useDefaultPadding && 'sm:p-6 p-4'}`}
            style={cardStyle}
            onMouseMove={handleMouseMove}
            onMouseLeave={handleMouseLeave}

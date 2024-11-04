@@ -3,7 +3,7 @@ import {
   Article,
   ArticleArchive,
   Category,
-  Concat,
+  Concat, SimpleArticle,
   Link,
   Notice,
   Page,
@@ -92,6 +92,13 @@ export const pageLabelArticle = (data: Record<string, any>) => {
  */
 export const listTopArticle = () => {
   return request<Article[]>('/open/article/top', 'GET')
+}
+
+/**
+ * 查询热门文章列表
+ */
+export const listHotArticle = () => {
+  return request<SimpleArticle[]>('/open/article/hot', 'GET')
 }
 
 /**

@@ -128,6 +128,15 @@ export interface Article {
 }
 
 /**
+ * 最小文章数据
+ */
+export interface SimpleArticle {
+  articleId: number;
+  title: string;
+  summary: string
+}
+
+/**
  * 文章归档信息
  */
 export interface ArticleArchive {

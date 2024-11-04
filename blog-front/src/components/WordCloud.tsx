@@ -4,6 +4,7 @@ import '@/styles/components/tags-word-cloud.scss'
 import React, { useEffect } from 'react'
 import DynamicCard from '@/components/DynamicCard'
 import TagCloud from 'TagCloud'
+import { useRouter } from 'next-nprogress-bar'
 
 /**
  * 标签词云组件
@@ -12,28 +13,51 @@ import TagCloud from 'TagCloud'
 export const WordCloud: React.FC<{
   children: React.ReactNode
 }> = ({ children }): React.ReactNode => {
+
+  const router = useRouter();
+
   useEffect( () => {
     const wordContainer = document.querySelector<HTMLDivElement>('.hidden-word-cloud-list');
     if (!wordContainer) {
       return ;
     }
-    const wordList = wordContainer.querySelectorAll<HTMLSpanElement>('.temp-word-cloud-li-item');
+    const wordList = wordContainer.querySelectorAll('.temp-word-cloud-li-item');
     const texts: string[] = []
     wordList.forEach(item => {
-      const firstElement = item.firstElementChild
-      firstElement && firstElement.classList.add('word-cloud-item');
-      texts.push(item.innerHTML);
+      const firstElement = item.firstElementChild as HTMLElement
+      if (!firstElement) {
+        return;
+      }
+      const spanElement = document.createElement('span');
+      spanElement.innerText = firstElement.innerText;
+      spanElement.classList.add('word-cloud-item')
+      spanElement.style.color = firstElement.style.color;
+      spanElement.setAttribute("path", firstElement.getAttribute("href") || '');
+      texts.push(spanElement.outerHTML);
     })
     const wordCloud = TagCloud('.tags-word-cloud', texts, {
       useContainerInlineStyles: false,
       useHTML: true,
     });
+    const cloudContainer = document.querySelector('.tags-word-cloud');
+    if (cloudContainer) {
+      const words = cloudContainer.getElementsByClassName('word-cloud-item');
+      if (words && words.length > 0) {
+        for (let i = 0; i < words.length; i++) {
+          const element = words[i] as HTMLSpanElement;
+          element.addEventListener('click', function() {
+            const path = this.getAttribute("path");
+            path && router.push(path, { scroll: true });
+          })
+        }
+      }
+    }
     return () => {
       wordCloud.destroy();
     }
   }, [children])
   return (
-    <DynamicCard padding="1.5rem" title="TAGS" icon="i-tabler:tags">
+    <DynamicCard title="TAGS" icon="i-tabler:tags">
       <div className="tags-word-cloud"></div>
       <ul className="hidden-word-cloud-list hidden">
         { children }

@@ -27,8 +27,8 @@ const TopicPage: React.FC<{
 
   return (
     <>
-      <StaticCard padding="1.5rem" title="TOPICS" icon="i-tabler:world" multiple={40}>
-        <h1 className="text-center font-bold text-4xl mb-8">
+      <StaticCard useDefaultPadding title="TOPICS" icon="i-tabler:world" multiple={40}>
+        <h1 className="text-center font-bold sm:text-4xl text-2xl mb-8">
           我的动态
         </h1>
         <Timeline>
@@ -60,6 +60,16 @@ const TopicPage: React.FC<{
                   <i className="inline-block i-tabler:message-chatbot" />
                   <span className="font-mono ml-1">0</span>
                 </li>
+                { topic.isTop && (
+                  <li className="flex items-center">
+                    <i className="i-tabler:pin-filled inline-block primary-color" title="置顶" />
+                  </li>
+                )}
+                { topic.isHot && (
+                  <li className="flex items-center">
+                    <i className="i-tabler:flame inline-block text-orange-5" title="热门" />
+                  </li>
+                )}
                 <li className="flex items-center absolute right-0 bottom-0">
                   <i className="inline-block text-sm i-tabler:location" />
                   <span className="ml-1 text-xs">中国-重庆</span>

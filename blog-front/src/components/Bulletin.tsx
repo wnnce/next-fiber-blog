@@ -11,7 +11,7 @@ import { Swiper, SwiperSlide } from '@/components/Swiper'
 const Bulletin: React.FC = async () => {
   const { data: notices } = await listNoticeByType(2);
   return (
-    <DynamicCard padding="1.5rem" title="BULLETINS" icon="i-tabler:bell-exclamation">
+    <DynamicCard title="BULLETINS" icon="i-tabler:bell-exclamation">
       <section className="mx--6 bulletin-swiper">
         <Swiper autoPlay showButton={false} showDot={false}>
           { notices.map(notice => (
