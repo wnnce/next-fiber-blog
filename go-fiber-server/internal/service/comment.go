@@ -30,9 +30,7 @@ func (self *CommentService) SaveComment(comment *usercase.Comment) error {
 	}
 	// 异步更新
 	pool.Go(func() {
-		if err := self.userService.UpdateUserExpertise(20, comment.UserId); err != nil {
-			slog.Error("更新用户经验失败", "err", err.Error(), "userId", comment.UserId)
-		}
+		_ = self.userService.UpdateUserExpertise(20, comment.UserId, 2)
 	})
 	return nil
 }
@@ -76,4 +74,41 @@ func (self *CommentService) TotalComment(query *usercase.CommentQueryForm) (uint
 		return 0, tools.FiberServerError("查询评论数量失败")
 	}
 	return total, nil
+}
+
+func (self *CommentService) ManagePage(query *usercase.CommentQueryForm) (*usercase.PageData[usercase.CommentManageVo], error) {
+	page, err := self.repo.ManagePage(query)
+	if err != nil {
+		slog.Error("管理端分页查询评论失败", "error", err)
+		return nil, tools.FiberServerError("查询失败")
+	}
+	return page, nil
+}
+
+func (self *CommentService) UpdateSelectiveComment(form *usercase.CommentUpdateForm) error {
+	if err := self.repo.UpdateSelective(form); err != nil {
+		slog.Error("快捷更新评论失败", "error", err, "commentId", form.CommentId)
+		return tools.FiberServerError("更新失败")
+	}
+	return nil
+}
+
+func (self *CommentService) Delete(commentId int64) error {
+	if err := self.repo.DeleteById(commentId); err != nil {
+		slog.Error("删除评论失败", "error", err)
+		return tools.FiberServerError("删除失败")
+	}
+	return nil
+}
+
+func (self *CommentService) CommentVoteUp(commentId int64, userId uint64) error {
+	if err := self.repo.CommentVoteUp(commentId, 1); err != nil {
+		slog.Error("评论点赞失败", "error", err, "commentId", commentId)
+		return tools.FiberServerError("点赞失败")
+	}
+	// 更新用户经验
+	pool.Go(func() {
+		_ = self.userService.UpdateUserExpertise(10, userId, 1)
+	})
+	return nil
 }

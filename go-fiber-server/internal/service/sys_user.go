@@ -97,6 +97,8 @@ func (self *SysUserService) QueryUserInfo(userId uint64) (*usercase.SysUser, err
 		slog.Warn("查询用户不存在", "userId", userId)
 		return nil, fiber.NewError(fiber.StatusNotFound, "用户不存在或被禁用")
 	}
+	// 抹除用户密码
+	user.Password = ""
 	return user, nil
 }
 

@@ -74,7 +74,7 @@ func (self *SysUserRepo) UpdateSelective(form *usercase.SysUserUpdateForm) error
 
 func (self *SysUserRepo) FindUserById(userId uint64) (*usercase.SysUser, error) {
 	builder := sqlbuild.NewSelectBuilder("t_system_user").
-		Select("user_id", "username", "nickname", "email", "phone", "avatar", "roles", "create_time", "remark").
+		Select("user_id", "username", "password", "nickname", "email", "phone", "avatar", "roles", "create_time", "last_login_ip", "last_login_time", "remark").
 		Where("user_id").Eq(userId).
 		And("status").EqRaw("0").
 		And("delete_at").EqRaw("0").BuildAsSelect()
@@ -125,7 +125,7 @@ func (self *SysUserRepo) Page(query *usercase.SysUserQueryForm) ([]*usercase.Sys
 func (self *SysUserRepo) DeleteById(userId int64) error {
 	builder := sqlbuild.NewUpdateBuilder("t_system_user").
 		Set("delete_at", time.Now().UnixMilli()).
-		Where("user_id").Eq(userId).BuildAsSelect()
+		Where("user_id").Eq(userId).BuildAsUpdate()
 	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
 	if err == nil {
 		slog.Info("删除系统用户完成", "row", result.RowsAffected(), "userId", userId)

@@ -2,6 +2,7 @@ package article
 
 import (
 	"github.com/gofiber/fiber/v3"
+	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/tools/res"
 	"go-fiber-ent-web-layout/internal/usercase"
 )
@@ -96,6 +97,14 @@ func (self *HttpApi) ListTop(ctx fiber.Ctx) error {
 	return ctx.JSON(res.OkByData(list))
 }
 
+func (self *HttpApi) ListHot(ctx fiber.Ctx) error {
+	list, err := self.service.ListHotArticle()
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(list))
+}
+
 func (self *HttpApi) Archives(ctx fiber.Ctx) error {
 	archives, err := self.service.Archives()
 	if err != nil {
@@ -128,4 +137,27 @@ func (self *HttpApi) Delete(ctx fiber.Ctx) error {
 		return err
 	}
 	return ctx.JSON(res.SimpleOK())
+}
+
+func (self *HttpApi) VoteUp(ctx fiber.Ctx) error {
+	articleId := fiber.Params[uint64](ctx, "id")
+	if articleId == 0 {
+		return tools.FiberRequestError("参数错误")
+	}
+	if err := self.service.ArticleVoteUp(articleId); err != nil {
+		return err
+	}
+	return ctx.JSON(res.SimpleOK())
+}
+
+func (self *HttpApi) Search(ctx fiber.Ctx) error {
+	keyword := fiber.Query[string](ctx, "keyword")
+	if keyword == "" {
+		return tools.FiberRequestError("搜索关键字不能为空")
+	}
+	result, err := self.service.SearchArticle(keyword)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(result))
 }

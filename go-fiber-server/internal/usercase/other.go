@@ -84,13 +84,35 @@ var DefaultSiteConfiguration = map[string]SiteConfigurationItem{
 
 // SiteStats 站点信息统计数据
 type SiteStats struct {
-	ArticleCount  uint   `json:"articleCount" db:"article_count"`
-	CategoryCount uint   `json:"categoryCount" db:"category_count"`
-	TagCount      uint   `json:"tagCount" db:"tag_count"`
-	CommentCount  uint   `json:"commentCount" db:"comment_count"`
+	ArticleCount  uint   `json:"articleCount" db:"article_count"`   // 文章数量
+	CategoryCount uint   `json:"categoryCount" db:"category_count"` // 分类数量
+	TagCount      uint   `json:"tagCount" db:"tag_count"`           // 标签数量
+	CommentCount  uint   `json:"commentCount" db:"comment_count"`   // 评论数量
 	VisitorCount  uint   `json:"visitorCount" db:"visitor_count"`
-	AccessCount   uint64 `json:"accessCount" db:"access_count"`
-	WordTotal     uint64 `json:"wordTotal" db:"word_total"`
+	AccessCount   uint64 `json:"accessCount" db:"access_count"` // 访问数
+	WordTotal     uint64 `json:"wordTotal" db:"word_total"`     // 总字数
+}
+
+// AdminIndexStats 管理端首页统计数量
+type AdminIndexStats struct {
+	ToDayAccess      uint       `json:"toDayAccess" db:"current_access"`          // 当日访问量
+	ToDayComment     uint       `json:"toDayComment" db:"current_comment"`        // 当日评论数
+	TotalAccess      uint64     `json:"totalAccess" db:"total_access"`            // 总访问量
+	TotalComment     uint64     `json:"totalComment" db:"total_comment"`          // 总评论量
+	TotalTopic       uint       `json:"totalTopic" db:"total_topic"`              // 总动态数量
+	TotalArticle     uint       `json:"totalArticle" db:"total_article"`          // 总文章数量
+	TotalUser        uint       `json:"totalUser" db:"total_user"`                // 总用户数量
+	ArticleTotalView uint64     `json:"articleTotalView" db:"article_total_view"` // 文章总阅读量
+	AccessArray      []DayStats `json:"accessArray"`                              // 近7天的访问量
+	CommentArray     []DayStats `json:"commentArray"`                             // 近7天的评论数
+	UserArray        []DayStats `json:"userArray"`                                // 近7天的新增用户数
+	ArticleArray     []DayStats `json:"articleArray"`                             // 近7天发布的文章字数
+}
+
+// DayStats 每一天的统计数量
+type DayStats struct {
+	DateItem  string `json:"dateItem" db:"date_item"`   // 统计的日期
+	CountItem uint   `json:"countItem" db:"count_item"` // 当天的数据
 }
 
 type IOtherRepo interface {
@@ -117,6 +139,21 @@ type IOtherRepo interface {
 
 	// SiteStats 获取站点的统计信息
 	SiteStats() (SiteStats, error)
+
+	// AdminIndexStats 获取管理端首页统计数据
+	AdminIndexStats() (AdminIndexStats, error)
+
+	// AccessStatsArray 7天内的访问量数据
+	AccessStatsArray() ([]DayStats, error)
+
+	// CommentStatsArray 7天内的评论数据
+	CommentStatsArray() ([]DayStats, error)
+
+	// UserStatsArray 7天内的新增用户数据
+	UserStatsArray() ([]DayStats, error)
+
+	// ArticleStatsArray 7天内的文章统计数据
+	ArticleStatsArray() ([]DayStats, error)
 }
 
 type IOtherService interface {
@@ -150,4 +187,7 @@ type IOtherService interface {
 
 	// SiteStats 获取站点的统计信息
 	SiteStats() (SiteStats, error)
+
+	// AdminIndexStats 获取管理端首页的统计信息
+	AdminIndexStats() (*AdminIndexStats, error)
 }

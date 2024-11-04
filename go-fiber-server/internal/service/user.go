@@ -134,13 +134,13 @@ func (self *UserService) Logout(userId uint64) error {
 // UpdateUserExpertise 更新用户经验值
 // 在更新用户经验值时 判断当前经验值是否达到了这个等级的经验上限
 // 如果达到 那么就将用户升级
-func (self *UserService) UpdateUserExpertise(count int64, userId uint64) error {
+func (self *UserService) UpdateUserExpertise(count int64, userId uint64, source uint8) error {
 	return self.repo.Transaction(context.Background(), func(tx pgx.Tx) error {
 		if err := self.repo.SaveExpertiseDetail(&usercase.ExpertiseDetail{
 			UserId:     userId,
 			Detail:     count,
 			DetailType: 1,
-			Source:     2,
+			Source:     source,
 		}, tx); err != nil {
 			slog.Error("保存经验值变更明细失败", "err", err.Error())
 			return err
@@ -159,6 +159,43 @@ func (self *UserService) UpdateUserExpertise(count int64, userId uint64) error {
 				return upgradeErr
 			}
 		}
+		slog.Info("更新用户经验和等级成功", "detail", count, "userId", userId, "source", source)
 		return nil
 	})
+}
+
+func (self *UserService) PageUser(query *usercase.UserQueryForm) (*usercase.PageData[usercase.UserVo], error) {
+	page, err := self.repo.Page(query)
+	if err != nil {
+		slog.Error("分页查询博客用户信息失败", "error", err.Error())
+		return nil, tools.FiberServerError("查询失败")
+	}
+	return page, nil
+}
+
+func (self *UserService) UpdateUser(user *usercase.User) error {
+	err := self.repo.Update(user)
+	if err != nil {
+		slog.Error("更新用户信息失败", "error", err.Error())
+		return tools.FiberServerError("更新失败")
+	}
+	// 当禁用用户时 判断当前用户是否已经登录
+	// 如果登录那么需要强制退出
+	pool.Go(func() {
+		if user.Status == 1 {
+			if logoutErr := auth.RemoveClassicLoginUserById(user.UserId); err != nil {
+				slog.Error("删除博客端用户登录信息失败", "error", logoutErr)
+			}
+		}
+	})
+	return nil
+}
+
+func (self *UserService) PageExpertise(query *usercase.ExpertiseQueryForm) (*usercase.PageData[usercase.ExpertiseDetailVo], error) {
+	page, err := self.repo.PageExpertise(query)
+	if err != nil {
+		slog.Error("查询用户经验值明细失败", "error", err.Error())
+		return nil, tools.FiberServerError("查询失败")
+	}
+	return page, nil
 }

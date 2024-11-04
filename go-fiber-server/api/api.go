@@ -91,6 +91,10 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	baseRoute.Post("/notice/admin", noticeApi.ListAdminNotice)
 	// 更新站点配置
 	baseRoute.Put("/site/configuration", oApi.UpdateSiteConfiguration)
+	// 获取首页统计数据
+	baseRoute.Get("/index/stats", oApi.AdminIndexStats)
+	// 指标监控接口
+	baseRoute.Get("/monitor", manage.Monitor)
 
 	// 标签管理接口
 	tagRoute := app.Group("/tag", auth.ManageAuth)
@@ -150,11 +154,22 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	classicUserRoute.Get("/info", classicUserApi.UserInfo, auth.ClassicAuth)
 	// 注销登录用户
 	classicUserRoute.Get("/logout", classicUserApi.Logout, auth.ClassicAuth)
+	// 查询用户 需要管理端权限
+	classicUserRoute.Post("/page", classicUserApi.Page, auth.ManageAuth)
+	// 查询用户经验值明细 需要管理端权限
+	classicUserRoute.Post("/expertise/page", classicUserApi.PageExpertise, auth.ManageAuth)
+	// 更新用户信息 需要管理端权限
+	classicUserRoute.Put("/", classicUserApi.Update, auth.ManageAuth)
 
+	// 评论接口
 	commentRoute := app.Group("/comment")
 	commentRoute.Post("/total", commentApi.Total)
 	commentRoute.Post("/page", commentApi.Page)
 	commentRoute.Post("/", commentApi.Save, auth.ClassicAuth)
+	commentRoute.Post("/vote-up/:id", commentApi.VoteUp, auth.ClassicAuth)
+	commentRoute.Post("/manage/page", commentApi.ManagePage, auth.ManageAuth)
+	commentRoute.Put("/manage/status", commentApi.UpdateSelective, auth.ManageAuth)
+	commentRoute.Delete("/manage/:id", commentApi.Delete, auth.ManageAuth)
 
 	// 开放接口
 	openRoute := app.Group("/open")
@@ -194,10 +209,18 @@ func RegisterRoutes(app *fiber.App, tagApi *tag.HttpApi, catApi *category.HttpAp
 	openRoute.Post("/article/label/page", articleApi.PageByLabel)
 	// 获取置顶文章列表
 	openRoute.Get("/article/top", articleApi.ListTop)
+	// 获取热门文章列表
+	openRoute.Get("/article/hot", articleApi.ListHot)
 	// 获取文章的归档信息
 	openRoute.Get("/article/archives", articleApi.Archives)
 	// 博客端获取文章详情
 	openRoute.Get("/article/:id", articleApi.QueryInfo)
+	// 博客文章点赞
+	openRoute.Post("/article/vote-up/:id", articleApi.VoteUp)
 	// 分页查询动态列表
 	openRoute.Post("/topic/page", topicApi.Page)
+	// 动态点赞接口
+	openRoute.Post("/topic/vote-up/:id", topicApi.VoteUp)
+	// 文章搜索接口
+	openRoute.Get("/search/article", articleApi.Search)
 }

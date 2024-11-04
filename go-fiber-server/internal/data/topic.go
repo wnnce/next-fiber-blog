@@ -8,6 +8,7 @@ import (
 	"go-fiber-ent-web-layout/internal/usercase"
 	sqlbuild "go-fiber-ent-web-layout/pkg/sql-build"
 	"log/slog"
+	"strconv"
 	"time"
 )
 
@@ -106,6 +107,18 @@ func (self *TopicRepo) Page(query *usercase.TopicQueryForm) ([]*usercase.Topic, 
 		return pgx.RowToAddrOfStructByNameLax[usercase.Topic](row)
 	})
 	return topics, total, err
+}
+
+func (self *TopicRepo) VoteUp(topicId uint64, num int) error {
+	builder := sqlbuild.NewUpdateBuilder("t_blog_topic").
+		SetRaw("update_time", "now()").
+		SetRaw("vote_up", "vote_up + "+strconv.Itoa(num)).
+		Where("topic_id").Eq(topicId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
+	if err == nil {
+		slog.Info("更新动态点赞数完成", "rows", result.RowsAffected(), "topicId", topicId)
+	}
+	return err
 }
 
 func (self *TopicRepo) DeleteById(topicId int64) error {

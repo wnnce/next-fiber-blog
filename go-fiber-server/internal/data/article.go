@@ -158,6 +158,25 @@ func (self *ArticleRepo) ListTopArticle() ([]*usercase.Article, error) {
 	})
 }
 
+func (self *ArticleRepo) ListHotArticle() ([]usercase.SimpleArticleVo, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_article").
+		Select("article_id", "title").
+		Where("status").EqRaw("0").And("delete_at").EqRaw("0").BuildAsSelect().
+		OrderByDesc("is_hot", "vote_up", "sort").
+		Limit(8)
+	rows, err := self.db.Query(context.Background(), builder.Sql())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (usercase.SimpleArticleVo, error) {
+		vo := usercase.SimpleArticleVo{}
+		scanErr := row.Scan(&vo.ArticleId, &vo.Title)
+		return vo, scanErr
+	})
+
+}
+
 func (self *ArticleRepo) PageByLabel(query *usercase.ArticleQueryForm) ([]*usercase.Article, int64, error) {
 	builder := sqlbuild.NewSelectBuilder("t_blog_article").
 		Select("article_id", "title", "summary", "cover_url", "view_num", "share_num", "vote_up", "is_hot", "is_top", "create_time").
@@ -213,8 +232,6 @@ func (self *ArticleRepo) SelectById(articleId uint64, isAdmin bool) (*usercase.A
 	}
 	builder := sqlbuild.NewSelectBuilder("t_blog_article as ba").
 		Select(selectFields...).
-		LeftJoin("t_blog_comment as bc").On("bc.article_id").EqRaw("ba.article_id").And("bc.status").EqRaw("0").And("bc.delete_at").EqRaw("0").BuildAsSelect().
-		Select("count(DISTINCT bc.comment_id) as comment_num").
 		LeftJoin("t_blog_category as ct").On("ct.category_id").EqRaw("ANY(ba.category_ids)").And("ct.status").EqRaw("0").And("ct.delete_at").EqRaw("0").BuildAsSelect().
 		Select("jsonb_agg(DISTINCT jsonb_build_object('categoryId', ct.category_id, 'categoryName', ct.category_name)) AS categories").
 		LeftJoin("t_blog_tag as bt").On("bt.tag_id").EqRaw("ANY(ba.tag_ids)").And("bt.status").EqRaw("0").And("bt.delete_at").EqRaw("0").BuildAsSelect().
@@ -264,7 +281,7 @@ func (self *ArticleRepo) CountByTitle(title string, articleId uint64) (uint8, er
 	return total, err
 }
 
-func (self ArticleRepo) DeleteById(articleId uint64) error {
+func (self *ArticleRepo) DeleteById(articleId uint64) error {
 	builder := sqlbuild.NewUpdateBuilder("t_blog_article").
 		Set("delete_at", time.Now().UnixMilli()).
 		Where("article_id").Eq(articleId).BuildAsUpdate()
@@ -273,4 +290,30 @@ func (self ArticleRepo) DeleteById(articleId uint64) error {
 		slog.Info("删除博客文章完成", "row", result.RowsAffected(), "articleId", articleId)
 	}
 	return err
+}
+
+func (self *ArticleRepo) VoteUp(articleId uint64, num int) error {
+	builder := sqlbuild.NewUpdateBuilder("t_blog_article").
+		SetRaw("update_time", "now()").
+		SetRaw("vote_up", "vote_up + "+strconv.Itoa(num)).
+		Where("article_id").Eq(articleId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), builder.Args()...)
+	if err == nil {
+		slog.Info("更新文章点赞数完成", "rows", result.RowsAffected(), "articleId", articleId)
+	}
+	return err
+}
+
+func (self *ArticleRepo) Search(keyword string, limit int) ([]usercase.SimpleArticleVo, error) {
+	sql := "select article_id, title, summary from t_blog_article where (title like '%" + keyword + "%' or summary like '%" + keyword + "%') and status = 0 and delete_at = 0 order by sort, view_num desc, create_time desc limit " + strconv.Itoa(limit)
+	rows, err := self.db.Query(context.Background(), sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (usercase.SimpleArticleVo, error) {
+		articleVo := usercase.SimpleArticleVo{}
+		scanErr := row.Scan(&articleVo.ArticleId, &articleVo.Title, &articleVo.Summary)
+		return articleVo, scanErr
+	})
 }

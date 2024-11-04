@@ -3,6 +3,7 @@ package comment
 import (
 	"github.com/gofiber/fiber/v3"
 	"go-fiber-ent-web-layout/internal/middleware/auth"
+	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/internal/tools/res"
 	"go-fiber-ent-web-layout/internal/usercase"
 )
@@ -54,4 +55,47 @@ func (self *HttpApi) Page(ctx fiber.Ctx) error {
 		return err
 	}
 	return ctx.JSON(res.OkByData(page))
+}
+
+func (self *HttpApi) UpdateSelective(ctx fiber.Ctx) error {
+	form := &usercase.CommentUpdateForm{}
+	if err := ctx.Bind().JSON(form); err != nil {
+		return err
+	}
+	if err := self.service.UpdateSelectiveComment(form); err != nil {
+		return err
+	}
+	return ctx.JSON(res.SimpleOK())
+}
+
+func (self *HttpApi) Delete(ctx fiber.Ctx) error {
+	commentId := fiber.Params[int64](ctx, "id")
+	if err := self.service.Delete(commentId); err != nil {
+		return err
+	}
+	return ctx.JSON(res.SimpleOK())
+}
+
+func (self *HttpApi) ManagePage(ctx fiber.Ctx) error {
+	query := &usercase.CommentQueryForm{}
+	if err := ctx.Bind().JSON(query); err != nil {
+		return err
+	}
+	page, err := self.service.ManagePage(query)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(res.OkByData(page))
+}
+
+func (self *HttpApi) VoteUp(ctx fiber.Ctx) error {
+	loginUser := fiber.Locals[auth.ClassicLoginUser](ctx, "classicUser")
+	commentId := fiber.Params[int64](ctx, "id")
+	if commentId <= 0 {
+		return tools.FiberRequestError("参数错误")
+	}
+	if err := self.service.CommentVoteUp(commentId, loginUser.GetUserId()); err != nil {
+		return err
+	}
+	return ctx.JSON(res.SimpleOK())
 }

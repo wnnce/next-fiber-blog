@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"errors"
+	"github.com/gofiber/fiber/v3"
 	"github.com/jackc/pgx/v5"
 	"go-fiber-ent-web-layout/internal/data"
 	"go-fiber-ent-web-layout/internal/tools"
@@ -95,6 +97,10 @@ func (self *SysDictService) UpdateDict(dict *usercase.SysDict) error {
 		return nil
 	})
 	if transactionErr != nil {
+		var fiberErr *fiber.Error
+		if errors.As(transactionErr, &fiberErr) {
+			return err
+		}
 		return tools.FiberServerError("更新失败")
 	}
 	return nil
