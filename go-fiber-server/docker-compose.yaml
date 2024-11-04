@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  go-blog-server:
+    image: go-blog-server
+    container_name: go-blog-server
+    restart: always
+    # 挂载目录
+    volumes:
+      - ./data:/app/data
+      - ./configs:/app/configs
+    # 配置端口
+    ports:
+      - 127.0.0.1:23352:4000
