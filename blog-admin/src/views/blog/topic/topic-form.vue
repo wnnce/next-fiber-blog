@@ -98,7 +98,7 @@ const formatImageToFileList = () => {
   }
   fileList.value = formData.imageUrls.map(item => {
     return {
-      uid: new Date().getTime().toString(),
+      uid: (1e7 + ((Math.random() * 10000).toFixed(0) << 4)) % 1e6.toString(),
       status: 'done',
       percent: 1,
       url: item

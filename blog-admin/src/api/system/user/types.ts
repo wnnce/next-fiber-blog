@@ -53,12 +53,10 @@ export interface UserQueryForm extends PageQuery {
 export interface LoginForm {
   username?: string;
   password?: string;
-  code?: string
 }
 
 // 更新密码表单
 export interface ResetPasswordForm {
   oldPassword: string;
   newPassword: string;
-  userId: number;
 }

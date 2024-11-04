@@ -13,6 +13,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "echarts": "^5.5.1",
     "nprogress": "^0.2.0",
     "pinia": "^2.1.7",
     "vditor": "^3.10.4",
@@ -24,6 +25,7 @@
     "@arco-plugins/vite-vue": "^1.4.5",
     "@rushstack/eslint-patch": "^1.8.0",
     "@tsconfig/node20": "^20.1.4",
+    "@types/echarts": "^4.9.22",
     "@types/node": "^20.12.5",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/eslint-config-prettier": "^9.0.0",

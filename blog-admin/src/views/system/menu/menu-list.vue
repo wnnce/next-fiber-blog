@@ -73,7 +73,9 @@ onMounted(() => {
         <a-table-column title="创建时间" data-index="createTime" align="center"/>
         <a-table-column title="操作" align="center">
           <template #cell="{ record }">
-            <a-button type="text" shape="circle" @click="showForm(undefined, record.menuId)">
+            <a-button type="text" shape="circle" @click="showForm(undefined, record.menuId)"
+                      v-if="record.menuType === 1"
+            >
               <template #icon><icon-plus /></template>
             </a-button>
             <a-button type="text" shape="circle" @click="showForm(record)">

@@ -22,7 +22,6 @@ const isSavePassword = ref<boolean>(false);
 const defaultFormData: LoginForm = {
   username: undefined,
   password: undefined,
-  code: undefined
 }
 const formData = reactive<LoginForm>({ ...defaultFormData })
 const loginButtonLoading = ref<boolean>(false);
@@ -32,7 +31,6 @@ const handleSubmit = async () => {
   const form: LoginForm = {
     username: formData.username,
     password: passwordBase64,
-    code: formData.code
   }
   try {
     const result = await userApi.login(form)
@@ -131,16 +129,6 @@ onMounted(() => {
                 <icon-unlock />
               </template>
             </a-input-password>
-          </a-form-item>
-          <a-form-item field="code" label="验证码" hide-label>
-            <div class="code-input flex">
-              <a-input v-model="formData.code" size="large" placeholder="请输入验证码">
-                <template #prefix>
-                  <icon-safe />
-                </template>
-              </a-input>
-              <div class="verify-code">验证码</div>
-            </div>
           </a-form-item>
           <a-form-item>
             <a-button type="primary" html-type="submit" size="large" long :loading="loginButtonLoading">登录</a-button>
