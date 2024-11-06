@@ -10,7 +10,7 @@ import CommentList from '@/components/comment/CommentList'
 import { CommonLike } from '@/components/client/CommonLike'
 import { LevelContext } from '@/components/comment/context/LevelContext'
 import { CommentEditor } from '@/components/comment/Comment'
-import useMarkdownParse from '@/hooks/markdown'
+import { getCommentRender } from '@/tools/markdown'
 import { CSSTransition } from 'react-transition-group'
 import useMessage from '@/components/message'
 import { commentVoteUp } from '@/lib/client-api'
@@ -22,7 +22,7 @@ const CommentItem: React.FC<{
 }> = ({ comment, articleId, topicId }) => {
   const level = useContext<number>(LevelContext);
   const [ isReply, setIsReply ] = useState<boolean>(false);
-  const commentRender = useMarkdownParse().commentRender();
+  const commentRender = getCommentRender();
   const message = useMessage();
 
   const commentContent = useMemo<string>(() => {

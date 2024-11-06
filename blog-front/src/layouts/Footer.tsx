@@ -1,17 +1,18 @@
 import '@/styles/layouts/footer.scss';
 import React from 'react';
 import Image from 'next/image'
-import useSiteConfiguration from '@/hooks/site-configuration'
+import { querySiteConfigs } from '@/tools/site-configuration'
+import Link from 'next/link'
 
 const Footer: React.FC = async () => {
-  const [ title, powered, icp ] = await useSiteConfiguration().queryConfigs('title', 'powered', 'icp')
+  const [ title, powered, icp ] = await querySiteConfigs('title', 'powered', 'icp')
   return (
     <footer className="footer">
       <div className="dynamic-container sm:flex justify-between">
         <div className="footer-left-summary">
-          <a href="#">
+          <Link href="/">
             <Image src="/images/logo.svg" alt="logo" width="100" height="60" />
-          </a>
+          </Link>
           <div className="mt-4 text-xs line-height-loose">
             <p className="flex items-center">
               <i className="i-tabler-copyright inline-block mr-1"></i >

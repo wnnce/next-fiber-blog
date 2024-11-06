@@ -13,7 +13,7 @@ import { LevelContext } from '@/components/comment/context/LevelContext'
 import useMessage from '@/components/message'
 import { CommentState, StateContext, StateContextProps } from '@/components/comment/context/StateContext'
 import Image from 'next/image'
-import useMarkdownParse from '@/hooks/markdown'
+import { getCommentRender } from '@/tools/markdown'
 
 export interface CommentProps {
   type: number;
@@ -137,7 +137,7 @@ export const CommentEditor: React.FC<{
 
   const { state } = useContext<StateContextProps>(StateContext);
   const { showLoading, showDanger, showSuccess } = useMessage();
-  const commentRender = useMarkdownParse().commentRender();
+  const commentRender = getCommentRender();
   
   const onSubmit = async (e: FormEvent) => {
     // 阻止默认提交

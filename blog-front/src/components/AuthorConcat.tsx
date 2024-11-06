@@ -3,7 +3,7 @@ import React from 'react'
 import DynamicCard from '@/components/DynamicCard'
 import RichImage from '@/components/RichImage'
 import { Concat } from '@/lib/types'
-import useSiteConfiguration from '@/hooks/site-configuration'
+import { querySiteConfigs } from '@/tools/site-configuration'
 import { listConcat, querySiteStats } from '@/lib/api'
 
 /**
@@ -49,7 +49,7 @@ const AuthorConcat: React.FC = async () => {
   ] = await Promise.all([
     querySiteStats(),
     listConcat(),
-    useSiteConfiguration().queryConfigs('avatar', 'title', 'summary')
+    querySiteConfigs('avatar', 'title', 'summary')
   ])
   return (
     <DynamicCard>
