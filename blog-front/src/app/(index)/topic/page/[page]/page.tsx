@@ -9,7 +9,7 @@ import StaticCard from '@/components/StaticCard'
 import { Timeline, TimeLineItem } from '@/components/Timeline'
 import RichImage from '@/components/RichImage'
 import { TopicLike } from '@/components/client/CommonLike'
-import useMarkdownParse from '@/hooks/markdown'
+import { getTopicRender } from '@/tools/markdown'
 
 const TopicPage: React.FC<{
   params: {
@@ -23,7 +23,7 @@ const TopicPage: React.FC<{
   }
   const { data: topicPage } = await pageTopic({ page: numberPage, size: 10 });
 
-  const topicRender = useMarkdownParse().topicRender();
+  const topicRender = getTopicRender();
 
   return (
     <>

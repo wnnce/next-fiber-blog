@@ -12,7 +12,7 @@ import {
   Tag,
   Topic
 } from '@/lib/types'
-import { SiteConfigurationItem } from '@/hooks/site-configuration'
+import { SiteConfigurationItem } from '@/tools/site-configuration'
 
 /**
  * 获取博客分类列表

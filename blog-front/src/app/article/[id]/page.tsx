@@ -11,7 +11,7 @@ import { queryArticle } from '@/lib/api'
 import RichImage from '@/components/RichImage'
 import { formatDateTime } from '@/tools/utils'
 import Link from 'next/link'
-import useMarkdownParse from '@/hooks/markdown'
+import { getArticleRender } from '@/tools/markdown'
 import { ArticleLike } from '@/components/client/CommonLike'
 import Comment from '@/components/comment/Comment'
 import StaticCard from '@/components/StaticCard'
@@ -33,7 +33,7 @@ const ArticlePage: React.FC<{
   }
 
   let articleTocHtml: string = '';
-  const articleRender = useMarkdownParse().articleRender((html: string) => {
+  const articleRender = getArticleRender((html: string) => {
     articleTocHtml = html;
   })
   const articleHtml = articleRender.render(article.content);
