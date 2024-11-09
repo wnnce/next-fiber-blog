@@ -69,7 +69,7 @@ func (self *WhereBuilder) addCondition(field, operator, prefix string, value any
 	}
 
 }
-func (self *WhereBuilder) addRawConditon(field, operator, prefix, value string) {
+func (self *WhereBuilder) addRawCondition(field, operator, prefix, value string) {
 	if self.isInit {
 		self.buffer.WriteString(" " + prefix + " ")
 	} else {
