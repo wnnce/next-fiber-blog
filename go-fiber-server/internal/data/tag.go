@@ -28,7 +28,7 @@ func (self *TagRepo) Save(form *usercase.TagForm) error {
 		Fields("tag_name", "cover_url", "color", "sort", "status").
 		Values(form.TagName, form.CoverUrl, form.Color, *form.Sort, *form.Status).
 		Returning("tag_id")
-	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args())
+	row := self.db.QueryRow(context.Background(), builder.Sql(), builder.Args()...)
 	var insertId int
 	err := row.Scan(&insertId)
 	if err == nil {
@@ -95,6 +95,7 @@ func (self *TagRepo) SelectById(id int) (*usercase.Tag, error) {
 func (self *TagRepo) Page(query *usercase.TagQueryForm) ([]*usercase.TagVo, int64, error) {
 	builder := sqlbuild.NewSelectBuilder("t_blog_tag as bt").
 		Select("bt.*").
+		CountField("bt.tag_id").
 		LeftJoin("t_blog_article as ba").On("bt.tag_id").EqRaw("ANY(ba.tag_ids)").And("ba.delete_at").EqRaw("0").BuildAsSelect().
 		Select("count(ba.*) as article_num").
 		WhereByCondition(query.TagName != "", "bt.tag_name").Like("%"+query.TagName+"%").

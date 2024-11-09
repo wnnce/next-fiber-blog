@@ -100,7 +100,7 @@ func (self *LinkRepo) ManagePage(query *usercase.LinkQueryForm) ([]*usercase.Lin
 		return links, 0, nil
 	}
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
-	builder.Limit(int64(query.Page)).Offset(offset)
+	builder.Limit(int64(query.Size)).Offset(offset)
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
 	if err != nil {
 		return nil, 0, err
