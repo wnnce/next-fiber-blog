@@ -5,13 +5,16 @@ import { querySiteConfigs } from '@/tools/site-configuration'
 import Link from 'next/link'
 
 const Footer: React.FC = async () => {
-  const [ title, powered, icp ] = await querySiteConfigs('title', 'powered', 'icp')
+  const [ title, powered, icp, logo ] = await querySiteConfigs('title', 'powered', 'icp', 'logo')
   return (
     <footer className="footer">
       <div className="dynamic-container sm:flex justify-between">
         <div className="footer-left-summary">
           <Link href="/">
-            <Image src="/images/logo.svg" alt="logo" width="100" height="60" />
+            <Image
+              src={ logo ? process.env.NEXT_PUBLIC_QINIU_IMAGE_DOMAIN + logo.value.toString().substring(6) : '/images/logo.svg' }
+              alt="logo" width="100" height="60"
+            />
           </Link>
           <div className="mt-4 text-xs line-height-loose">
             <p className="flex items-center">

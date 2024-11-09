@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import HeaderDrawerMenu from '@/layouts/HeaderDrawerMenu'
 import Search from '@/components/client/Search'
+import { querySiteConfigs } from '@/tools/site-configuration'
 
 export interface HeaderProps {
   navList: {
@@ -18,7 +19,8 @@ export interface HeaderProps {
  * @param navList 导航列表
  * @constructor
  */
-const Header: React.FC<HeaderProps> = ({ navList }): React.ReactNode => {
+const Header: React.FC<HeaderProps> = async ({ navList }) => {
+  const [ logoItem ] = await querySiteConfigs('logo');
   return (
     <header className="p-4 w-full text-sm header">
       <div className="flex justify-between items-center dynamic-container">
@@ -28,7 +30,10 @@ const Header: React.FC<HeaderProps> = ({ navList }): React.ReactNode => {
         <div className="nav-div flex">
           <div className="logo">
             <Link href="/">
-              <Image src="/images/logo.svg" alt="logo" width="100" height="60" />
+              <Image
+                src={ logoItem ? process.env.NEXT_PUBLIC_QINIU_IMAGE_DOMAIN + logoItem.value.toString().substring(6) : '/images/logo.svg' }
+                alt="logo" width="100" height="60"
+              />
             </Link>
           </div>
           <nav className="hidden sm:block">

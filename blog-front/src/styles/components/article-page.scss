@@ -164,8 +164,11 @@
         .item-cover {
           transform: scale(1.25);
         }
-        .item-content > h3 {
-          color: rgb(var(--primary-color));
+        .item-content {
+          background-color: rgba(0, 0, 0, 0.5);
+          > h3 {
+            transform: translateY(0);
+          }
         }
       }
       .item-cover {
@@ -182,16 +185,17 @@
         right: 0;
         bottom: 0;
         top: 0;
-        padding: 1rem;
+        padding: 0.5rem;
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
-        background-color: rgba(0, 0, 0, 0.3);
+        background-color: transparent;
+        transition: background-color 300ms ease;
         > h3 {
-          line-height: 100%;
+          line-height: 125%;
           font-size: 0.9rem;
-          color: rgb(var(--text-color-1));
-          transition: color 300ms ease;
+          transition: transform 300ms ease;
+          transform: translateY(300%);
         }
       }
     }

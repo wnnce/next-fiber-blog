@@ -12,7 +12,7 @@ const LabelArticleList: React.FC<{
     <ul className="list-none flex flex-col gap-row-4">
       { articles.map(article => (
         <div className="flex gap-col-4" key={article.articleId}>
-          <RichImage src={article.coverUrl} width={80} height={80} fill thumbnail radius={12} />
+          <RichImage style={{ flexShrink: "0" }} src={article.coverUrl} width={100} height={70} fill thumbnail radius={12} />
           <div className="flex flex-col justify-between py-4">
             <p className="text-xs desc-text flex items-center">
               <i className="inline-block i-tabler:clock mr-1" />
@@ -21,7 +21,11 @@ const LabelArticleList: React.FC<{
             <h3>
               { article.isTop && <TopLabel className="mr-2" /> }
               { article.isHot && <HotLabel className="mr-2" /> }
-              <Link className="a-hover-line-text-md" href="#">{article.title}</Link>
+              <Link className="a-hover-line-text-md" href={`/article/${article.articleId}`}
+                    title={article.title}
+              >
+                {article.title}
+              </Link>
             </h3>
           </div>
         </div>

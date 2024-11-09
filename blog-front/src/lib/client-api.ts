@@ -92,3 +92,10 @@ export const articleVoteUp = (articleId: number) => {
 export const searchArticle = (keyword: string) => {
   return baseClientRequest<SimpleArticle[]>('/open/search/article', 'GET', { keyword })
 }
+
+/**
+ * 记录访问请求
+ */
+export const traceAccess = () => {
+  return baseClientRequest<null>('/open/trace/access', 'GET')
+}

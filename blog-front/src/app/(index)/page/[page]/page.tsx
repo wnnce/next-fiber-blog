@@ -7,6 +7,7 @@ import { pageArticle } from '@/lib/api'
 import Empty from '@/components/Empty'
 import { formatDateTime } from '@/tools/utils'
 import Link from 'next/link'
+import { querySiteConfigs } from '@/tools/site-configuration'
 
 const ArticlePage: React.FC<{
   params: {
@@ -17,7 +18,8 @@ const ArticlePage: React.FC<{
   if (!numberPage || isNaN(numberPage) || numberPage <= 0 ) {
     throw new Error('页码参数错误')
   }
-  const { data: articlePage } = await pageArticle({ page: numberPage,  size: 5})
+  const [ articleSizeItem ] = await querySiteConfigs('articleSize');
+  const { data: articlePage } = await pageArticle({ page: numberPage,  size: articleSizeItem ? articleSizeItem.value : 5})
   if (articlePage.records.length === 0) {
     return (
       <DynamicCard>

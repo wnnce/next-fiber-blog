@@ -10,6 +10,7 @@ import { Timeline, TimeLineItem } from '@/components/Timeline'
 import RichImage from '@/components/RichImage'
 import { TopicLike } from '@/components/client/CommonLike'
 import { getTopicRender } from '@/tools/markdown'
+import { querySiteConfigs } from '@/tools/site-configuration'
 
 const TopicPage: React.FC<{
   params: {
@@ -21,7 +22,8 @@ const TopicPage: React.FC<{
   if (!numberPage || isNaN(numberPage) || numberPage <= 0 ) {
     throw new Error('动态参数错误')
   }
-  const { data: topicPage } = await pageTopic({ page: numberPage, size: 10 });
+  const [ topicSize ] = await querySiteConfigs('topicSize');
+  const { data: topicPage } = await pageTopic({ page: numberPage, size: topicSize ? topicSize.value : 10 });
 
   const topicRender = getTopicRender();
 

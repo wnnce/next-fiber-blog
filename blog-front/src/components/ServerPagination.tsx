@@ -89,7 +89,7 @@ const ServerPagination: React.FC<Props> = ({
         </>}
       </div>
       <div>
-        {current < pages ? <Link href={`${targetUrlPrefix}${current - 1}`} className="inline-block page-button">
+        {current < pages ? <Link href={`${targetUrlPrefix}${current + 1}`} className="inline-block page-button">
           Next
         </Link> : <span />}
       </div>

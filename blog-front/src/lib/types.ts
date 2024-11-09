@@ -125,6 +125,8 @@ export interface Article {
   categories: ArticleCategory[];
   // 标签列表
   tags: ArticleTag[];
+  // 关联的文章列表
+  relatedList: SimpleArticle[];
 }
 
 /**
@@ -133,7 +135,8 @@ export interface Article {
 export interface SimpleArticle {
   articleId: number;
   title: string;
-  summary: string
+  summary: string;
+  coverUrl: string;
 }
 
 /**

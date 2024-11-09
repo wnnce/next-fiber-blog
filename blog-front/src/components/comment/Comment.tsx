@@ -4,7 +4,7 @@ import '@/styles/components/comment.scss'
 import 'highlight.js/styles/atom-one-dark.min.css'
 import 'github-markdown-css/github-markdown-dark.css'
 import '@/styles/components/markdown.scss'
-import React, { FormEvent, useCallback, useContext, useEffect, useState } from 'react'
+import React, { FormEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import Button from '@/components/Button'
 import type { Comment, Page } from '@/lib/types'
 import { clientAuthTokenKey, pageComment, saveComment, totalComment, userInfo } from '@/lib/client-api'
@@ -14,6 +14,7 @@ import useMessage from '@/components/message'
 import { CommentState, StateContext, StateContextProps } from '@/components/comment/context/StateContext'
 import Image from 'next/image'
 import { getCommentRender } from '@/tools/markdown'
+import MarkdownIt from 'markdown-it'
 
 export interface CommentProps {
   type: number;
@@ -34,7 +35,6 @@ const Comment: React.FC<CommentProps> = ({ type, articleId, topicId }) => {
       return;
     }
     const result = await userInfo();
-    console.log(result);
     if (result.code === 200) {
       setState(prevState => {
         return {
@@ -102,22 +102,21 @@ const Comment: React.FC<CommentProps> = ({ type, articleId, topicId }) => {
   )
 }
 
-const CommentTotal: React.FC = React.memo(() => {
+const CommentTotal: React.FC<CommentProps> = React.memo(({ type, articleId, topicId }) => {
   const [total, setTotal] = useState<number>(0)
-  const { state } = useContext<StateContextProps>(StateContext);
   useEffect(() => {
     totalComment({
       page: 1,
       size: 10,
-      commentType: state.type,
-      articleId: state.articleId,
-      topicId: state.topicId
+      commentType: type,
+      articleId: articleId,
+      topicId: topicId
     }).then(res => {
       if (res.code === 200) {
         setTotal(res.data);
       }
     })
-  }, [state])
+  }, [type, articleId, topicId])
   return (
     <h2 className="text-sm info-text"><span className="main-text text-6">{total}</span> 条评论</h2>
   )
@@ -137,7 +136,7 @@ export const CommentEditor: React.FC<{
 
   const { state } = useContext<StateContextProps>(StateContext);
   const { showLoading, showDanger, showSuccess } = useMessage();
-  const commentRender = getCommentRender();
+  const commentRender = useMemo<MarkdownIt>(() => getCommentRender(), [])
   
   const onSubmit = async (e: FormEvent) => {
     // 阻止默认提交
@@ -240,7 +239,7 @@ const CommentBody: React.FC<CommentProps> = React.memo(({ type, articleId, topic
   }, [queryCommentPage])
   return (
     <>
-      <CommentTotal />
+      <CommentTotal type={type} articleId={articleId} topicId={topicId} />
       {page && (
         <LevelContext.Provider value={1}>
           <CommentList page={page} type={type} articleId={articleId} topicId={topicId} />
