@@ -41,9 +41,11 @@ func (self *ArticleService) SaveArticle(article *usercase.Article) error {
 		slog.Error("保存博客文章失败", "error", err.Error())
 		return tools.FiberServerError("保存失败")
 	}
-	// 如果文章状态为正常 那么需要删除归档数据缓存
-	if article.Status != nil && *article.Status == 1 {
+	// 如果文章状态为正常 那么需要删除归档数据缓存、分类缓存和标签缓存
+	if article.Status != nil && *article.Status == 0 {
 		self.deleteRedisArticleArchives()
+		self.deleteRedisCategory()
+		self.deleteRedisTags()
 	}
 	// 如果是置顶文章 那么删除redis的置顶文章缓存
 	if article.IsTop {
@@ -65,10 +67,7 @@ func (self *ArticleService) UpdateArticle(article *usercase.Article) error {
 		slog.Error("更新博客文章失败", "error", err.Error())
 		return tools.FiberServerError("更新失败")
 	}
-	// 清除文章的redis缓存
-	self.deleteRedisArticleArchives()
-	self.deleteRedisHotArticle()
-	self.deleteRedisTopArticle()
+	self.clearArticleRelatedCache()
 	return nil
 }
 
@@ -80,10 +79,7 @@ func (self *ArticleService) UpdateSelectiveArticle(form *usercase.ArticleUpdateF
 		slog.Error("快捷更新博客文章失败", "error", err.Error())
 		return tools.FiberServerError("更新失败")
 	}
-	// 清除文章的redis缓存
-	self.deleteRedisArticleArchives()
-	self.deleteRedisHotArticle()
-	self.deleteRedisTopArticle()
+	self.clearArticleRelatedCache()
 	return nil
 }
 
@@ -169,6 +165,18 @@ func (self *ArticleService) SelectById(articleId uint64, isAdmin bool) (*usercas
 	if article == nil {
 		return nil, fiber.NewError(fiber.StatusNotFound, "文章不存在")
 	}
+	if !isAdmin {
+		pool.Go(func() {
+			if updateErr := self.repo.UpdateViewNum(articleId, 1); updateErr != nil {
+				slog.Error("更新博客文章查询次数失败", "articleId", articleId, "error", err)
+			}
+		})
+	}
+	related, err := self.repo.ListRelatedArticle(articleId, 5)
+	if err != nil {
+		slog.Error("获取博客关联文章失败", "articleId", articleId, "error", err)
+	}
+	article.RelatedList = related
 	return article, err
 }
 
@@ -177,6 +185,8 @@ func (self *ArticleService) DeleteArticleById(articleId uint64) error {
 		slog.Error("删除博客文章失败", "error", err.Error())
 		return tools.FiberServerError("删除失败")
 	}
+	// 清除文章的redis缓存
+	self.clearArticleRelatedCache()
 	return nil
 }
 
@@ -210,6 +220,15 @@ func (self *ArticleService) getArticleInfoCacheKey(articleId uint64) string {
 	return articleInfoCacheKeyPrefix + strconv.FormatUint(articleId, 10)
 }
 
+// 清除文章相关的所有缓存
+func (self *ArticleService) clearArticleRelatedCache() {
+	self.deleteRedisArticleArchives()
+	self.deleteRedisHotArticle()
+	self.deleteRedisTopArticle()
+	self.deleteRedisCategory()
+	self.deleteRedisTags()
+}
+
 func (self *ArticleService) deleteRedisHotArticle() {
 	pool.Go(func() {
 		if err := self.redisTemplate.Delete(context.Background(), hotArticleCacheKey); err != nil {
@@ -230,6 +249,22 @@ func (self *ArticleService) deleteRedisArticleArchives() {
 	pool.Go(func() {
 		if err := self.redisTemplate.Delete(context.Background(), archivesArticleCacheKey); err != nil {
 			slog.Error("删除redis文章归档缓存失败", "error", err)
+		}
+	})
+}
+
+func (self *ArticleService) deleteRedisCategory() {
+	pool.Go(func() {
+		if err := self.redisTemplate.Delete(context.Background(), categoryTreeListCacheKey); err != nil {
+			slog.Error("删除redis分类列表缓存失败", "error", err)
+		}
+	})
+}
+
+func (self *ArticleService) deleteRedisTags() {
+	pool.Go(func() {
+		if err := self.redisTemplate.Delete(context.Background(), tagListCacheKey); err != nil {
+			slog.Error("删除redis标签列表缓存失败", "error", err)
 		}
 	})
 }

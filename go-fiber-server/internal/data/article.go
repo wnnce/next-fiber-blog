@@ -88,6 +88,17 @@ func (self *ArticleRepo) UpdateSelective(form *usercase.ArticleUpdateForm) error
 	return err
 }
 
+func (self *ArticleRepo) UpdateViewNum(articleId uint64, num int) error {
+	builder := sqlbuild.NewUpdateBuilder("t_blog_article").
+		SetRaw("view_num", "view_num + "+strconv.Itoa(num)).
+		Where("article_id").Eq(articleId).BuildAsUpdate()
+	result, err := self.db.Exec(context.Background(), builder.Sql(), articleId)
+	if err == nil {
+		slog.Info("更新博客文章查看次数完成", "rows", result.RowsAffected(), "articleId", articleId)
+	}
+	return err
+}
+
 func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.ArticleVo, int64, error) {
 	var articleSelectFields []string
 	if query.IsAdmin {
@@ -100,6 +111,7 @@ func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Art
 	}
 	builder := sqlbuild.NewSelectBuilder("t_blog_article as ba").
 		Select(articleSelectFields...).
+		CountField("ba.article_id").
 		LeftJoin("t_blog_comment as bc").On("bc.article_id").EqRaw("ba.article_id").And("bc.status").EqRaw("0").And("bc.delete_at").EqRaw("0").BuildAsSelect().
 		Select("count(DISTINCT bc.comment_id) as comment_num").
 		LeftJoin("t_blog_category as ct").On("ct.category_id").EqRaw("ANY(ba.category_ids)").And("ct.status").EqRaw("0").And("ct.delete_at").EqRaw("0").BuildAsSelect().
@@ -174,7 +186,30 @@ func (self *ArticleRepo) ListHotArticle() ([]usercase.SimpleArticleVo, error) {
 		scanErr := row.Scan(&vo.ArticleId, &vo.Title)
 		return vo, scanErr
 	})
+}
 
+func (self *ArticleRepo) ListRelatedArticle(articleId uint64, limit int) ([]usercase.SimpleArticleVo, error) {
+	builder := sqlbuild.NewSelectBuilder("t_blog_article as ba1").
+		Select("ba2.article_id", "ba2.title", "ba2.cover_url").
+		InnerJoin("t_blog_article as ba2").On("ba2.article_id").NeRaw("ba1.article_id").
+		And("ba2.tag_ids").OriginalRaw("&&", "ba1.tag_ids").
+		And("ba2.status").EqRaw("0").
+		And("ba2.delete_at").EqRaw("0").BuildAsSelect().
+		Where("ba1.article_id").Eq(articleId).
+		And("ba1.status").EqRaw("0").
+		And("ba1.delete_at").EqRaw("0").BuildAsSelect().
+		OrderBy("ba2.sort", "ba2.view_num desc", "ba2.create_time desc").
+		Limit(int64(limit))
+	rows, err := self.db.Query(context.Background(), builder.Sql(), articleId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (usercase.SimpleArticleVo, error) {
+		vo := usercase.SimpleArticleVo{}
+		scanErr := row.Scan(&vo.ArticleId, &vo.Title, &vo.CoverUrl)
+		return vo, scanErr
+	})
 }
 
 func (self *ArticleRepo) PageByLabel(query *usercase.ArticleQueryForm) ([]*usercase.Article, int64, error) {

@@ -27,14 +27,16 @@ type SimpleArticleVo struct {
 	ArticleId uint64 `json:"articleId" db:"article_id"`
 	Title     string `json:"title" db:"title"`
 	Summary   string `json:"summary" db:"summary"`
+	CoverUrl  string `json:"coverUrl" db:"cover_url"`
 }
 
 // ArticleVo 博客文章Vo类
 type ArticleVo struct {
 	Article
-	CommentNum int64                `json:"commentNum" db:"comment_num"` // 评论数量
-	Categories []*ArticleCategoryVo `json:"categories" db:"categories"`  // 分类列表
-	Tags       []*ArticleTagVo      `json:"tags" db:"tags"`              // 标签列表
+	CommentNum  int64                `json:"commentNum" db:"comment_num"` // 评论数量
+	Categories  []*ArticleCategoryVo `json:"categories" db:"categories"`  // 分类列表
+	Tags        []*ArticleTagVo      `json:"tags" db:"tags"`              // 标签列表
+	RelatedList []SimpleArticleVo    `json:"relatedList"`
 }
 
 // ArticleUpdateForm 文章更新表单
@@ -71,11 +73,15 @@ type IArticleRepo interface {
 
 	UpdateSelective(form *ArticleUpdateForm) error
 
+	UpdateViewNum(articleId uint64, num int) error
+
 	Page(query *ArticleQueryForm) ([]*ArticleVo, int64, error)
 
 	ListTopArticle() ([]*Article, error)
 
 	ListHotArticle() ([]SimpleArticleVo, error)
+
+	ListRelatedArticle(articleId uint64, limit int) ([]SimpleArticleVo, error)
 
 	PageByLabel(query *ArticleQueryForm) ([]*Article, int64, error)
 
