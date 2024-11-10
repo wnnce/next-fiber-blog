@@ -99,10 +99,10 @@ func (self *TopicRepo) Page(query *usercase.TopicQueryForm) ([]*usercase.Topic, 
 	offset := tools.ComputeOffset(total, query.Page, query.Size, true)
 	builder.Limit(int64(query.Size)).Offset(offset)
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
 	topics, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Topic, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.Topic](row)
 	})

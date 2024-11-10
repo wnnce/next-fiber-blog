@@ -74,10 +74,10 @@ func (self *LinkRepo) List() ([]*usercase.Link, error) {
 		And("delete_at").EqRaw("0").BuildAsSelect().
 		OrderBy("sort", "create_time desc")
 	rows, err := self.db.Query(context.Background(), builder.Sql())
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Link, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.Link](row)
 	})
@@ -102,10 +102,10 @@ func (self *LinkRepo) ManagePage(query *usercase.LinkQueryForm) ([]*usercase.Lin
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
 	builder.Limit(int64(query.Size)).Offset(offset)
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
 	links, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Link, error) {
 		return pgx.RowToAddrOfStructByName[usercase.Link](row)
 	})

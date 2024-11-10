@@ -79,8 +79,8 @@ func (self *SysUserRepo) FindUserById(userId uint64) (*usercase.SysUser, error) 
 		And("status").EqRaw("0").
 		And("delete_at").EqRaw("0").BuildAsSelect()
 	rows, err := self.db.Query(context.Background(), builder.Sql(), userId)
+	defer rows.Close()
 	if err == nil && rows.Next() {
-		defer rows.Close()
 		return pgx.RowToAddrOfStructByNameLax[usercase.SysUser](rows)
 	}
 	return nil, err
@@ -112,10 +112,10 @@ func (self *SysUserRepo) Page(query *usercase.SysUserQueryForm) ([]*usercase.Sys
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
 	builder.Limit(int64(query.Size)).Offset(offset)
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
 	users, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.SysUser, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.SysUser](row)
 	})
@@ -163,8 +163,8 @@ func (self *SysUserRepo) QueryUserByUsernameAndPassword(username, password strin
 		And("password").Eq(password).
 		And("delete_at").EqRaw("0").BuildAsSelect()
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err == nil {
-		defer rows.Close()
 		for rows.Next() {
 			return pgx.RowToAddrOfStructByNameLax[usercase.SysUser](rows)
 		}

@@ -71,12 +71,14 @@ func SelectPage[T any](builder sqlbuild.SelectBuilder, page, size int, safe bool
 	offset := tools.ComputeOffset(total, page, size, safe)
 	builder.Limit(int64(size)).Offset(offset)
 	rows, err := db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
 	records, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (*T, error) {
 		return pgx.RowToAddrOfStructByNameLax[T](row)
 	})
+	rows.Close()
 	if err != nil {
 		return nil, err
 	}

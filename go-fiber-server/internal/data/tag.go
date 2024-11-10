@@ -85,8 +85,8 @@ func (self *TagRepo) SelectById(id int) (*usercase.Tag, error) {
 		And("status").EqRaw("0").
 		And("delete_at").EqRaw("0").BuildAsSelect()
 	rows, err := self.db.Query(context.Background(), builder.Sql(), id)
+	defer rows.Close()
 	if err == nil && rows.Next() {
-		defer rows.Close()
 		return pgx.RowToAddrOfStructByName[usercase.Tag](rows)
 	}
 	return nil, err
@@ -116,10 +116,10 @@ func (self *TagRepo) Page(query *usercase.TagQueryForm) ([]*usercase.TagVo, int6
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
 	builder.Limit(int64(query.Size)).Offset(offset)
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
 	tags, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.TagVo, error) {
 		return pgx.RowToAddrOfStructByName[usercase.TagVo](row)
 	})
@@ -136,10 +136,10 @@ func (self *TagRepo) List() ([]*usercase.TagVo, error) {
 		GroupBy("bt.tag_id").
 		OrderBy("bt.sort", "bt.create_time desc")
 	rows, err := self.db.Query(context.Background(), builder.Sql())
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.TagVo, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.TagVo](row)
 	})
@@ -155,10 +155,10 @@ func (self *TagRepo) ListByIds(ids []uint) ([]*usercase.Tag, error) {
 		And("status").EqRaw("0").
 		And("delete_at").EqRaw("0").BuildAsSelect()
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Tag, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.Tag](row)
 	})

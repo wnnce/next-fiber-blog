@@ -89,8 +89,8 @@ func (c *CategoryRepo) SelectById(catId int) (*usercase.Category, error) {
 		And("status").EqRaw("0").
 		And("delete_at").EqRaw("0").BuildAsSelect()
 	rows, err := c.db.Query(context.Background(), builder.Sql(), catId)
+	defer rows.Close()
 	if err == nil && rows.Next() {
-		defer rows.Close()
 		return pgx.RowToAddrOfStructByName[usercase.Category](rows)
 	}
 	return nil, err
@@ -105,10 +105,10 @@ func (c *CategoryRepo) List() ([]*usercase.CategoryVo, error) {
 		GroupBy("bc.category_id").
 		OrderBy("bc.is_top desc", "bc.sort")
 	rows, err := c.db.Query(context.Background(), builder.Sql())
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.CategoryVo, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.CategoryVo](row)
 	})
@@ -124,10 +124,10 @@ func (c *CategoryRepo) ManageList() ([]*usercase.CategoryVo, error) {
 		GroupBy("bc.category_id").
 		OrderBy("bc.is_top desc", "bc.sort")
 	rows, err := c.db.Query(context.Background(), builder.Sql())
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.CategoryVo, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.CategoryVo](row)
 	})
@@ -143,10 +143,10 @@ func (c *CategoryRepo) ListByIds(ids []uint) ([]usercase.Category, error) {
 		And("status").EqRaw("0").
 		And("delete_at").EqRaw("0").BuildAsSelect()
 	rows, err := c.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (usercase.Category, error) {
 		return pgx.RowToStructByNameLax[usercase.Category](row)
 	})

@@ -149,6 +149,7 @@ func (self *ArticleRepo) Page(query *usercase.ArticleQueryForm) ([]*usercase.Art
 	articles, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.ArticleVo, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.ArticleVo](row)
 	})
+	rows.Close()
 	return articles, total, err
 }
 
@@ -276,6 +277,7 @@ func (self *ArticleRepo) SelectById(articleId uint64, isAdmin bool) (*usercase.A
 		And("ba.delete_at").EqRaw("0").BuildAsSelect().
 		GroupBy("ba.article_id")
 	rows, err := self.db.Query(context.Background(), builder.Sql(), articleId)
+	defer rows.Close()
 	if err == nil && rows.Next() {
 		return pgx.RowToAddrOfStructByNameLax[usercase.ArticleVo](rows)
 	}
@@ -342,10 +344,10 @@ func (self *ArticleRepo) VoteUp(articleId uint64, num int) error {
 func (self *ArticleRepo) Search(keyword string, limit int) ([]usercase.SimpleArticleVo, error) {
 	sql := "select article_id, title, summary from t_blog_article where (title like '%" + keyword + "%' or summary like '%" + keyword + "%') and status = 0 and delete_at = 0 order by sort, view_num desc, create_time desc limit " + strconv.Itoa(limit)
 	rows, err := self.db.Query(context.Background(), sql)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (usercase.SimpleArticleVo, error) {
 		articleVo := usercase.SimpleArticleVo{}
 		scanErr := row.Scan(&articleVo.ArticleId, &articleVo.Title, &articleVo.Summary)

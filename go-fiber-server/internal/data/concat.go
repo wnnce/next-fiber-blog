@@ -74,10 +74,10 @@ func (self *ConcatRepo) List() ([]*usercase.Concat, error) {
 		And("delete_at").EqRaw("0").BuildAsSelect().
 		OrderBy("sort", "create_time desc")
 	rows, err := self.db.Query(context.Background(), builder.Sql())
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Concat, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.Concat](row)
 	})
@@ -91,10 +91,10 @@ func (self *ConcatRepo) ManageList(query *usercase.ConcatQueryForm) ([]*usercase
 		And("delete_at").EqRaw("0").BuildAsSelect().
 		OrderBy("sort", "create_time desc")
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Concat, error) {
 		return pgx.RowToAddrOfStructByName[usercase.Concat](rows)
 	})

@@ -39,8 +39,8 @@ func (self *OtherRepo) QueryFileByMd5(fileMd5 string) (*usercase.UploadFile, err
 	builder := sqlbuild.NewSelectBuilder("t_upload_file").
 		Where("file_md5").Eq(fileMd5).BuildAsSelect()
 	rows, err := self.db.Query(context.Background(), builder.Sql(), fileMd5)
+	defer rows.Close()
 	if err == nil && rows.Next() {
-		defer rows.Close()
 		return pgx.RowToAddrOfStructByName[usercase.UploadFile](rows)
 	}
 	return nil, err
@@ -96,10 +96,10 @@ func (self *OtherRepo) PageLoginRecord(query *usercase.LoginLogQueryForm) ([]*us
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
 	builder.Limit(int64(query.Size)).Offset(offset)
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
 	records, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.LoginLog, error) {
 		return pgx.RowToAddrOfStructByName[usercase.LoginLog](row)
 	})
@@ -124,10 +124,10 @@ func (self *OtherRepo) PageAccessRecord(query *usercase.AccessLogQueryForm) ([]*
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
 	builder.Limit(int64(query.Size)).Offset(offset)
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
 	records, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.AccessLog, error) {
 		return pgx.RowToAddrOfStructByName[usercase.AccessLog](row)
 	})
@@ -188,10 +188,10 @@ func (self *OtherRepo) ArticleStatsArray() ([]usercase.DayStats, error) {
 
 func (self *OtherRepo) commonStatsArrayQuery(querySql string) ([]usercase.DayStats, error) {
 	rows, err := self.db.Query(context.Background(), querySql)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows[usercase.DayStats](rows, func(row pgx.CollectableRow) (usercase.DayStats, error) {
 		stats := usercase.DayStats{}
 		scanErr := row.Scan(&stats.DateItem, &stats.CountItem)

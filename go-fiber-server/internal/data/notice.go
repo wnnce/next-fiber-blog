@@ -62,10 +62,10 @@ func (self *NoticeRepo) ListByType(noticeType int) ([]usercase.Notice, error) {
 		And("delete_at").EqRaw("0").BuildAsSelect().
 		OrderBy("sort")
 	rows, err := self.db.Query(context.Background(), builder.Sql(), noticeType)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (usercase.Notice, error) {
 		return pgx.RowToStructByNameLax[usercase.Notice](row)
 	})
@@ -93,10 +93,10 @@ func (self *NoticeRepo) ManagePage(query *usercase.NoticeQueryForm) ([]*usercase
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
 	builder.Limit(int64(query.Size)).Offset(offset)
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
 	records, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.Notice, error) {
 		return pgx.RowToAddrOfStructByName[usercase.Notice](row)
 	})
