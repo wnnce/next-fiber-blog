@@ -38,7 +38,7 @@ const Search: React.FC = () => {
 
   return (
     <div className="header-search">
-      <button className="i-tabler-search cursor-pointer" onClick={() => {
+      <button className="i-tabler-search cursor-pointer" aria-label="搜索" onClick={() => {
         setMaskVisible(true);
         setTimeout(() => {
           setBodyVisible(true);

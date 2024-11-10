@@ -53,24 +53,28 @@ const ArticlePage: React.FC<{
                     </h2>
                     <div className="flex gap-col-8 gap-row-2 text-xs desc-text flex-wrap">
                       { (article.categories && article.categories.length) > 0 && (
-                        <ul className="list-none flex gap-col-2 flex-wrap">
+                        <div className="flex gap-col-2">
                           <i className="inline-block i-tabler:category text-sm" />
-                          {article.categories.map(item => (
-                            <li key={item.categoryId}>
-                              <Link href="#" className="a-hover-line-text-sm">{item.categoryName}</Link>
-                            </li>
-                          ))}
-                        </ul>
+                          <ul className="list-none flex gap-col-2 flex-wrap">
+                            {article.categories.map(item => (
+                              <li key={item.categoryId}>
+                                <Link href={`/category/${item.categoryId}/page/1`} className="a-hover-line-text-sm">{item.categoryName}</Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       )}
-                      { (article.tags && article.tags.length > 0) && (
-                        <ul className="list-none flex gap-col-2 flex-wrap">
+                      {(article.tags && article.tags.length > 0) && (
+                        <div className="flex gap-col-2">
                           <i className="inline-block i-tabler:tag text-sm" />
-                          {article.tags.map(item => (
-                            <li key={item.tagId}>
-                              <Link href="#" className="a-hover-line-text-sm">{item.tagName}</Link>
-                            </li>
-                          ))}
-                        </ul>
+                          <ul className="list-none flex gap-col-2 flex-wrap">
+                            {article.tags.map(item => (
+                              <li key={item.tagId}>
+                                <Link href={`/tag/${item.tagId}/page/1`} className="a-hover-line-text-sm">{item.tagName}</Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       )}
                     </div>
                     <p className="desc-text text-sm line-clamp-2 line-height-relaxed">
@@ -78,7 +82,7 @@ const ArticlePage: React.FC<{
                     </p>
                     <ul className="list-none flex gap-col-4 info-text text-xs">
                       <li className="flex items-center">
-                        <i className="inline-block i-tabler:eye mr-1 text-sm" />
+                      <i className="inline-block i-tabler:eye mr-1 text-sm" />
                         { article.viewNum }
                       </li>
                       <li className="flex items-center">

@@ -28,10 +28,24 @@ const Footer: React.FC = async () => {
         </div>
         <div
           className="footer-right-icons flex gap-col-4 justify-end flex-wrap items-center text-7 max-w-md mt-6 sm:mt-0">
-          <a className="inline-block i-tabler-creative-commons" href="https://baidu.com" target="_blank" />
-          <a className="inline-block i-tabler-brand-github" href="https://github.com/wnnce" target="_blank" />
-          <a className="inline-block i-tabler-brand-golang" href="https://go.dev/" target="_blank" />
-          <a className="inline-block i-tabler-brand-nextjs" href="https://nextjs.org/" target="_blank" />
+          <a className="inline-block i-tabler-creative-commons"
+             href="https://zh.wikipedia.org/wiki/%E7%9F%A5%E8%AF%86%E5%85%B1%E4%BA%AB%E8%AE%B8%E5%8F%AF%E5%8D%8F%E8%AE%AE"
+             target="_blank"
+             title="知识共享协议"
+          />
+          <a className="inline-block i-tabler-brand-github"
+             href="https://github.com/wnnce"
+             target="_blank"
+             title="Github"
+          />
+          <a className="inline-block i-tabler-brand-golang" href="https://go.dev/"
+             target="_blank"
+             title="go-fiber"
+          />
+          <a className="inline-block i-tabler-brand-nextjs" href="https://nextjs.org/"
+             target="_blank"
+             title="next.js"
+          />
         </div>
       </div>
     </footer>
