@@ -6,8 +6,6 @@
 
 `Markdown`编辑器使用开源的`Vditor`编辑器，支持所见即所得模式，除了`GFM`标准之外还支持数学公式等等等。
 
-[Preview](https://fiber-blog-admin.vercel.app/) `admin@admin123456`
-
 ## 待实现的功能
 
 - [x] 个人中心
