@@ -4,6 +4,7 @@ import { pageLabelArticle } from '@/lib/api'
 import LabelArticleList from '@/components/LabelArticleList'
 import ServerPagination from '@/components/ServerPagination'
 import Empty from '@/components/Empty'
+import { querySiteConfigs } from '@/tools/site-configuration'
 
 const CategoryArticlePage: React.FC<{
   params: {
@@ -24,7 +25,7 @@ const CategoryArticlePage: React.FC<{
       </DynamicCard>
     )
   }
-  const { data: pageData } = await pageLabelArticle({ categoryId, page: articlePage, size: 20 });
+  const { data: pageData } = await pageLabelArticle({ categoryId, page: articlePage, size: 10 });
   if ( !pageData || pageData.records.length === 0) {
     return (
       <DynamicCard title="POSTS" icon="i-tabler:news">
@@ -34,7 +35,7 @@ const CategoryArticlePage: React.FC<{
   }
   return (
     <>
-      <DynamicCard title="POSTS" icon="i-tabler:news">
+      <DynamicCard title="POSTS" icon="i-tabler:news" multiple={80}>
         <LabelArticleList articles={pageData.records} />
       </DynamicCard>
       <ServerPagination current={pageData.current}

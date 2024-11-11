@@ -8,28 +8,27 @@ import { tasklist } from "@mdit/plugin-tasklist"
 import anchor from 'markdown-it-anchor';
 import toc from 'markdown-it-toc-done-right';
 
-let _articleRender: MarkdownIt;
-let _commentRender: MarkdownIt;
-
 export const getArticleRender = (tocRenderCallback?: (html: string) => void): MarkdownIt => {
-  if (!_articleRender) {
-    _articleRender = markdownit('default', {
-      highlight: (str, lang) => {
-        let resultValue: string
-        if (lang && hljs.getLanguage(lang)) {
-          resultValue = hljs.highlight(str, { language: lang }).value;
-        } else {
-          resultValue = str;
-        }
-        return `<pre><code class="hljs ${lang && `language-${lang}`}">${resultValue}</code></pre>`
+  const articleRender = markdownit('default', {
+    highlight: (str, lang) => {
+      let resultValue: string
+      if (lang && hljs.getLanguage(lang)) {
+        resultValue = hljs.highlight(str, { language: lang }).value;
+      } else {
+        resultValue = str;
       }
-    }).use(katex).use(alert).use(imgLazyload).use(tasklist).use(anchor).use(toc, {
-      callback: !tocRenderCallback ? undefined : (html: string, _: object) => {
+      return `<pre><code class="hljs ${lang && `language-${lang}`}">${resultValue}</code></pre>`
+    }
+  }).use(katex).use(alert).use(imgLazyload).use(tasklist).use(anchor)
+
+  if (tocRenderCallback) {
+    articleRender.use(toc, {
+      callback: (html: string, _: object) => {
         tocRenderCallback(html);
       }
     });
   }
-  return _articleRender;
+  return articleRender;
 }
 
 export const getTopicRender = () => {
@@ -37,19 +36,16 @@ export const getTopicRender = () => {
 }
 
 export const getCommentRender = () => {
-  if (!_commentRender) {
-    _commentRender = markdownit('default', {
-      breaks: true,
-      highlight: (str, lang) => {
-        let resultValue: string
-        if (lang && hljs.getLanguage(lang)) {
-          resultValue = hljs.highlight(str, { language: lang }).value;
-        } else {
-          resultValue = str;
-        }
-        return `<pre><code class="hljs ${lang && `language-${lang}`}">${resultValue}</code></pre>`
+  return markdownit('default', {
+    breaks: true,
+    highlight: (str, lang) => {
+      let resultValue: string
+      if (lang && hljs.getLanguage(lang)) {
+        resultValue = hljs.highlight(str, { language: lang }).value;
+      } else {
+        resultValue = str;
       }
-    }).disable(['image', 'heading'], true)
-  }
-  return _commentRender;
+      return `<pre><code class="hljs ${lang && `language-${lang}`}">${resultValue}</code></pre>`
+    }
+  }).disable(['image', 'heading'], true)
 }

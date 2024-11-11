@@ -20,6 +20,7 @@ export function request<T> (url: string, method: HttpMethod, params?: Record<str
       const result = await response.json() as Result<T>;
       resolve(result);
     }).catch(err => {
+      console.log('请求失败：' + err)
       reject(err)
     })
   })

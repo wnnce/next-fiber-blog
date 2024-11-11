@@ -56,14 +56,14 @@ const ArticlePage: React.FC<{
 
   return (
     <div className="dynamic-container">
-      <div className="sm:py-8 py-4 sm:px-4 block lg:gap-4 lg:flex">
-        <div className="article-slide-option text-xl flex flex-col gap-row-1">
-          <div className="toc-button lg:hidden">
-            <ArticleDrawerToc tocHtml={articleTocHtml} />
-          </div>
-          <ArticleDynamicScrollTop />
+      <div className="article-slide-option text-xl flex flex-col gap-row-1">
+        <div className="toc-button lg:hidden">
+          <ArticleDrawerToc tocHtml={articleTocHtml} />
         </div>
-        <div className="flex-1 flex gap-row-4 flex-col">
+        <ArticleDynamicScrollTop />
+      </div>
+      <div className="sm:py-8 py-4 sm:px-4 gap-4 flex max-w-full">
+        <div className="flex gap-row-4 flex-1 flex-col max-w-full overflow-x-auto">
           <div className={`${cardStyles.card} article-content`}>
             <div className="article-header h-80 xl:h-100">
               <RichImage className="header-cover" src={article.coverUrl} fill lazy />
@@ -124,23 +124,29 @@ const ArticlePage: React.FC<{
                 <li><ArticleLike articleId={article.articleId} count={article.voteUp} /></li>
                 <li><i className="inline-block i-tabler:qrcode"></i></li>
               </ul>
-              <p className="sm:text-sm text-3">{ `本文使用 ${article.protocol || 'CC BY-NC-SA 4.0'} 许可协议，转载请注明出处` }</p>
-              { article.tips && <p className="sm:text-sm text-3">{ `TIPS: ${article.tips}` }</p> }
+              <p className="sm:text-sm text-3">{`本文使用 ${article.protocol || 'CC BY-NC-SA 4.0'} 许可协议，转载请注明出处`}</p>
+              {article.tips && <p className="sm:text-sm text-3">{`TIPS: ${article.tips}`}</p>}
             </div>
           </div>
-          <div className="related-article sm:px-0 px-2">
-            <h2 className="mb-4">关联文章</h2>
-            <div className="related-article-list flex gap-col-4">
-              <Link href={`/article/${article.articleId}`}>
-                <div className="related-article-item">
-                  <RichImage className="item-cover" src={article.coverUrl} fill lazy />
-                  <div className="item-content">
-                    <h3>{ article.title }</h3>
-                  </div>
-                </div>
-              </Link>
+          { (article.relatedList && article.relatedList.length > 0) && (
+            <div className="related-article sm:px-0 px-2">
+              <h2 className="mb-4">关联文章</h2>
+              <ul className="related-article-list list-none flex gap-col-4 overflow-x-auto pb-2">
+                { article.relatedList.map(item => (
+                  <li key={item.articleId}>
+                    <Link href={`/article/${item.articleId}`}>
+                      <div className="related-article-item">
+                        <RichImage className="item-cover" src={item.coverUrl} fill lazy />
+                        <div className="item-content">
+                          <h3>{item.title}</h3>
+                        </div>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
+          )}
           <StaticCard useDefaultPadding>
             <Comment type={1} articleId={article.articleId} />
           </StaticCard>

@@ -7,6 +7,7 @@ import { pageArticle } from '@/lib/api'
 import Empty from '@/components/Empty'
 import { formatDateTime } from '@/tools/utils'
 import Link from 'next/link'
+import { querySiteConfigs } from '@/tools/site-configuration'
 
 const ArticlePage: React.FC<{
   params: {
@@ -17,7 +18,8 @@ const ArticlePage: React.FC<{
   if (!numberPage || isNaN(numberPage) || numberPage <= 0 ) {
     throw new Error('页码参数错误')
   }
-  const { data: articlePage } = await pageArticle({ page: numberPage,  size: 5})
+  const [ articleSizeItem ] = await querySiteConfigs('articleSize');
+  const { data: articlePage } = await pageArticle({ page: numberPage,  size: articleSizeItem ? articleSizeItem.value : 5})
   if (articlePage.records.length === 0) {
     return (
       <DynamicCard>
@@ -51,24 +53,28 @@ const ArticlePage: React.FC<{
                     </h2>
                     <div className="flex gap-col-8 gap-row-2 text-xs desc-text flex-wrap">
                       { (article.categories && article.categories.length) > 0 && (
-                        <ul className="list-none flex gap-col-2 flex-wrap">
+                        <div className="flex gap-col-2">
                           <i className="inline-block i-tabler:category text-sm" />
-                          {article.categories.map(item => (
-                            <li key={item.categoryId}>
-                              <Link href="#" className="a-hover-line-text-sm">{item.categoryName}</Link>
-                            </li>
-                          ))}
-                        </ul>
+                          <ul className="list-none flex gap-col-2 flex-wrap">
+                            {article.categories.map(item => (
+                              <li key={item.categoryId}>
+                                <Link href={`/category/${item.categoryId}/page/1`} className="a-hover-line-text-sm">{item.categoryName}</Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       )}
-                      { (article.tags && article.tags.length > 0) && (
-                        <ul className="list-none flex gap-col-2 flex-wrap">
+                      {(article.tags && article.tags.length > 0) && (
+                        <div className="flex gap-col-2">
                           <i className="inline-block i-tabler:tag text-sm" />
-                          {article.tags.map(item => (
-                            <li key={item.tagId}>
-                              <Link href="#" className="a-hover-line-text-sm">{item.tagName}</Link>
-                            </li>
-                          ))}
-                        </ul>
+                          <ul className="list-none flex gap-col-2 flex-wrap">
+                            {article.tags.map(item => (
+                              <li key={item.tagId}>
+                                <Link href={`/tag/${item.tagId}/page/1`} className="a-hover-line-text-sm">{item.tagName}</Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       )}
                     </div>
                     <p className="desc-text text-sm line-clamp-2 line-height-relaxed">
@@ -76,7 +82,7 @@ const ArticlePage: React.FC<{
                     </p>
                     <ul className="list-none flex gap-col-4 info-text text-xs">
                       <li className="flex items-center">
-                        <i className="inline-block i-tabler:eye mr-1 text-sm" />
+                      <i className="inline-block i-tabler:eye mr-1 text-sm" />
                         { article.viewNum }
                       </li>
                       <li className="flex items-center">

@@ -12,7 +12,6 @@ const ArticleDynamicScrollTop: React.FC = () => {
   })
 
   const handleScrollTop = () => {
-    console.log('scroll')
     document.body.scrollTo({
       left: 0,
       top: 0,

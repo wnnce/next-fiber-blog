@@ -78,12 +78,16 @@
     display: none;
   }
 
+  img {
+    border-radius: 1rem;
+  }
+
   pre {
     background: rgb(var(--button-background-color));
     padding: 2.25rem 0.75rem 0.75rem 0.75rem;
     position: relative;
     overflow-x: auto;
-    width: 100%;
+    max-width: 100%;
     &::after {
       content: "";
       background: rgb(var(--border-color));
@@ -103,6 +107,7 @@
     .code {
       word-break: break-word;
       text-wrap: wrap;
+      white-space: pre-wrap;;
     }
     $languages: (java: 'Java', go: 'Go', python: 'Python', javascript: 'JavaScript', typescript: 'TypeScript', vue: 'Vue',
     react: 'React', 'xml': XML, 'html': HTML, css: CSS, 'yaml': Yaml, 'json': JSON, 'bash': BASH, 'properties': Properties,
