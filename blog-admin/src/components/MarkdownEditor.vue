@@ -138,12 +138,15 @@ onMounted(() => {
 .editor-container {
   width: 100%;
 }
+:deep(.vditor-wysiwyg__block) {
+  max-width: 100% !important;
+}
 :deep(.vditor-reset) {
   color: var(--text-color) !important;
 }
-:deep(.vditor-content) {
-  max-height: 100%;
-  overflow-y: auto;
+:deep(.vditor-content *) {
+  text-wrap: wrap;
+  white-space: pre-wrap;
 }
 .vditor {
   --border-color: var(--color-border-2);

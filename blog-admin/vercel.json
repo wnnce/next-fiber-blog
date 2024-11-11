@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/b-oss/:path*",
+      "destination": "/api/qiniu"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
+    }
+  ]
+}
