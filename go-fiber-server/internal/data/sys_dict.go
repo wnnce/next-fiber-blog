@@ -107,10 +107,10 @@ func (self *SysDictRepo) PageDict(query *usercase.SysDictQueryForm) ([]*usercase
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
 	builder.Limit(int64(query.Size)).Offset(offset)
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
 	dicts, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.SysDict, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.SysDict](row)
 	})
@@ -122,6 +122,7 @@ func (self *SysDictRepo) SelectDictById(dictId uint64) (*usercase.SysDict, error
 		Where("dict_id").Eq(dictId).
 		And("delete_at").EqRaw("0").BuildAsSelect()
 	rows, err := self.db.Query(context.Background(), builder.Sql(), dictId)
+	defer rows.Close()
 	if err == nil && rows.Next() {
 		return pgx.RowToAddrOfStructByNameLax[usercase.SysDict](rows)
 	}
@@ -239,10 +240,10 @@ func (self *SysDictRepo) PageDictValue(query *usercase.SysDictValueQueryForm) ([
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
 	builder.Limit(int64(query.Size)).Offset(offset)
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
 	values, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.SysDictValue, error) {
 		return pgx.RowToAddrOfStructByName[usercase.SysDictValue](row)
 	})
@@ -256,10 +257,10 @@ func (self *SysDictRepo) ListDictValueByDictKey(dictKey string) ([]usercase.SysD
 		And("delete_at").EqRaw("0").BuildAsSelect().
 		OrderBy("sort")
 	rows, err := self.db.Query(context.Background(), builder.Sql(), dictKey)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (usercase.SysDictValue, error) {
 		return pgx.RowToStructByNameLax[usercase.SysDictValue](row)
 	})

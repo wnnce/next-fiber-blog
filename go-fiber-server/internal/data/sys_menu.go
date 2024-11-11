@@ -71,10 +71,10 @@ func (m *SysMenuRepo) ListAll() ([]*usercase.SysMenu, error) {
 		Where("delete_at").EqRaw("0").BuildAsSelect().
 		OrderBy("sort")
 	rows, err := m.db.Query(context.Background(), builder.Sql())
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.SysMenu, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.SysMenu](row)
 	})
@@ -104,10 +104,10 @@ func (self *SysMenuRepo) RecursiveByRoleKeys(roleKeys []string) ([]*usercase.Sys
 	}
 	builder.WriteByte(')')
 	rows, err := self.db.Query(context.Background(), fmt.Sprintf(sql, builder.String()), args...)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.SysMenu, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.SysMenu](row)
 	})
@@ -118,10 +118,10 @@ func (m *SysMenuRepo) ManageListAll() ([]*usercase.SysMenu, error) {
 		Where("delete_at").EqRaw("0").BuildAsSelect().
 		OrderBy("sort")
 	rows, err := m.db.Query(context.Background(), builder.Sql())
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.SysMenu, error) {
 		return pgx.RowToAddrOfStructByNameLax[usercase.SysMenu](row)
 	})

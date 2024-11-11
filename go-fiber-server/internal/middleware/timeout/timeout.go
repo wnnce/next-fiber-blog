@@ -3,7 +3,9 @@ package timeout
 import (
 	"context"
 	"github.com/gofiber/fiber/v3"
+	"go-fiber-ent-web-layout/internal/tools"
 	"go-fiber-ent-web-layout/pkg/pool"
+	"log/slog"
 	"time"
 )
 
@@ -16,17 +18,19 @@ func NewMiddleware(timeout time.Duration) fiber.Handler {
 
 		c.SetUserContext(ctx)
 
-		ch := make(chan struct{})
+		ch := make(chan error)
+		defer close(ch)
 
-		var err error
-		pool.Go(func() {
-			err = c.Next()
-			ch <- struct{}{}
+		pool.DoGo(context.Background(), func(ctx context.Context, err any) {
+			slog.Error("协程池请求处理异常", "error", err, "uri", c.OriginalURL(), "method", c.Method())
+			ch <- tools.FiberServerError("请求处理失败")
+		}, func() {
+			ch <- c.Next()
 		})
 
 		select {
 		// 如果请求正常完成那么直接返回
-		case <-ch:
+		case err := <-ch:
 			return err
 		// 返回请求超时错误
 		case <-ctx.Done():

@@ -16,6 +16,8 @@ type FieldCondition interface {
 	LtRaw(value string) *WhereBuilder
 	Gt(value any) *WhereBuilder
 	GtRaw(value string) *WhereBuilder
+	Original(operate string, value any) *WhereBuilder
+	OriginalRaw(operate, value string) *WhereBuilder
 	Like(value string) *WhereBuilder
 	In(value ...any) *WhereBuilder
 	InRaw(value string) *WhereBuilder
@@ -113,6 +115,14 @@ func (self *Field) GtRaw(value string) *WhereBuilder {
 	return self.saveConditionRaw("<=", value)
 }
 
+func (self *Field) Original(operate string, value any) *WhereBuilder {
+	return self.saveCondition(operate, value)
+}
+
+func (self *Field) OriginalRaw(operate, value string) *WhereBuilder {
+	return self.saveConditionRaw(operate, value)
+}
+
 func (self *Field) InRaw(value string) *WhereBuilder {
 	return self.saveConditionRaw("IN", value)
 }
@@ -142,7 +152,7 @@ func (self *Field) saveConditionRaw(operator, value string) *WhereBuilder {
 	}
 	// 回收字段对象
 	defer defaultPool.RecycleField(self)
-	self.builder.addRawConditon(self.column, operator, self.prefix, value)
+	self.builder.addRawCondition(self.column, operator, self.prefix, value)
 	return self.builder
 }
 func (self *Field) saveCondition(operator string, value any) *WhereBuilder {

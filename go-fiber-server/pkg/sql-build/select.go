@@ -8,6 +8,7 @@ import (
 // SelectBuilder Select Sql构造器
 type SelectBuilder interface {
 	Select(fields ...string) SelectBuilder
+	CountField(field string) SelectBuilder
 	Join(table string) *JoinBuilder
 	LeftJoin(table string) *JoinBuilder
 	RightJoin(table string) *JoinBuilder
@@ -26,6 +27,7 @@ type SelectBuilder interface {
 
 type PostgresSelectBuilder struct {
 	tableName    string
+	countField   string
 	columns      []string
 	orderColumns []string
 	groupColumns []string
@@ -78,7 +80,11 @@ func (self *PostgresSelectBuilder) Sql() string {
 
 func (self *PostgresSelectBuilder) CountSql() string {
 	builder := defaultPool.GetStringBuilder()
-	builder.WriteString("SELECT COUNT(*) as total FROM " + self.tableName)
+	if self.countField == "" {
+		builder.WriteString("SELECT COUNT(*) as total FROM " + self.tableName)
+	} else {
+		builder.WriteString("SELECT COUNT(DISTINCT " + self.countField + ") as total FROM " + self.tableName)
+	}
 	if self.joins != nil && len(self.joins) > 0 {
 		builder.WriteByte(' ')
 		handleStringsSplice(self.joins, " ", builder)
@@ -96,6 +102,11 @@ func (self *PostgresSelectBuilder) Select(fields ...string) SelectBuilder {
 		self.columns = make([]string, 0)
 	}
 	self.columns = slices.Concat(self.columns, fields)
+	return self
+}
+
+func (self *PostgresSelectBuilder) CountField(field string) SelectBuilder {
+	self.countField = field
 	return self
 }
 

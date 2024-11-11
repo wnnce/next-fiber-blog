@@ -31,8 +31,8 @@ func (self *UserRepo) QueryUserByUsername(username string) (*usercase.User, erro
 		Select("user_id", "nick_name", "summary", "avatar", "email", "link", "username", "labels", "user_type", "create_time", "status").
 		Where("username").Eq(username).BuildAsSelect()
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err == nil && rows.Next() {
-		defer rows.Close()
 		return pgx.RowToAddrOfStructByNameLax[usercase.User](rows)
 	}
 	return nil, err
@@ -65,6 +65,7 @@ func (self *UserRepo) QueryUserExtendById(userId uint64) (*usercase.UserExtend, 
 		Select("level", "expertise", "register_ip", "register_location").
 		Where("user_id").Eq(userId).BuildAsSelect()
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err == nil && rows.Next() {
 		return pgx.RowToAddrOfStructByNameLax[usercase.UserExtend](rows)
 	}

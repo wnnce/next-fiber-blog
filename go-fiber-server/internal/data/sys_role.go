@@ -73,10 +73,10 @@ func (self *SysRoleRepo) ListAll() ([]usercase.SysRole, error) {
 		Where("status").EqRaw("0").
 		And("delete_at").EqRaw("0").BuildAsSelect()
 	rows, err := self.db.Query(context.Background(), builder.Sql())
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (usercase.SysRole, error) {
 		return pgx.RowToStructByNameLax[usercase.SysRole](row)
 	})
@@ -103,10 +103,10 @@ func (self *SysRoleRepo) Page(query *usercase.SysRoleQueryForm) ([]*usercase.Sys
 	offset := tools.ComputeOffset(total, query.Page, query.Size, false)
 	builder.Limit(int64(query.Size)).Offset(offset)
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
 	roles, err = pgx.CollectRows(rows, func(row pgx.CollectableRow) (*usercase.SysRole, error) {
 		return pgx.RowToAddrOfStructByName[usercase.SysRole](row)
 	})
@@ -143,11 +143,11 @@ func (self *SysRoleRepo) ListRoleKeyByIds(ids []uint) ([]string, error) {
 		And("status").EqRaw("0").
 		And("delete_at").EqRaw("0").BuildAsSelect()
 	rows, err := self.db.Query(context.Background(), builder.Sql(), builder.Args()...)
+	defer rows.Close()
 	if err != nil {
 		slog.Error("查询角色Key列表失败", "err", err)
 		return nil, err
 	}
-	defer rows.Close()
 	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (string, error) {
 		var key string
 		err = row.Scan(&key)
